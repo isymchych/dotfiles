@@ -1,0 +1,6 @@
+autoload -U promptinit; promptinit
+prompt spaceship
+
+alias n=nnn
+alias e='emacs -nw'
+alias v='emacs -nw'

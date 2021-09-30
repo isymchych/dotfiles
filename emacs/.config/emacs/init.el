@@ -248,26 +248,28 @@
 
 
 
+
 ;; ---------------------------------------- copy-paste in Wayland https://gist.github.com/yorickvP/6132f237fbc289a45c808d8d75e0e1fb
+(if mb-is-linux
+    (progn (
+            (setq wl-copy-process nil)
 
+            (defun wl-copy (text)
+              (setq wl-copy-process (make-process :name "wl-copy"
+                                                  :buffer nil
+                                                  :command '("wl-copy" "-f" "-n")
+                                                  :connection-type 'pipe))
+              (process-send-string wl-copy-process text)
+              (process-send-eof wl-copy-process))
 
-(setq wl-copy-process nil)
+            (defun wl-paste ()
+              (if (and wl-copy-process (process-live-p wl-copy-process))
+                  nil ; should return nil if we're the current paste owner
+                (shell-command-to-string "wl-paste -n | tr -d \r")))
 
-(defun wl-copy (text)
-  (setq wl-copy-process (make-process :name "wl-copy"
-                                      :buffer nil
-                                      :command '("wl-copy" "-f" "-n")
-                                      :connection-type 'pipe))
-  (process-send-string wl-copy-process text)
-  (process-send-eof wl-copy-process))
-
-(defun wl-paste ()
-  (if (and wl-copy-process (process-live-p wl-copy-process))
-      nil ; should return nil if we're the current paste owner
-    (shell-command-to-string "wl-paste -n | tr -d \r")))
-
-(setq interprogram-cut-function 'wl-copy)
-(setq interprogram-paste-function 'wl-paste)
+            (setq interprogram-cut-function 'wl-copy)
+            (setq interprogram-paste-function 'wl-paste)
+            )))
 
 
 
@@ -1083,13 +1085,13 @@ Clear field placeholder if field was not modified."
   :ensure t
   :diminish flyspell-mode
   :init
-  (mb/ensure-bin-tool-exists "aspell")
 
-  (setq ispell-program-name "aspell") ; use aspell instead of ispell
-  (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-dotfiles-dir))
-  (setq-default ispell-extra-args '("--sug-mode=ultra"
-                                    "--lang=en_GB"
-                                    "--camel-case"))
+  (when (executable-find "aspell")
+    (setq ispell-program-name "aspell") ; use aspell instead of ispell
+    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-dotfiles-dir))
+    (setq-default ispell-extra-args '("--sug-mode=ultra"
+                                      "--lang=en_GB"
+                                      "--camel-case")))
 
   (add-hook 'text-mode-hook 'flyspell-mode)
   (add-hook 'prog-mode-hook (lambda ()

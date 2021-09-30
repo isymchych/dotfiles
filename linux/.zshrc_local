@@ -1,3 +1,6 @@
+# Starship https://starship.rs/
+eval "$(starship init zsh)"
+
 alias remove_final_newline="perl -pi -e 'chomp if eof'"
 
 alias ydl='noglob youtube-dl -o "%(title)s.%(ext)s"'
