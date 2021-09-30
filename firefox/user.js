@@ -1,5 +1,5 @@
 user_pref("layout.frame_rate", -1); // for 60hz monitor
-user_pref("layout.frame_rate", 120);
+// user_pref("layout.frame_rate", 120);
 
 // do not detach tabs with drag-n-drop
 user_pref("browser.tabs.allowTabDetach", false);

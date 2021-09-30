@@ -34,9 +34,6 @@ export WINEDLLOVERRIDES=winemenubuilder.exe=d
 export CARGO_HOME=$HOME/.cargo
 export GOPATH=$HOME/.go
 
-# for VDPAU on amd
-export VDPAU_DRIVER=radeonsi
-
 # PATH
 export NPM_BIN="$HOME/.npm-global/bin"
 export YARN_BIN="$HOME/.config/yarn/global/node_modules/.bin"

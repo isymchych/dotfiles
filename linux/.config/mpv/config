@@ -1,4 +1,4 @@
-hwdec=vaapi-copy
+hwdec=auto
 hwdec-codecs=all
 vo=gpu
 profile=gpu-hq

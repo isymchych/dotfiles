@@ -374,11 +374,3 @@ exec_always {
     # allow to run GUI programs as a root
     xhost si:localuser:root
 }
-
-# for Asus ROG Zephyrus 14
-bindsym --release --no-warn Print exec swaymsg -t get_inputs -r \
-  | jq '[.[] | select(.type == "keyboard") | .xkb_active_layout_index][0] - 1 | fabs' \
-  | xargs swaymsg 'input type:keyboard xkb_switch_layout'
-bindsym Alt+Print exec mb-screenshot
-bindsym --release XF86KbdBrightnessUp exec asusctl -k low
-bindsym --release XF86KbdBrightnessDown exec asusctl -k off
