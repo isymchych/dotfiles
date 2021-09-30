@@ -1,0 +1,4 @@
+# name: let
+# key: l
+# --
+let ${1:x} = $0;

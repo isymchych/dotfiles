@@ -1,0 +1,88 @@
+{
+  "layer": "top", // Waybar at top layer
+  "position": "right", // Waybar position (top|bottom|left|right)
+  "modules-left": ["clock", "clock#date", "clock#day-of-week", "sway/workspaces", "sway/mode"],
+  "modules-center": ["tray"],
+  "modules-right": ["pulseaudio", "pulseaudio#mic", "cpu", "temperature", "memory", "disk", "backlight", "battery"],
+  // Modules configuration
+  "sway/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true
+  },
+  "sway/mode": {
+    "format": "<span style=\"italic\">{}</span>"
+  },
+  "tray": {
+    "icon-size": 24,
+    "spacing": 12
+  },
+  "clock": {
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
+    "format": "{:%H:%M}",
+    "on-click": "gsimplecal"
+  },
+  "clock#date": {
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
+    "format": "{:%b %d}",
+    "on-click": "gsimplecal"
+  },
+  "clock#day-of-week": {
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
+    "format": "{:%A}",
+    "on-click": "gsimplecal"
+  },
+  "cpu": {
+    "format": "CPU {usage:3}%",
+    "tooltip": true
+  },
+  "memory": {
+    "format": "MEM {:3}%"
+  },
+  "disk": {
+    "interval": 30,
+    "format": "DISK{percentage_used:3}%",
+    "path": "/home"
+  },
+  "temperature": {
+    "hwmon-path": "/sys/class/hwmon/hwmon6/temp1_input",
+    "critical-threshold": 98,
+    "format": "TEMP{temperatureC:3}°"
+  },
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% ",
+    "format-plugged": "{capacity}% ",
+    "format-icons": ["", "", "", "", ""]
+  },
+  "pulseaudio": {
+    "format": "{volume:2}% {icon}",
+    "format-bluetooth": "{volume:2}% {icon}",
+    "format-bluetooth-muted": " {icon}",
+    "format-muted": "",
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["", "", ""]
+    },
+    "on-click": "pavucontrol"
+  },
+  "pulseaudio#mic": {
+    "format": "{format_source}",
+    "format-source": "{volume:2}% ",
+    "format-source-muted": "",
+    "on-click": "pavucontrol -t 4",
+    "on-scroll-up": "",
+    "on-scroll-down": ""
+  },
+  "backlight": {
+    "format": "{percent}% <span size=\"x-large\" rise=\"-2000\">🌣</span>",
+  }
+}

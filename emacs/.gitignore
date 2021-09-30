@@ -1,0 +1,5 @@
+.config/emacs/local.el
+.config/emacs/custom.el
+.config/emacs/packages
+.config/emacs/transient
+.config/emacs/.lsp-session-v1

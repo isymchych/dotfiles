@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+# Description: Show tree output in $PAGER
+tree -hsFC --du --dirsfirst | $PAGER -R

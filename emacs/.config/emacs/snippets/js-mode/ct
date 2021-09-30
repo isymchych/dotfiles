@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+#name : console.time()
+#key  : ct
+# --
+console.time("$1");$0
+console.timeEnd("$1");

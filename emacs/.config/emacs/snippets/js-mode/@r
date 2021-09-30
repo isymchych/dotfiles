@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+#name : jsdoc return
+#key : @r
+# --
+@returns $0

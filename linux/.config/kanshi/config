@@ -1,0 +1,30 @@
+profile laptopROG {
+    output "Unknown TL140BDXP01-0 0x00000000" enable mode 1920x1080@120 scale 1
+    # output "Unknown TL140BDXP01-0 0x00000000" enable mode 2560x1440@120 scale 1.34
+    exec swaymsg "output * background #002B36 solid_color"
+}
+profile laptop {
+    output eDP-1 enable mode 1920x1080
+}
+profile home2k {
+    output eDP-1 disable
+    output "Unknown AG271QG " enable mode 2560x1440
+}
+profile home2k144 {
+    output eDP-1 disable
+    output "Unknown AG271QG #ASNxuIWF8vrd" enable mode 2560x1440@144
+}
+profile projector {
+    output eDP-1 disable
+    output "Optoma Corporation Optoma 1080P Q79C9180083" enable mode 1920x1080
+}
+profile work {
+    output eDP-1 disable
+    output "Dell Inc. DELL U2311H 6H2JC12R3PUL" enable mode 1920x1080@60
+}
+profile home2k144pc {
+    output "Unknown AG271QG #ASNxuIWF8vrd" enable mode 2560x1440@144
+}
+profile home4kpc {
+    output "Iiyama North America PL4071UH 1143470300509" enable mode 3840x2160@60 scale 2
+}

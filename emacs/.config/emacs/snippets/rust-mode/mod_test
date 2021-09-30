@@ -1,0 +1,7 @@
+# name: mod test
+# key: modt
+# --
+#[cfg(test)]
+mod test {
+    $0
+}

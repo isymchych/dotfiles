@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+cases="lock screen
+logout
+suspend
+sleep
+hibernate
+reboot
+restart
+shutdown
+halt
+poweroff"
+
+res=$(echo "$cases" | wofi --dmenu)
+
+case "$res" in
+    "lock screen")
+        mb-lock-screen
+        ;;
+    "logout")
+        swaymsg exit
+        ;;
+    "suspend" | "sleep")
+        mb-lock-screen & systemctl suspend
+        ;;
+    "hibernate")
+        mb-lock-screen & systemctl hibernate
+        ;;
+    "reboot" | "restart")
+        systemctl reboot
+        ;;
+    "shutdown" | "poweroff" | "halt")
+        systemctl poweroff
+        ;;
+esac
+
+exit 0

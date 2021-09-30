@@ -1,0 +1,16 @@
+max-history=10
+max-visible=7
+default-timeout=5000
+
+font=DejaVu Sans Bold Semi-Condensed 14
+text-color=#ffffff
+background-color=#2e3440d0
+border-size=1
+border-color=#434c5e
+border-radius=2
+
+width=520
+margin=25
+padding=10
+text-alignment=center
+anchor=top-center

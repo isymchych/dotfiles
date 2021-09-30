@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+find . -name '*.js' -exec rename .js .ts {} +
+find . -name '*.jsx' -exec rename .jsx .tsx {} +

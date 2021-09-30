@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: new private var
+# key: defp
+# binding: direct-keybinding
+# --
+(def ^:private $1 $2)

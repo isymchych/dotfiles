@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+cases="screen
+window
+part of the screen"
+
+res=$(echo "$cases" | wofi --dmenu)
+
+case "$res" in
+    "screen")
+        grim - | swappy -f -
+        ;;
+    "window")
+        grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.focused?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"')" - | swappy -f - 
+        ;;
+    "part of the screen")
+        grim -g "$(slurp)" - | swappy -f -
+        ;;
+esac
+
+exit 0

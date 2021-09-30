@@ -1,0 +1,18 @@
+hwdec=vaapi-copy
+hwdec-codecs=all
+vo=gpu
+profile=gpu-hq
+ao=pulse
+
+# audio normalization
+af=acompressor
+audio-normalize-downmix=yes
+
+#no-sub-auto
+#no-sub-ass
+no-sub
+# auto load external audio files if they contain media filename
+audio-file-auto=fuzzy
+
+# use wayland
+gpu-context=wayland

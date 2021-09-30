@@ -1,0 +1,19 @@
+alias remove_final_newline="perl -pi -e 'chomp if eof'"
+
+alias ydl='noglob youtube-dl -o "%(title)s.%(ext)s"'
+alias ydl-mp3='noglob youtube-dl -x --audio-format mp3 -o "%(title)s.%(ext)s"'
+alias zip-package='7z a -mx=0'
+
+alias outputs='swaymsg -t get_outputs'
+alias windows='swaymsg -t get_tree'
+alias windows-ids='swaymsg -t get_tree | grep app_id'
+
+# SYSTEMD-related aliases
+alias -r jnl='journalctl -e -f -b'
+alias -r jnlu='journalctl --user -e -f -b'
+alias -r ctl='sudo systemctl'
+alias -r ctlu='systemctl --user'
+
+alias n=nnn
+alias e='emacs -nw'
+alias v='emacs -nw'

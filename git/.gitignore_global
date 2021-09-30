@@ -1,0 +1,4 @@
+.projectile
+.tern-project
+.dir-locals.el
+FLYCHECK_XXY*

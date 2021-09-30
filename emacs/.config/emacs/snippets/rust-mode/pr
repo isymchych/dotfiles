@@ -1,0 +1,4 @@
+# name: println!
+# key: pr
+# --
+println!("{$1}", $2);
