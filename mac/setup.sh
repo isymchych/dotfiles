@@ -32,6 +32,9 @@ defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 # Don’t automatically rearrange Spaces based on most recent use
 defaults write com.apple.dock mru-spaces -bool false
 
+# Disable mouse acceleration
+defaults write .GlobalPreferences com.apple.mouse.scaling -1
+
 
 killall Finder
 
