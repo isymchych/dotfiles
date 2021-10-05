@@ -7,3 +7,6 @@
 * Use zsh as a shell `chsh -s /bin/zsh`
 * Map caps lock to escape https://vim.fandom.com/wiki/Map_caps_lock_to_escape_in_macOS
 * Make ctrl-c etc work https://apple.stackexchange.com/a/170671
+* install Rectangle https://github.com/rxhanson/Rectangle
+* Settings
+ * Trackpad -> enable "Tap to click"

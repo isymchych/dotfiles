@@ -251,25 +251,44 @@
 
 ;; ---------------------------------------- copy-paste in Wayland https://gist.github.com/yorickvP/6132f237fbc289a45c808d8d75e0e1fb
 (if mb-is-linux
-    (progn (
-            (setq wl-copy-process nil)
+    (progn
+      (setq wl-copy-process nil)
 
-            (defun wl-copy (text)
-              (setq wl-copy-process (make-process :name "wl-copy"
-                                                  :buffer nil
-                                                  :command '("wl-copy" "-f" "-n")
-                                                  :connection-type 'pipe))
-              (process-send-string wl-copy-process text)
-              (process-send-eof wl-copy-process))
+      (defun wl-copy (text)
+        (setq wl-copy-process (make-process :name "wl-copy"
+                                            :buffer nil
+                                            :command '("wl-copy" "-f" "-n")
+                                            :connection-type 'pipe))
+        (process-send-string wl-copy-process text)
+        (process-send-eof wl-copy-process))
 
-            (defun wl-paste ()
-              (if (and wl-copy-process (process-live-p wl-copy-process))
-                  nil ; should return nil if we're the current paste owner
-                (shell-command-to-string "wl-paste -n | tr -d \r")))
+      (defun wl-paste ()
+        (if (and wl-copy-process (process-live-p wl-copy-process))
+            nil ; should return nil if we're the current paste owner
+          (shell-command-to-string "wl-paste -n | tr -d \r")))
 
-            (setq interprogram-cut-function 'wl-copy)
-            (setq interprogram-paste-function 'wl-paste)
-            )))
+      (setq interprogram-cut-function 'wl-copy)
+      (setq interprogram-paste-function 'wl-paste)
+      ))
+
+
+
+;; ---------------------------------------- copy-paste on Mac https://apple.stackexchange.com/a/182785
+
+(if mb-is-mac-os
+    (progn
+      (defun copy-from-osx ()
+        (shell-command-to-string "pbpaste"))
+
+      (defun paste-to-osx (text &optional push)
+        (let ((process-connection-type nil))
+          (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+            (process-send-string proc text)
+            (process-send-eof proc))))
+
+      (setq interprogram-cut-function 'paste-to-osx)
+      (setq interprogram-paste-function 'copy-from-osx))
+  )
 
 
 

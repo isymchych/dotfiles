@@ -16,6 +16,7 @@ defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock autohide-time-modifier -float 0
+defaults write com.apple.dock expose-animation-duration -float 0.1
 
 #"Enabling UTF-8 ONLY in Terminal.app"
 defaults write com.apple.terminal StringEncodings -array 4
@@ -35,8 +36,16 @@ defaults write com.apple.dock mru-spaces -bool false
 # Disable mouse acceleration
 defaults write .GlobalPreferences com.apple.mouse.scaling -1
 
+# Make sure font smoothing works
+defaults write -g CGFontRenderingFontSmoothingDisabled -bool NO
+defaults -currentHost write -globalDomain AppleFontSmoothing -int 2
+
+# Keyboard repeat rate
+defaults write -g InitialKeyRepeat -int 10 # normal minimum is 15 (225 ms)
+defaults write -g KeyRepeat -int 1 # normal minimum is 2 (30 ms)
 
 killall Finder
+killall Dock
 
 
 echo "Done!"
