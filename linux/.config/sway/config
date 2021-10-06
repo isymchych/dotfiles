@@ -12,11 +12,12 @@ set  $c_text        #eee8d5
 set  $c_urgent      #cb4b16
 
 
-# Input configuration
+# Input configuration, for all options see `man xkeyboard-config`
 input type:keyboard {
     xkb_layout us,ua(winkeys)
-    xkb_options grp:rctrl_toggle,grp_led:caps,caps:escape
+    xkb_options grp:win_space_toggle,grp_led:caps,caps:escape
 }
+
 input type:touchpad {
     scroll_factor 0.6
     dwt enabled
