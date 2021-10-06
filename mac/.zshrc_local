@@ -1,5 +1,5 @@
-autoload -U promptinit; promptinit
-prompt spaceship
+# Starship https://starship.rs/
+eval "$(starship init zsh)"
 
 alias n=nnn
 alias e='emacs -nw'
