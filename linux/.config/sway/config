@@ -16,6 +16,12 @@ set  $c_urgent      #cb4b16
 input type:keyboard {
     xkb_layout us,ua(winkeys)
     xkb_options grp:win_space_toggle,grp_led:caps,caps:escape
+
+    # chars per second
+    repeat_rate 30
+
+    # initial delay ms before start repeating
+    repeat_delay 225
 }
 
 input type:touchpad {
