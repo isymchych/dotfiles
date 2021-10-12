@@ -36,3 +36,5 @@ export PAGER=less
 # export TERM=xterm-256color
 
 export LESS="-r -i -J" # smart ignore case during search, render color text
+
+export PATH="$PATH:$HOME/bin"

@@ -7,6 +7,9 @@ path=(
   $path
 )
 
+# Starship https://starship.rs/
+eval "$(starship init zsh)"
+
 # Current title tweaks
 autoload -Uz add-zsh-hook
 
@@ -88,11 +91,11 @@ unsetopt beep
 # Send desktop notifications after long-running commands https://github.com/MichaelAquilina/zsh-auto-notify
 source "$HOME/.zsh/auto-notify.plugin.zsh"
 
-# Source local config
-if [[ -s "$HOME/.zshrc_local" ]]; then
-    source "$HOME/.zshrc_local"
-fi
-
+# Source local configs
+# (N) at the end of the glob suppresses the error when no matches
+for file in $HOME/.zshrc_*(N); do
+    source "$file"
+done
 
 # Execute code that does not affect the current session in the background.
 {

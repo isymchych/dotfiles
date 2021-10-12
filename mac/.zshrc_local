@@ -1,6 +1,1 @@
-# Starship https://starship.rs/
-eval "$(starship init zsh)"
-
-alias n=nnn
-alias e='emacs -nw'
-alias v='emacs -nw'
+export TERMINAL=iTerm

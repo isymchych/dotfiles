@@ -22,13 +22,9 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-(defvar mb-font-menlo "menlo-13")
-(defvar mb-font-jetbrains "jetbrains mono-13")
+(defvar mb-terminal (getenv "TERMINAL"))
 
-(defvar mb-font
-  (if mb-is-mac-os
-      mb-font-menlo
-    mb-font-jetbrains))
+(defvar mb-font "jetbrains mono-14")
 
 (defvar mb-tab-size        4)
 (defvar mb-web-indent-size 2)
@@ -81,18 +77,27 @@
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
+;; Terminal mouse support
+(unless window-system
+  (require 'mouse)
+  (xterm-mouse-mode t)
+  (defun track-mouse (e)))
+
+(setq-default
+ ;; scroll one line at a time (less "jumpy" than defaults)
+ mouse-wheel-scroll-amount '(2 ((shift) . 2))
+ ;; don't accelerate scrolling
+ mouse-wheel-progressive-speed nil
+ ;; scroll window under mouse
+ mouse-wheel-follow-mouse 't)
+
+
 (setq-default
  frame-title-format '(buffer-file-name "%f" ("%b"))
  ;; no beep and blinking
  visible-bell       nil
  ring-bell-function 'ignore
 
- ;; scroll one line at a time (less "jumpy" than defaults)
- mouse-wheel-scroll-amount '(2 ((shift) . 2))
- ;; don't accelerate scrolling
- mouse-wheel-progressive-speed nil
- ;; scroll window under mouse
- mouse-wheel-follow-mouse 't
  ;; keyboard scroll one line at a time
  scroll-step 1
 
@@ -359,8 +364,8 @@ It wouldn't be associated with the buffer."
   "Launches terminal emulator with ARGS."
   (interactive)
   (let ((commands (if mb-is-mac-os
-                      (-concat (list "open" "-a" "Terminal" default-directory) args)
-                    (-concat (list "alacritty") args))))
+                      (-concat (list "open" "-a" mb-terminal default-directory) args)
+                    (-concat (list mb-terminal) args))))
     (apply 'mb/launch-application commands)))
 
 (defun mb/projectile-base-term (&rest args)
@@ -1884,6 +1889,7 @@ Clear field placeholder if field was not modified."
 (use-package company-shell
   :after (company sh-script)
   :ensure t
+  :unless mb-is-mac-os ;; FIXME really slow on mac https://github.com/Alexander-Miller/company-shell/issues/15
   :config
   (add-to-list 'company-backends 'company-shell))
 
@@ -1944,12 +1950,20 @@ Clear field placeholder if field was not modified."
 (global-unset-key (kbd "C-x C-z"))
 
 
-;; zoom in / zoom out in editor
-(global-set-key [C-mouse-4] 'text-scale-increase)
-(global-set-key [C-mouse-5] 'text-scale-decrease)
-(when mb-is-mac-os
-  (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
-  (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease))
+(if (window-system)
+    (progn
+      ;; zoom in / zoom out in editor
+      (global-set-key [C-mouse-4] 'text-scale-increase)
+      (global-set-key [C-mouse-5] 'text-scale-decrease)
+
+      (when mb-is-mac-os
+        (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
+        (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
+
+  (progn
+    ;; activate mouse-based scrolling
+    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+    (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
 
 
 (define-key input-decode-map [?\C-\M-i] [M-tab]) ;; make M-tab work in terminal

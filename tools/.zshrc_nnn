@@ -1,0 +1,5 @@
+alias n=nnn
+
+# nnn config
+export NNN_PLUG='t:-treeview;o:fzopen'
+

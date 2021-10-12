@@ -1,6 +1,3 @@
-# Starship https://starship.rs/
-eval "$(starship init zsh)"
-
 alias remove_final_newline="perl -pi -e 'chomp if eof'"
 
 alias ydl='noglob youtube-dl -o "%(title)s.%(ext)s"'
@@ -17,6 +14,5 @@ alias -r jnlu='journalctl --user -e -f -b'
 alias -r ctl='sudo systemctl'
 alias -r ctlu='systemctl --user'
 
-alias n=nnn
-alias e='emacs -nw'
-alias v='emacs -nw'
+export NNN_BMS="m:/run/media/$USER;s:/mnt/shares"
+

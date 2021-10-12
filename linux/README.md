@@ -64,7 +64,7 @@ $ chmod 600 ~/.ssh/key
 * stow zsh & git; switch user to zsh
 * stow vim, cd dotfiles/vim; ./install.sh
 * mkdir ~/.local/share/applications ~/.cargo
-* stow linux, utils, kdiff3, emacs, newsboat
+* stow linux, kdiff3, emacs, newsboat
 * install pipewire pipewire-pulse
 
 ## GUI
@@ -99,7 +99,7 @@ $ chmod 600 ~/.ssh/key
 * xorg-xrdb
 * xorg-xhost
 * wmname
-* alacritty - terminal
+* alacritty - terminal, stow alacritty
 * safeeyes - break reminder
 * wlsunset - adjust display color temperature at night
 * udiskie - automounter for removable media
@@ -112,7 +112,7 @@ $ chmod 600 ~/.ssh/key
 * slurp - select the part of the screen
 * wf-recorder - record the screen
 * swappy - simple drawing on top of images
-* nnn - file manager
+* nnn - file manager, stow nnn
 * translate-shell - Google Translate
 * mate-calc - calculator
 * easyeffects - enable "auto gain" plugin, for volume normalisation

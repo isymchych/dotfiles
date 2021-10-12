@@ -38,15 +38,10 @@ export GOPATH=$HOME/.go
 export NPM_BIN="$HOME/.npm-global/bin"
 export YARN_BIN="$HOME/.config/yarn/global/node_modules/.bin"
 export RUST_BIN="$HOME/.cargo/bin"
-export UTILS_BIN="$HOME/bin"
-export PATH=$PATH:$UTILS_BIN:$NPM_BIN:$YARN_BIN:$RUST_BIN
+export PATH=$PATH:$NPM_BIN:$YARN_BIN:$RUST_BIN
 
 export TERMINAL=alacritty
 export BROWSER=firefox
-
-# nnn config
-export NNN_PLUG='t:-treeview;o:fzopen'
-export NNN_BMS="m:/run/media/$USER;s:/mnt/shares"
 
 # gnome keyring
 eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
