@@ -123,7 +123,8 @@ $ chmod 600 ~/.ssh/key
 * xcursor-simpleandsoft - cursor theme
 * ttf-jetbrains-mono - JetBrains Mono font
 * ttf-droid - Droid font
-* noto-fonts, noto-fonts-emoji, noto-fonts-extra - Noto fonts
+* ttf-fira-mono - Fira Mono font
+* noto-fonts, noto-fonts-emoji, noto-fonts-extra, noto-fonts-cjk - Noto fonts
 
 * if bluetooth
  * install bluez bluez-utils
