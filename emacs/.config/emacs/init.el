@@ -1889,8 +1889,8 @@ Clear field placeholder if field was not modified."
 (use-package company-shell
   :after (company sh-script)
   :ensure t
-  :unless mb-is-mac-os ;; FIXME really slow on mac https://github.com/Alexander-Miller/company-shell/issues/15
   :config
+  (setq company-shell-dont-fetch-meta t) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
   (add-to-list 'company-backends 'company-shell))
 
 (use-package eshell
