@@ -89,7 +89,9 @@ bindkey '^x^e' edit-command-line
 unsetopt beep
 
 # Send desktop notifications after long-running commands https://github.com/MichaelAquilina/zsh-auto-notify
-source "$HOME/.zsh/auto-notify.plugin.zsh"
+if [[ `uname` = "Darwin" ||  -n "$DISPLAY" ]]; then
+    source "$HOME/.zsh/auto-notify.plugin.zsh"
+fi
 
 # Source local configs
 # (N) at the end of the glob suppresses the error when no matches
