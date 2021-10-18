@@ -26,5 +26,6 @@ profile home2k144pc {
     output "Unknown AG271QG #ASNxuIWF8vrd" enable mode 2560x1440@144
 }
 profile home4kpc {
+    output eDP-1 disable
     output "Iiyama North America PL4071UH 1143470300509" enable mode 3840x2160@60 scale 2
 }
