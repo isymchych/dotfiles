@@ -1753,6 +1753,11 @@ Clear field placeholder if field was not modified."
         )
 
   :config
+
+  (use-package prettier
+    :ensure t)
+
+
   (add-hook 'web-mode-hook 'rainbow-mode)
 
   (add-hook 'web-mode-hook (lambda ()
@@ -1765,6 +1770,8 @@ Clear field placeholder if field was not modified."
                                     )
 
                                (flycheck-add-mode 'javascript-eslint 'web-mode)
+
+                               (prettier-mode t)
 
                                (lsp)
                                (lsp-diagnostics-mode)
