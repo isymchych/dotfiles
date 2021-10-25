@@ -1771,7 +1771,8 @@ Clear field placeholder if field was not modified."
 
                                (flycheck-add-mode 'javascript-eslint 'web-mode)
 
-                               (prettier-mode t)
+                               (when (executable-find "prettier")
+                                 (prettier-mode t))
 
                                (lsp)
                                (lsp-diagnostics-mode)
