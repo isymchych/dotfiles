@@ -4,13 +4,14 @@
 * Fonts: `brew tap homebrew/cask-fonts`
 * brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
 * Clone dotfiles
-* stow vim, zsh, emacs, git, mac, tools
+* stow vim, zsh, emacs, git, mac, tools, kdiff
 * Use zsh as a shell `chsh -s /bin/zsh`
 * Install iTerm2
 * Install "Solarized Light.terminal" theme into Terminal.app
 * Install Rectangle https://github.com/rxhanson/Rectangle
 * Install LinearMouse
 * Install Alfred
+* Install kdiff3
 
 
 # Settings
