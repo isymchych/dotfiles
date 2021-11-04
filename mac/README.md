@@ -1,6 +1,6 @@
 # Setting up
 * Install brew
-* brew install git, stow, starship, coreutils
+* brew install git, stow, starship, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, coreutils
 * Fonts: `brew tap homebrew/cask-fonts`
 * brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
 * Clone dotfiles

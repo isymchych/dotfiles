@@ -99,9 +99,6 @@ for file in $HOME/.zshrc_*(N); do
     source "$file"
 done
 
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
 # Execute code that does not affect the current session in the background.
 {
   # Compile the completion dump to increase startup speed.

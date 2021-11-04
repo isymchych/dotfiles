@@ -16,3 +16,6 @@ alias -r ctlu='systemctl --user'
 
 export NNN_BMS="m:/run/media/$USER;s:/mnt/shares"
 
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
