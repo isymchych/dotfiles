@@ -53,15 +53,15 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{capacity}% {icon}",
+    "format": "{capacity}% <span size=\"xx-large\" rise=\"-2500\">{icon}</span>",
     "format-charging": "{capacity}% ",
     "format-plugged": "{capacity}% ",
     "format-icons": ["", "", "", "", ""]
   },
   "pulseaudio": {
-    "format": "{volume:2}% {icon}",
-    "format-bluetooth": "{volume:2}% {icon}",
-    "format-bluetooth-muted": " {icon}",
+    "format": "{volume:2}% <span size=\"xx-large\" rise=\"-2000\">{icon}</span>",
+    "format-bluetooth": "{volume:2}% <span size=\"xx-large\" rise=\"-2000\">{icon}</span>",
+    "format-bluetooth-muted": " <span size=\"xx-large\" rise=\"-2000\">{icon}</span>",
     "format-muted": "",
     "format-icons": {
       "headphone": "",
