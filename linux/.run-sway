@@ -47,4 +47,4 @@ export BROWSER=firefox
 eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
 export SSH_AUTH_SOCK
 
-exec systemd-cat -t sway sway --my-next-gpu-wont-be-nvidia
+exec systemd-cat -t sway sway --unsupported-gpu
