@@ -1495,6 +1495,13 @@ Clear field placeholder if field was not modified."
 
 
 
+;; Git-modes: modes for .gitattributes, .gitconfig and .gitignore
+(use-package git-modes
+  :ensure t
+  :defer t)
+
+
+
 ;; Git-diff mode
 (use-package diff-mode
   :ensure t
@@ -1514,20 +1521,6 @@ Clear field placeholder if field was not modified."
   (evil-make-overriding-map git-timemachine-mode-map 'normal)
   ;; force update evil keymaps after git-timemachine-mode loaded
   (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps))
-
-
-
-;; Git-config mode
-(use-package gitconfig-mode
-  :ensure t
-  :defer t)
-
-
-
-;; Git-ignore mode
-(use-package gitignore-mode
-  :ensure t
-  :defer t)
 
 
 
