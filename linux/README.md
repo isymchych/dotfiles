@@ -116,6 +116,7 @@ $ chmod 600 ~/.ssh/key
 * translate-shell - Google Translate
 * mate-calc - calculator
 * easyeffects - enable "auto gain" plugin, for volume normalisation
+* playerctl - CLI to control MPRIS-compatible players (including browsers)
 
 * nordic - dark GTK3 theme
 * adwaita (gtk default) - light GTK3 theme

@@ -328,6 +328,10 @@ bindsym --to-code $mod+Mod1+i exec clipman clear --all
 # editor
 bindsym --to-code $mod+e exec alacritty -t Emacs --class Emacs -e emacs -nw
 
+# control currently active player
+bindsym --release XF86AudioPlay exec playerctl play
+bindsym --release XF86AudioPause exec playerctl pause
+
 
 # AUTOSTART
 
