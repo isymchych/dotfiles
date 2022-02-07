@@ -1,18 +1,28 @@
 # Setting up
 * Install brew
-* brew install git, stow, starship, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, coreutils
-* Fonts: `brew tap homebrew/cask-fonts`
-* brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
+* Install iTerm2, choose color theme
+* Install LinearMouse - disable mouse acceleration
+* Install Alfred
+* Install Owly - prevent Mac from sleeping in 15 minutes
+* brew install zsh, git, stow, starship, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, coreutils
 * Clone dotfiles
 * stow vim, zsh, emacs, git, mac, tools, kdiff
 * Use zsh as a shell `chsh -s /bin/zsh`
-* Install iTerm2
-* Install "Solarized Light.terminal" theme into Terminal.app
-* Install Rectangle https://github.com/rxhanson/Rectangle
-* Install LinearMouse
-* Install Alfred
-* Install kdiff3
-
+* Fonts: `brew tap homebrew/cask-fonts`
+    brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
+* CLI tools
+    brew install aspell editorconfig fd gitui htop jq just nnn nvm ripgrep tokei wget
+* kdiff3 - diff tool
+    brew install --cask kdiff3
+* Rectangle - windows management
+    brew install --cask rectangle
+* Emacs https://github.com/d12frosted/homebrew-emacs-plus
+* optional git-credentials-manager-core - for passwordless auth
+    brew tap microsoft/git
+    brew cask install git-credential-manager-core
+* sad - code search and replace
+    brew install ms-jpq/sad/sad
+* Install Telegram
 
 # Settings
 * Trackpad -> enable "Tap to click"
