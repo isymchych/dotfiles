@@ -1,10 +1,9 @@
 # Setting up
 * Install brew
 * Install iTerm2, choose color theme
-* Install LinearMouse - disable mouse acceleration
 * Install Alfred
 * Install Owly - prevent Mac from sleeping in 15 minutes
-* brew install zsh, git, stow, starship, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, coreutils
+* brew install git, stow, zsh, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, starship, coreutils
 * Clone dotfiles
 * stow vim, zsh, emacs, git, mac, tools, kdiff
 * Use zsh as a shell `chsh -s /bin/zsh`
@@ -14,9 +13,13 @@
     brew install aspell editorconfig fd gitui htop jq just nnn nvm ripgrep tokei wget
 * kdiff3 - diff tool
     brew install --cask kdiff3
+* LinearMouse - disable mouse acceleration
+    brew install --cask linearmouse --no-quarantine
 * Rectangle - windows management
     brew install --cask rectangle
 * Emacs https://github.com/d12frosted/homebrew-emacs-plus
+    brew tap d12frosted/emacs-plus
+    brew install emacs-plus@29 --without-cocoa --with-native-comp
 * optional git-credentials-manager-core - for passwordless auth
     brew tap microsoft/git
     brew cask install git-credential-manager-core
