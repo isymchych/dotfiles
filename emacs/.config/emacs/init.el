@@ -1376,7 +1376,25 @@ Clear field placeholder if field was not modified."
     (interactive)
     (-if-let (window (flycheck-get-error-list-window))
         (quit-window nil window)
-      (flycheck-list-errors))))
+      (flycheck-list-errors)))
+
+
+  ;; https://github.com/flycheck/flycheck/issues/1428#issuecomment-591320954
+  (defun flycheck-node_modules-executable-find (executable)
+    (or
+     (let* ((base (locate-dominating-file buffer-file-name "node_modules"))
+            (cmd  (if base (expand-file-name (concat "node_modules/.bin/" executable)  base))))
+       (if (and cmd (file-exists-p cmd))
+           cmd))
+     (flycheck-default-executable-find executable)))
+
+  (defun my-node_modules-flycheck-hook ()
+    (setq-local flycheck-executable-find #'flycheck-node_modules-executable-find))
+
+  (add-hook 'js2-mode-hook 'my-node_modules-flycheck-hook)
+  (add-hook 'js-mode-hook 'my-node_modules-flycheck-hook)
+  (add-hook 'web-mode-hook 'my-node_modules-flycheck-hook)
+  )
 
 
 
