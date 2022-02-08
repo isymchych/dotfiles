@@ -1,18 +1,22 @@
 # Setting up
 * Install brew
-* Install iTerm2, choose color theme
-* Install Alfred
-* Install Owly - prevent Mac from sleeping in 15 minutes
-* brew install git, stow, zsh, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, starship, coreutils
+* Fonts:
+    brew tap homebrew/cask-fonts
+    brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
+* Install iTerm2
+    * Choose color theme
+    * Preferences > Profiles > Keyboard > Left/Right Option as Esc+
+    * Change font to JetBrains Mono Nerd font
+* brew install git git-delta stow zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions starship coreutils
 * Clone dotfiles
 * stow vim, zsh, emacs, git, mac, tools, kdiff
 * Use zsh as a shell `chsh -s /bin/zsh`
-* Fonts: `brew tap homebrew/cask-fonts`
-    brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
 * CLI tools
     brew install aspell editorconfig fd gitui htop jq just nnn nvm ripgrep tokei wget
 * kdiff3 - diff tool
     brew install --cask kdiff3
+* Install Alfred
+* Install Owly - prevent Mac from sleeping in 15 minutes
 * LinearMouse - disable mouse acceleration
     brew install --cask linearmouse --no-quarantine
 * Rectangle - windows management
