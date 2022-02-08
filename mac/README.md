@@ -22,6 +22,8 @@
     brew cask install git-credential-manager-core
 * sad - code search and replace
     brew install ms-jpq/sad/sad
+* Stretchly - break time reminder
+    brew install --cask stretchly
 * Install Telegram
 
 # Settings
