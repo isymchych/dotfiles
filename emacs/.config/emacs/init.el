@@ -1728,10 +1728,6 @@ Clear field placeholder if field was not modified."
 
   :config
 
-  (use-package prettier
-    :ensure t)
-
-
   (add-hook 'web-mode-hook 'rainbow-mode)
 
   (add-hook 'web-mode-hook (lambda ()
@@ -1760,6 +1756,13 @@ Clear field placeholder if field was not modified."
   ;;               (message "mb: WEB MODE FOR TS(X)"))))
 
   (message "mb: WEB MODE"))
+
+
+
+;; Run code formatters like Prettier
+(use-package apheleia
+  :ensure t
+  :init (apheleia-global-mode +1))
 
 
 
