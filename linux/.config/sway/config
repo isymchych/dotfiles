@@ -272,6 +272,10 @@ for_window [app_id="FLOAT"] floating enable
 
 # KEYBINDINGS
 
+# control currently active player
+bindsym --locked XF86AudioPlay exec playerctl play
+bindsym --locked XF86AudioPause exec playerctl pause
+
 # Increase volume
 bindsym --locked XF86AudioRaiseVolume exec mb-audio speakers up
 bindsym $mod+Prior exec mb-audio speakers up # win-pageup
@@ -328,10 +332,6 @@ bindsym --to-code $mod+Mod1+i exec clipman clear --all
 # editor
 bindsym --to-code $mod+e exec alacritty -t Emacs --class Emacs -e emacs -nw
 
-# control currently active player
-bindsym --release XF86AudioPlay exec playerctl play
-bindsym --release XF86AudioPause exec playerctl pause
-
 
 # AUTOSTART
 
@@ -355,11 +355,11 @@ exec wl-paste -t text --watch clipman store --max-items=30 --histpath="~/.local/
 exec wl-paste -p -t text --watch clipman store -P --max-items=30 --histpath="~/.local/share/clipman-primary.json"
 
 # Forward bluetooth midi controls via mpris2 so they are picked up by supporting media players
-exec mpris-proxy
+# exec mpris-proxy
 
 exec nm-applet --indicator
 exec blueman-applet
-exec safeeyes
+exec safeeyes -d
 exec udiskie --appindicator
 
 # https://github.com/swaywm/sway/wiki#gtk-applications-take-20-seconds-to-start
