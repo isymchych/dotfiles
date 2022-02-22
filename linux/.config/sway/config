@@ -338,10 +338,9 @@ bindsym --to-code $mod+e exec alacritty -t Emacs --class Emacs -e emacs -nw
 exec_always wmname Sawfish
 exec_always xrdb -merge ~/.Xresources
 exec_always ~/.config/sway/kanshi.sh
+exec_always ~/.config/sway/wlsunset.sh
 
 exec ~/.config/sway/polkit.sh
-
-exec wlsunset -l 49.842957 -L 24.031111
 
 # turn off screen in 5min
 # lock screen before sleep and on lock hint
