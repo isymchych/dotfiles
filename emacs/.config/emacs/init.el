@@ -565,8 +565,15 @@ narrowed."
   :diminish undo-tree-mode
   :config
   (global-undo-tree-mode)
-  (setq undo-tree-visualizer-timestamps t
-        undo-tree-visualizer-diff       t))
+
+  (let ((history-dir (expand-file-name "undo-tree-history" mb-save-path)))
+    ;; create temp dir if it does not exists
+    (unless (file-exists-p history-dir)
+      (make-directory history-dir))
+
+    (setq undo-tree-history-directory-alist (list `(".*" . ,history-dir))
+          undo-tree-visualizer-timestamps t
+          undo-tree-visualizer-diff       t)))
 
 
 ;; evil uses dabbrev and hippie-expand
