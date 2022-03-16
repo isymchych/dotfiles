@@ -1972,6 +1972,7 @@ Clear field placeholder if field was not modified."
   "lt" 'mb/sort-columns
   "k"  'mb/kill-this-buffer
   "s"  'save-buffer
+  "e"  'eshell
   "lm" 'evil-show-marks
   "u"  'undo-tree-visualize
   "i"  'counsel-semantic-or-imenu
