@@ -10,7 +10,7 @@ window#waybar {
   background-color: #2e3440;
   color: #ffffff;
   transition-property: background-color;
-  transition-duration: .5s;
+  transition-duration: 0.5s;
   border-left: 1px solid #434c5e;
 }
 
@@ -43,7 +43,7 @@ window#waybar {
 }
 
 #workspaces button.focused {
-  background-color: #64727D;
+  background-color: #64727d;
 }
 
 #workspaces button.urgent {
@@ -51,11 +51,12 @@ window#waybar {
 }
 
 #mode {
-  background-color: #64727D;
+  background-color: #64727d;
   padding: 10px 0;
 }
 
-#tray * { /* set font for tray context menus */
+#tray * {
+  /* set font for tray context menus */
   font-family: DejaVu Sans Bold Semi-Condensed;
   font-size: 16px;
 }
@@ -112,4 +113,8 @@ label:focus {
 
 #temperature.critical {
   background-color: #bf616a;
+}
+
+#language {
+  font-size: 18px;
 }

@@ -3,7 +3,7 @@
   "position": "right", // Waybar position (top|bottom|left|right)
   "modules-left": ["clock", "clock#date", "clock#day-of-week", "sway/workspaces", "sway/mode"],
   "modules-center": ["tray"],
-  "modules-right": ["pulseaudio", "pulseaudio#mic", "cpu", "temperature", "memory", "disk", "backlight", "battery"],
+  "modules-right": ["sway/language", "pulseaudio", "pulseaudio#mic", "cpu", "temperature", "memory", "disk", "backlight", "battery"],
   // Modules configuration
   "sway/workspaces": {
     "disable-scroll": true,
@@ -84,5 +84,8 @@
   },
   "backlight": {
     "format": "{percent}% <span size=\"x-large\" rise=\"-2000\">🌣</span>",
+  },
+  "sway/language": {
+    "format": "{shortDescription}",
   }
 }
