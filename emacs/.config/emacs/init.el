@@ -1892,6 +1892,14 @@ Clear field placeholder if field was not modified."
   (message "mb: ESHELL MODE"))
 
 
+;; Lua mode
+(use-package lua-mode
+  :ensure t
+  :defer t
+  :config
+  (message "mb: LUA MODE"))
+
+
 
 ;; Groovy mode (for Jenkinsfile)
 (use-package groovy-mode
