@@ -3,18 +3,21 @@ env:
 
 font:
   normal:
-    family: JetBrains Mono
+    family: Iosevka Term Medium
     style: Regular
   bold:
-    family: JetBrains Mono
+    family: Iosevka Term Medium
     style: Bold
   italic:
-    family: JetBrains Mono
+    family: Iosevka Term Medium
     style: Oblique
+  bold_italic:
+    family: Iosevka Term Medium
+    style: Bold Italic
 
-  size: 13
+  size: 14.5
 
-# need this so that solarized looks good
+# need this so that solarized ls looks good
 draw_bold_text_with_bright_colors: false
 
 window:
@@ -26,93 +29,92 @@ window:
 schemes:
   nord_dark: &dark
     primary:
-      background: '#2e3440'
-      foreground: '#d8dee9'
+      background: "#2e3440"
+      foreground: "#d8dee9"
 
     cursor:
-      text: '#2e3440'
-      cursor: '#d8dee9'
+      text: "#2e3440"
+      cursor: "#d8dee9"
 
     vi_mode_cursor:
-      text: '#2e3440'
-      cursor: '#d9dee9'
+      text: "#2e3440"
+      cursor: "#d9dee9"
 
     selection:
       text: CellForeground
-      background: '#4c566a'
+      background: "#4c566a"
 
     search:
       matches:
         foreground: CellBackground
-        background: '#88c0d0'
+        background: "#88c0d0"
 
       bar:
-        background: '#3b4252'
-        foreground: '#d8dee9'
+        background: "#3b4252"
+        foreground: "#d8dee9"
 
     normal:
-      black: '#3b4252'
-      red: '#bf616a'
-      green: '#a3be8c'
-      yellow: '#ebcb8b'
-      blue: '#81a1c1'
-      magenta: '#b48ead'
-      cyan: '#88c0d0'
-      white: '#e5e9f0'
+      black: "#3b4252"
+      red: "#bf616a"
+      green: "#a3be8c"
+      yellow: "#ebcb8b"
+      blue: "#81a1c1"
+      magenta: "#b48ead"
+      cyan: "#88c0d0"
+      white: "#e5e9f0"
 
     bright:
-      black: '#4c566a'
-      red: '#bf616a'
-      green: '#a3be8c'
-      yellow: '#ebcb8b'
-      blue: '#81a1c1'
-      magenta: '#b48ead'
-      cyan: '#8fbcbb'
-      white: '#eceff4'
+      black: "#4c566a"
+      red: "#bf616a"
+      green: "#a3be8c"
+      yellow: "#ebcb8b"
+      blue: "#81a1c1"
+      magenta: "#b48ead"
+      cyan: "#8fbcbb"
+      white: "#eceff4"
 
     dim:
-      black: '#2e3440'
-      red: '#bf616a'
-      green: '#a3be8c'
-      yellow: '#ebcb8b'
-      blue: '#81a1c1'
-      magenta: '#b48ead'
-      cyan: '#81a1c1'
-      white: '#d8dee9'
+      black: "#2e3440"
+      red: "#bf616a"
+      green: "#a3be8c"
+      yellow: "#ebcb8b"
+      blue: "#81a1c1"
+      magenta: "#b48ead"
+      cyan: "#81a1c1"
+      white: "#d8dee9"
 
   # Colors (Solarized Light)
-  solarized_light: &light
-    # Default colors
+  solarized_light: &light # Default colors
     primary:
-      background: '#fdf6e3' # base3
-      foreground: '#657b83' # base00
+      background: "#fdf6e3" # base3
+      foreground: "#657b83" # base00
 
     # Cursor colors
     cursor:
-      text:   '#fdf6e3' # base3
-      cursor: '#657b83' # base00
+      text: "#fdf6e3" # base3
+      cursor: "#657b83" # base00
 
     # Normal colors
     normal:
-      black:   '#073642' # base02
-      red:     '#dc322f' # red
-      green:   '#859900' # green
-      yellow:  '#b58900' # yellow
-      blue:    '#268bd2' # blue
-      magenta: '#d33682' # magenta
-      cyan:    '#2aa198' # cyan
-      white:   '#eee8d5' # base2
+      black: "#073642" # base02
+      red: "#dc322f" # red
+      green: "#859900" # green
+      yellow: "#b58900" # yellow
+      blue: "#268bd2" # blue
+      magenta: "#d33682" # magenta
+      cyan: "#2aa198" # cyan
+      white: "#eee8d5" # base2
 
     # Bright colors
     bright:
-      black:   '#002b36' # base03
-      red:     '#cb4b16' # orange
-      green:   '#586e75' # base01
-      yellow:  '#657b83' # base00
-      blue:    '#839496' # base0
-      magenta: '#6c71c4' # violet
-      cyan:    '#93a1a1' # base1
-      white:   '#fdf6e3' # base3
+      black: "#002b36" # base03
+      red: "#cb4b16" # orange
+      green: "#586e75" # base01
+      yellow: "#657b83" # base00
+      blue: "#839496" # base0
+      magenta: "#6c71c4" # violet
+      cyan: "#93a1a1" # base1
+      white: "#fdf6e3" # base3
 
 colors: *light
 # colors: *dark
@@ -121,29 +123,29 @@ key_bindings:
   # spawn new instance in the same dir on Alt-Enter
   - { key: Return, mods: Alt, action: SpawnNewInstance }
   # on Mac, make Option key to be Meta key (like Alt)
-  - { key: A,        mods: Alt,     chars: "\x1ba"     }
-  - { key: B,        mods: Alt,     chars: "\x1bb"     }
-  - { key: C,        mods: Alt,     chars: "\x1bc"     }
-  - { key: D,        mods: Alt,     chars: "\x1bd"     }
-  - { key: E,        mods: Alt,     chars: "\x1be"     }
-  - { key: F,        mods: Alt,     chars: "\x1bf"     }
-  - { key: G,        mods: Alt,     chars: "\x1bg"     }
-  - { key: H,        mods: Alt,     chars: "\x1bh"     }
-  - { key: I,        mods: Alt,     chars: "\x1bi"     }
-  - { key: J,        mods: Alt,     chars: "\x1bj"     }
-  - { key: K,        mods: Alt,     chars: "\x1bk"     }
-  - { key: L,        mods: Alt,     chars: "\x1bl"     }
-  - { key: M,        mods: Alt,     chars: "\x1bm"     }
-  - { key: N,        mods: Alt,     chars: "\x1bn"     }
-  - { key: O,        mods: Alt,     chars: "\x1bo"     }
-  - { key: P,        mods: Alt,     chars: "\x1bp"     }
-  - { key: Q,        mods: Alt,     chars: "\x1bq"     }
-  - { key: R,        mods: Alt,     chars: "\x1br"     }
-  - { key: S,        mods: Alt,     chars: "\x1bs"     }
-  - { key: T,        mods: Alt,     chars: "\x1bt"     }
-  - { key: U,        mods: Alt,     chars: "\x1bu"     }
-  - { key: V,        mods: Alt,     chars: "\x1bv"     }
-  - { key: W,        mods: Alt,     chars: "\x1bw"     }
-  - { key: X,        mods: Alt,     chars: "\x1bx"     }
-  - { key: Y,        mods: Alt,     chars: "\x1by"     }
-  - { key: Z,        mods: Alt,     chars: "\x1bz"     }
+  - { key: A, mods: Alt, chars: "\x1ba" }
+  - { key: B, mods: Alt, chars: "\x1bb" }
+  - { key: C, mods: Alt, chars: "\x1bc" }
+  - { key: D, mods: Alt, chars: "\x1bd" }
+  - { key: E, mods: Alt, chars: "\x1be" }
+  - { key: F, mods: Alt, chars: "\x1bf" }
+  - { key: G, mods: Alt, chars: "\x1bg" }
+  - { key: H, mods: Alt, chars: "\x1bh" }
+  - { key: I, mods: Alt, chars: "\x1bi" }
+  - { key: J, mods: Alt, chars: "\x1bj" }
+  - { key: K, mods: Alt, chars: "\x1bk" }
+  - { key: L, mods: Alt, chars: "\x1bl" }
+  - { key: M, mods: Alt, chars: "\x1bm" }
+  - { key: N, mods: Alt, chars: "\x1bn" }
+  - { key: O, mods: Alt, chars: "\x1bo" }
+  - { key: P, mods: Alt, chars: "\x1bp" }
+  - { key: Q, mods: Alt, chars: "\x1bq" }
+  - { key: R, mods: Alt, chars: "\x1br" }
+  - { key: S, mods: Alt, chars: "\x1bs" }
+  - { key: T, mods: Alt, chars: "\x1bt" }
+  - { key: U, mods: Alt, chars: "\x1bu" }
+  - { key: V, mods: Alt, chars: "\x1bv" }
+  - { key: W, mods: Alt, chars: "\x1bw" }
+  - { key: X, mods: Alt, chars: "\x1bx" }
+  - { key: Y, mods: Alt, chars: "\x1by" }
+  - { key: Z, mods: Alt, chars: "\x1bz" }

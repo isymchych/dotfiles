@@ -100,6 +100,7 @@ $ chmod 600 ~/.ssh/key
 * xorg-xhost
 * wmname
 * alacritty - terminal, stow alacritty
+* OR wezterm - terminal, stow wezterm
 * safeeyes - break reminder
 * wlsunset - adjust display color temperature at night
 * udiskie - automounter for removable media
@@ -126,6 +127,7 @@ $ chmod 600 ~/.ssh/key
 * ttf-droid - Droid font
 * ttf-fira-mono - Fira Mono font
 * noto-fonts, noto-fonts-emoji, noto-fonts-extra, noto-fonts-cjk - Noto fonts
+* ttc-iosevka - Iosevka Term mono font
 
 * if bluetooth
  * install bluez bluez-utils
