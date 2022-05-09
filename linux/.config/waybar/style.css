@@ -55,13 +55,16 @@ window#waybar {
   padding: 10px 0;
 }
 
+#tray {
+  padding-top: 24px;
+}
+
 #tray * {
   /* set font for tray context menus */
   font-family: DejaVu Sans Bold Semi-Condensed;
   font-size: 16px;
 }
 
-#pulseaudio,
 #cpu,
 #memory,
 #disk,
@@ -115,7 +118,11 @@ label:focus {
   background-color: #bf616a;
 }
 
+#pulseaudio {
+  font-size: 15px;
+  padding: 5px;
+}
+
 #language {
   font-size: 18px;
-  padding-top: 10px;
 }
