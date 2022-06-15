@@ -358,7 +358,7 @@ exec wl-paste -p -t text --watch clipman store -P --max-items=30 --histpath="~/.
 
 exec nm-applet --indicator
 exec blueman-applet
-exec safeeyes # -d
+exec safeeyes -d
 exec udiskie --appindicator
 
 # https://github.com/swaywm/sway/wiki#gtk-applications-take-20-seconds-to-start
