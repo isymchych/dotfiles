@@ -95,6 +95,7 @@ $ chmod 600 ~/.ssh/key
   * To automatically unlock gnome-keyring on login, edit `/etc/pam.d/greetd`:
   * Add `auth optional pam_gnome_keyring.so` at the end of the `auth` section
   * Add `session optional pam_gnome_keyring.so auto_start` at the end of the `session` section
+  * Enable ssh in the gnome keyring daemon https://wiki.archlinux.org/title/GNOME/Keyring#Enable_the_keyring_ssh_component
 * polkit-gnome - allow apps to ask for root password if needed
 * xorg-xrdb
 * xorg-xhost

@@ -51,3 +51,7 @@ user_pref("browser.safebrowsing.downloads.enabled", false);
 
 // open "search in google" tab in background
 user_pref("browser.search.context.loadInBackground", true);
+
+// strip query params used for tracking
+user_pref("privacy.query_stripping.enabled", true);
+user_pref("privacy.query_stripping.enabled.pbmode", true);

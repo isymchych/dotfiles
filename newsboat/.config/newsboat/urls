@@ -20,7 +20,6 @@ https://adambard.com/blog/feed.xml "clojure"
 http://inchingforward.blogspot.com/feeds/posts/default "clojure"
 http://swannodette.github.io/atom.xml "clojure"
 http://feeds2.feedburner.com/blogerator "it news"
-https://addmeto.cc/rss/ "it news"
 http://endlessparentheses.com/atom.xml "it news"
 http://feeds.feedburner.com/ozmmorg "hackers"
 https://nullprogram.com/blog/index.rss "hackers"
@@ -50,7 +49,6 @@ https://lucumr.pocoo.org/feed.atom
 https://cheapskatesguide.org/cheapskates-guide-rss-feed.xml
 https://thesephist.com/index.xml
 https://scattered-thoughts.net/rss.xml
-https://astralcodexten.substack.com/feed
 https://datagubbe.se/atom.xml
 https://www.rozhkov.me/rss/
 https://ecton.dev/rss.xml

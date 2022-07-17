@@ -43,8 +43,7 @@ export PATH=$PATH:$NPM_BIN:$YARN_BIN:$RUST_BIN
 export TERMINAL=alacritty
 export BROWSER=firefox
 
-# gnome keyring
-eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
-export SSH_AUTH_SOCK
+# for gnome keyring git/ssh integration
+export SSH_AUTH_SOCK="/run/user/$(id -u)/keyring/ssh"
 
 exec systemd-cat -t sway sway --unsupported-gpu
