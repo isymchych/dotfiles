@@ -1617,6 +1617,12 @@ Clear field placeholder if field was not modified."
 (add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs)
 
 
+;; Justfile mode
+(use-package just-mode
+  :ensure t
+  :defer t)
+
+
 
 ;; Python mode
 (use-package python
