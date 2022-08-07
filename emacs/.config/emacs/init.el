@@ -1,9 +1,8 @@
 ;;; init.el --- main emacs config file
 ;;; Commentary:
-;; * Emacs Prelude https://github.com/bbatsov/prelude
-;; * Emacs Graphene https://github.com/rdallasgray/graphene
 ;; * Spacemacs https://github.com/syl20bnr/spacemacs
-;; * Ohai https://github.com/bodil/ohai-emacs
+;; * Doom Emacs https://github.com/doomemacs/doomemacs
+;; * Evil guide https://github.com/noctuid/evil-guide
 ;;; Code:
 
 
@@ -657,8 +656,8 @@ narrowed."
   ;; set leader key in all states
   (evil-set-leader nil (kbd "C-SPC"))
 
-  ;; set leader key in normal state
-  (evil-set-leader 'normal (kbd "SPC"))
+  ;; set leader key in normal & visual state
+  (evil-set-leader '(normal visual) (kbd "SPC"))
 
   ;; Use escape to quit, and not as a meta-key.
   (define-key evil-normal-state-map           [escape] 'keyboard-quit)
@@ -1984,7 +1983,6 @@ Clear field placeholder if field was not modified."
   (kbd "<leader>q") 'evil-quit
   (kbd "<leader>n") 'mb/narrow-or-widen-dwim
   (kbd "<leader>ll") 'mb/cleanup-buffer
-  (kbd "<leader>lt") 'mb/sort-columns
   (kbd "<leader>k")  'mb/kill-this-buffer
   (kbd "<leader>s")  'save-buffer
   (kbd "<leader>e")  'eshell
@@ -1995,6 +1993,11 @@ Clear field placeholder if field was not modified."
   (kbd "<leader>bd") 'mb/delete-current-buffer-file
   (kbd "<leader>br") 'mb/rename-file-and-buffer
   (kbd "<leader>bs") 'scratch)
+
+(evil-define-key 'visual 'global
+  (kbd "<leader>n") 'mb/narrow-or-widen-dwim
+  (kbd "<leader>ll") 'mb/cleanup-buffer
+  (kbd "<leader>lt") 'mb/sort-columns)
 
 (provide 'init)
 ;;; init.el ends here
