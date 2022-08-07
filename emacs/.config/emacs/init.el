@@ -1207,7 +1207,8 @@ Clear field placeholder if field was not modified."
   :ensure t
   :diminish which-key-mode
   :init
-  (which-key-mode))
+  (which-key-mode)
+  (evil-define-key nil 'global (kbd "<leader><escape>") 'which-key-abort))
 
 
 
