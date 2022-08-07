@@ -1298,6 +1298,7 @@ Clear field placeholder if field was not modified."
       (kill-buffer old)))
 
   (evil-define-key 'normal dired-mode-map
+    " " nil ; unbind Space key for evil <leader>
     "h" 'mb/dired-up-directory
     "l" 'dired-find-alternate-file
     "o" 'dired-sort-toggle-or-edit
