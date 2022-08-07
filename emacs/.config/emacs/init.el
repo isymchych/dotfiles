@@ -654,6 +654,12 @@ narrowed."
 
   (evil-mode 1)
 
+  ;; set leader key in all states
+  (evil-set-leader nil (kbd "C-SPC"))
+
+  ;; set leader key in normal state
+  (evil-set-leader 'normal (kbd "SPC"))
+
   ;; Use escape to quit, and not as a meta-key.
   (define-key evil-normal-state-map           [escape] 'keyboard-quit)
   (define-key evil-visual-state-map           [escape] 'keyboard-quit)
@@ -723,17 +729,6 @@ narrowed."
   (evil-collection-setup-minibuffer nil)
   :init
   (evil-collection-init))
-
-;; vim leader feature
-(use-package evil-leader
-  :after evil
-  :ensure t
-  :config
-  (setq evil-leader/in-all-states     t
-        evil-leader/non-normal-prefix "M-")
-  (global-set-key (kbd "M-<SPC>") evil-leader--default-map)
-  (evil-leader/set-leader "<SPC>")
-  (global-evil-leader-mode))
 
 ;; match visual selection with * and #
 (use-package evil-visualstar
@@ -858,8 +853,7 @@ narrowed."
   (define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-immediate-done)
   (define-key ivy-minibuffer-map (kbd "C-j") 'ivy-immediate-done)
 
-  (evil-leader/set-key
-    "`" 'ivy-resume))
+  (evil-define-key 'normal 'global (kbd "<leader>`") 'ivy-resume))
 
 
 ;; show references to variables in ivy
@@ -900,15 +894,14 @@ narrowed."
   ("<f1> u" . 'counsel-unicode-char)
   :config
   (setq counsel-yank-pop-truncate-radius 5)
-  (ivy-configure 'counsel-yank-pop
-    :height 25)
-  (evil-leader/set-key
-    "SPC" 'counsel-recentf
-    "r" 'counsel-recentf
-    "y" 'counsel-yank-pop
-    "ff" 'counsel-find-file
-    "bb" 'counsel-ibuffer
-    ))
+  (ivy-configure 'counsel-yank-pop :height 25)
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>SPC") 'counsel-recentf
+    (kbd "<leader>r") 'counsel-recentf
+    (kbd "<leader>y") 'counsel-yank-pop
+    (kbd "<leader>ff") 'counsel-find-file
+    (kbd "<leader>bb") 'counsel-ibuffer))
 
 
 
@@ -916,9 +909,9 @@ narrowed."
 (use-package avy
   :ensure t
   :config
-  (evil-leader/set-key
-    "jj" 'evil-avy-goto-char-timer
-    "jl" 'evil-avy-goto-line))
+  (evil-define-key 'normal 'global
+    (kbd "<leader>jj") 'evil-avy-goto-char-timer
+    (kbd "<leader>jl") 'evil-avy-goto-line))
 
 
 
@@ -940,12 +933,12 @@ narrowed."
   :config
   (projectile-mode)
 
-  (evil-leader/set-key
-    "pD" 'projectile-dired
-    "pe" 'projectile-run-eshell
-    "pr" 'projectile-recentf
-    "pR" 'projectile-replace
-    "pk" 'projectile-kill-buffers))
+  (evil-define-key 'normal 'global
+    (kbd "<leader>pD") 'projectile-dired
+    (kbd "<leader>pe") 'projectile-run-eshell
+    (kbd "<leader>pr") 'projectile-recentf
+    (kbd "<leader>pR") 'projectile-replace
+    (kbd "<leader>pk") 'projectile-kill-buffers))
 
 
 (use-package counsel-projectile
@@ -962,15 +955,14 @@ narrowed."
                                                     (shell-quote-argument value)))))
       (counsel-projectile-rg)))
 
-  (evil-leader/set-key
-    "pd" 'counsel-projectile-find-dir
-    "pf" 'counsel-projectile-find-file
-    "pF" 'counsel-projectile-find-file-dwim
-    "ps" 'counsel-projectile-rg
-    "pS" 'mb/counsel-projectile-rg-dwim
-    "pb" 'counsel-projectile-switch-to-buffer
-    "pp" 'counsel-projectile-switch-project
-    ))
+  (evil-define-key 'normal 'global
+    (kbd "<leader>pd") 'counsel-projectile-find-dir
+    (kbd "<leader>pf") 'counsel-projectile-find-file
+    (kbd "<leader>pF") 'counsel-projectile-find-file-dwim
+    (kbd "<leader>ps") 'counsel-projectile-rg
+    (kbd "<leader>pS") 'mb/counsel-projectile-rg-dwim
+    (kbd "<leader>pb") 'counsel-projectile-switch-to-buffer
+    (kbd "<leader>pp") 'counsel-projectile-switch-project))
 
 
 
@@ -1143,7 +1135,7 @@ Clear field placeholder if field was not modified."
     (message "mb: reloading EditorConfig...")
     (editorconfig-apply))
 
-  (evil-leader/set-key "le" 'mb/reload-editorconfig))
+  (evil-define-key 'normal 'prog-mode (kbd "<leader>le") 'mb/reload-editorconfig))
 
 
 
@@ -1296,7 +1288,7 @@ Clear field placeholder if field was not modified."
   (setq dired-auto-revert-buffer t)    ; automatically revert buffer
 
   (evil-set-initial-state 'wdired-mode 'normal)
-  (evil-leader/set-key "d" 'dired-jump)
+  (evil-define-key 'normal 'global (kbd "<leader>d" )'dired-jump)
 
   (defun mb/dired-up-directory ()
     "Take dired up one directory, but behave like dired-find-alternate-file."
@@ -1410,7 +1402,7 @@ Clear field placeholder if field was not modified."
   :ensure t
   :defer t
   :init
-  (evil-leader/set-key "w" 'er/expand-region)
+  (evil-define-key 'normal 'global (kbd "<leader>w") 'er/expand-region)
   (setq expand-region-contract-fast-key "W"
         expand-region-reset-fast-key    "r")
   :config
@@ -1485,11 +1477,11 @@ Clear field placeholder if field was not modified."
 
   :init
   (mb/ensure-bin-tool-exists "git")
-  (evil-leader/set-key
-    "gs" 'magit-status
-    "gl" 'magit-log-all
-    "gL" 'magit-log-buffer-file
-    "gb" 'magit-blame)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gs") 'magit-status
+    (kbd "<leader>gl") 'magit-log-all
+    (kbd "<leader>gL") 'magit-log-buffer-file
+    (kbd "<leader>gb") 'magit-blame)
 
   :config
   (setq vc-follow-symlinks nil
@@ -1541,7 +1533,7 @@ Clear field placeholder if field was not modified."
 (use-package git-timemachine
   :ensure t
   :defer t
-  :init (evil-leader/set-key "gt" 'git-timemachine)
+  :init (evil-define-key 'normal 'global (kbd "<leader>gt") 'git-timemachine)
   :config
   (evil-make-overriding-map git-timemachine-mode-map 'normal)
   ;; force update evil keymaps after git-timemachine-mode loaded
@@ -1556,11 +1548,11 @@ Clear field placeholder if field was not modified."
   (setq diff-hl-draw-borders nil)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
 
-  (evil-leader/set-key
-    "gj" 'diff-hl-next-hunk
-    "gk" 'diff-hl-previous-hunk
-    "gr" 'diff-hl-revert-hunk
-    "gd" 'diff-hl-diff-goto-hunk)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gj") 'diff-hl-next-hunk
+    (kbd "<leader>gk") 'diff-hl-previous-hunk
+    (kbd "<leader>gr") 'diff-hl-revert-hunk
+    (kbd "<leader>gd") 'diff-hl-diff-goto-hunk)
 
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 
@@ -1606,7 +1598,7 @@ Clear field placeholder if field was not modified."
         lsp-eldoc-render-all nil
         lsp-eldoc-enable-hover t)
   :config
-  (evil-leader/set-key "a" 'lsp-execute-code-action))
+  (evil-define-key 'normal 'global (kbd "<leader>a") 'lsp-execute-code-action))
 
 
 
@@ -1848,9 +1840,11 @@ Clear field placeholder if field was not modified."
 
 
 ;; Emacs Lisp
-(evil-leader/set-key-for-mode 'emacs-lisp-mode "meb" 'eval-buffer)
-(evil-leader/set-key-for-mode 'emacs-lisp-mode "mer" 'eval-region)
-(evil-leader/set-key-for-mode 'emacs-lisp-mode "mes" 'eval-last-sexp)
+(evil-define-key 'normal 'emacs-lisp-mode
+  (kbd "<leader>meb") 'eval-buffer
+  (kbd "<leader>mer") 'eval-region
+  (kbd "<leader>mes") 'eval-last-sexp)
+
 (add-hook 'emacs-lisp-mode-hook
           (lambda()
             (setq mode-name "ELisp")))
@@ -1979,22 +1973,22 @@ Clear field placeholder if field was not modified."
 
 
 ;; NOTE: m is reserved for mode-local bindings
-(evil-leader/set-key
-  "2"  'call-last-kbd-macro
-  "q"  'evil-quit
-  "n"  'mb/narrow-or-widen-dwim
-  "ll" 'mb/cleanup-buffer
-  "lt" 'mb/sort-columns
-  "k"  'mb/kill-this-buffer
-  "s"  'save-buffer
-  "e"  'eshell
-  "lm" 'evil-show-marks
-  "u"  'undo-tree-visualize
-  "i"  'counsel-semantic-or-imenu
+(evil-define-key 'normal 'global
+  (kbd "<leader>2")  'call-last-kbd-macro
+  (kbd "<leader>q") 'evil-quit
+  (kbd "<leader>n") 'mb/narrow-or-widen-dwim
+  (kbd "<leader>ll") 'mb/cleanup-buffer
+  (kbd "<leader>lt") 'mb/sort-columns
+  (kbd "<leader>k")  'mb/kill-this-buffer
+  (kbd "<leader>s")  'save-buffer
+  (kbd "<leader>e")  'eshell
+  (kbd "<leader>lm") 'evil-show-marks
+  (kbd "<leader>u")  'undo-tree-visualize
+  (kbd "<leader>i")  'counsel-semantic-or-imenu
 
-  "bd" 'mb/delete-current-buffer-file
-  "br" 'mb/rename-file-and-buffer
-  "bs" 'scratch)
+  (kbd "<leader>bd") 'mb/delete-current-buffer-file
+  (kbd "<leader>br") 'mb/rename-file-and-buffer
+  (kbd "<leader>bs") 'scratch)
 
 (provide 'init)
 ;;; init.el ends here
