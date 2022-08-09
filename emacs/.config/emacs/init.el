@@ -1172,7 +1172,7 @@ Clear field placeholder if field was not modified."
 ;; Ace-window: switch windows
 (use-package ace-window
   :ensure t
-  :bind*
+  :bind
   ("M-w" . ace-window)
   :config
   (defun mb/other-window ()
