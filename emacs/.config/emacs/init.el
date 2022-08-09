@@ -1349,19 +1349,20 @@ Clear field placeholder if field was not modified."
 (use-package flycheck
   :ensure t
   :defer t
-  :bind*
-  ("M-e 1" . flycheck-first-error)
-  ("M-e j" . flycheck-next-error)
-  ("M-e M-j" . flycheck-next-error)
-  ("M-e k" . flycheck-previous-error)
-  ("M-e M-k" . flycheck-previous-error)
-  ("M-e l" . mb/toggle-flyckeck-errors-list)
-  ("M-e b" . flycheck-buffer)
   :init
   (setq flycheck-indication-mode 'right-margin)
   (global-flycheck-mode)
 
   :config
+  (evil-define-key 'normal 'global
+    (kbd "M-e 1") 'flycheck-first-error
+    (kbd "M-e j") 'flycheck-next-error
+    (kbd "M-e M-j") 'flycheck-next-error
+    (kbd "M-e k") 'flycheck-previous-error
+    (kbd "M-e M-k") 'flycheck-previous-error
+    (kbd "M-e l") 'mb/toggle-flyckeck-errors-list
+    (kbd "M-e b") 'flycheck-buffer)
+
   (if (display-graphic-p)
       (setq flycheck-indication-mode 'right-fringe)
     (progn
