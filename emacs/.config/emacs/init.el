@@ -1772,7 +1772,10 @@ Clear field placeholder if field was not modified."
 ;; Run code formatters like Prettier
 (use-package apheleia
   :ensure t
-  :init (apheleia-global-mode +1))
+  :init (apheleia-global-mode +1)
+  :config
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("yarn" "run" "-s" "prettier" "--stdin-filepath" filepath)))
 
 
 
