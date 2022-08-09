@@ -659,6 +659,10 @@ narrowed."
   ;; set leader key in normal & visual state
   (evil-set-leader '(normal visual) (kbd "SPC"))
 
+  (add-hook 'view-mode-hook
+            (lambda()
+              (define-key view-mode-map (kbd "SPC") nil)))
+
   ;; Use escape to quit, and not as a meta-key.
   (define-key evil-normal-state-map           [escape] 'keyboard-quit)
   (define-key evil-visual-state-map           [escape] 'keyboard-quit)
