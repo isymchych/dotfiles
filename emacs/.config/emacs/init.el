@@ -876,8 +876,9 @@ narrowed."
 ;; counsel use it for M-x
 (use-package smex
   :ensure t
-  :bind*
-  ("C-M-x" . 'smex-major-mode-commands)
+  :bind
+  ("M-x" . 'smex)
+  ("M-X" . 'smex-major-mode-commands)
   :config
   (setq smex-save-file (expand-file-name  "smex-items"  mb-save-path)))
 
@@ -889,7 +890,6 @@ narrowed."
   :after ivy
   :ensure t
   :bind*
-  ("M-x" . 'counsel-M-x)
   ("C-x C-f" . 'counsel-find-file)
   ("<f1> f" . 'counsel-describe-function)
   ("<f1> v" . 'counsel-describe-variable)
