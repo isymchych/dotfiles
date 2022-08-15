@@ -679,11 +679,11 @@ narrowed."
 
   ;; insert tabs only in emacs state
   (define-key evil-motion-state-map (kbd "TAB")
-    (lambda () (interactive) (if (evil-emacs-state-p) (indent-for-tab-command) (evil-jump-forward))))
+              (lambda () (interactive) (if (evil-emacs-state-p) (indent-for-tab-command) (evil-jump-forward))))
 
   ;; insert newline only in emacs state
   (define-key evil-motion-state-map (kbd "RET")
-    (lambda () (interactive) (when (evil-emacs-state-p) (newline))))
+              (lambda () (interactive) (when (evil-emacs-state-p) (newline))))
 
   (define-key evil-motion-state-map (kbd " ") nil)
 
@@ -1772,11 +1772,20 @@ Clear field placeholder if field was not modified."
 
 ;; Run code formatters like Prettier
 (use-package apheleia
+  :disabled t ;; buggy, prettier doesn't works
   :ensure t
   :init (apheleia-global-mode +1)
   :config
   (setf (alist-get 'prettier apheleia-formatters)
         '("yarn" "run" "-s" "prettier" "--stdin-filepath" filepath)))
+
+(use-package prettier
+  :ensure t
+  :defer t
+  :hook ((web-mode . prettier-mode)
+         (css-mode . prettier-mode)
+         (js-mode . prettier-mode))
+  )
 
 
 
