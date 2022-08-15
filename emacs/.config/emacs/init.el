@@ -1776,6 +1776,7 @@ Clear field placeholder if field was not modified."
 ;; XML
 (use-package nxml-mode
   :mode ("\\.xml\\'" . nxml-mode)
+  :mode ("\\.svg\\'" . nxml-mode)
   :config
 
   (setq nxml-child-indent  mb-tab-size)

@@ -3,6 +3,7 @@
 * Fonts:
     brew tap homebrew/cask-fonts
     brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
+    brew install --cask font-iosevka-nerd-font
 * Install iTerm2
     * Choose color theme
     * Preferences > Profiles > Keyboard > Left/Right Option as Esc+
