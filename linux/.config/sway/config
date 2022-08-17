@@ -303,6 +303,12 @@ bindsym $mod+F8 exec mb-backlight inc
 bindsym XF86MonBrightnessDown exec mb-backlight dec
 bindsym $mod+F7 exec mb-backlight dec
 
+# increase keyboard backlight
+bindsym XF86KbdBrightnessUp exec mb-backlight --keyboard inc
+
+# decrease keyboard backlight
+bindsym XF86KbdBrightnessDown exec mb-backlight --keyboard dec
+
 # terminal
 bindsym $mod+Return exec alacritty
 
