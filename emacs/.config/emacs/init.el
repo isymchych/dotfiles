@@ -1602,7 +1602,12 @@ Clear field placeholder if field was not modified."
         lsp-enable-on-type-formatting nil
 
         lsp-eldoc-render-all nil
-        lsp-eldoc-enable-hover t)
+        lsp-eldoc-enable-hover t
+
+        ;; UI https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
+        lsp-lens-enable nil
+        lsp-headerline-breadcrumb-enable t
+        )
   :config
   (evil-define-key 'normal 'global (kbd "<leader>a") 'lsp-execute-code-action))
 
