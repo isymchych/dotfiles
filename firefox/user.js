@@ -1,4 +1,4 @@
-user_pref("layout.frame_rate", -1); // for 60hz monitor
+// auto frame rate by default
 // user_pref("layout.frame_rate", 120);
 
 // do not detach tabs with drag-n-drop

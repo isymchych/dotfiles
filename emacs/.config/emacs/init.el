@@ -1597,7 +1597,6 @@ Clear field placeholder if field was not modified."
         lsp-modeline-code-actions-segments '(count name)
 
         lsp-signature-render-documentation nil
-        lsp-headerline-breadcrumb-enable nil
         lsp-enable-indentation nil
         lsp-enable-on-type-formatting nil
 
