@@ -90,6 +90,7 @@ $ chmod 600 ~/.ssh/key
 * mako - notification daemon
 * darkman - enable dark mode on sunset
 * wev - monitor keypresses, like xev
+* wtype - xdotool type for wayland
 * libnotify
 * light - to control backlight
 * gnome-keyring, seahorse - GUI for storing & unlocking SSH keys
@@ -121,6 +122,7 @@ $ chmod 600 ~/.ssh/key
 * mate-calc - calculator
 * easyeffects - enable "auto gain" plugin, for volume normalisation
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
+* rofimoji - pick & insert emoji
 
 * nordic - dark GTK3 theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme

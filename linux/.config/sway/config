@@ -43,7 +43,7 @@ output * background #002B36 solid_color
 xwayland enable
 
 # Cursor in xwayland
-seat seat0 xcursor_theme Simple-and-Soft 48
+seat seat0 xcursor_theme Simple-and-Soft 32
 
 font $font
 
@@ -54,7 +54,7 @@ floating_modifier $mod
 bindsym --to-code $mod+q kill
 
 # enter fullscreen mode for the focused container
-bindsym --to-code $mod+Mod1+f fullscreen
+bindsym --to-code $mod+Shift+f fullscreen
 
 # change focus
 bindsym --to-code $mod+h focus left
@@ -69,20 +69,20 @@ bindsym --to-code $mod+Shift+k move up
 bindsym --to-code $mod+Shift+l move right
 
 # split in horizontal orientation
-bindsym --to-code $mod+Shift+g split h
+bindsym --to-code $mod+Alt+g split h
 # split in vertical orientation
-bindsym --to-code $mod+Shift+v split v
+bindsym --to-code $mod+Alt+v split v
 # change container layout (stacked, tabbed, toggle split)
-bindsym --to-code $mod+Shift+s layout stacking
-bindsym --to-code $mod+Shift+w layout tabbed
-bindsym --to-code $mod+Shift+e layout toggle split
+bindsym --to-code $mod+Alt+s layout stacking
+bindsym --to-code $mod+Alt+w layout tabbed
+bindsym --to-code $mod+Alt+e layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
 # change focus between tiling / floating windows
-bindsym $mod+Mod1+space focus mode_toggle # Alt
-# toggle sticy
-bindsym --to-code $mod+Shift+m sticky toggle
+bindsym $mod+Alt+space focus mode_toggle # Alt
+# toggle sticky
+bindsym --to-code $mod+Alt+m sticky toggle
 
 # focus the parent container
 bindsym --to-code $mod+Shift+a focus parent
@@ -132,10 +132,10 @@ mode "resize" {
      # Pressing right will grow the window’s width.
      # Pressing up will shrink the window’s height.
      # Pressing down will grow the window’s height.
-     bindsym --to-code j resize shrink width 10 px or 10 ppt
+     bindsym --to-code h resize shrink width 10 px or 10 ppt
+     bindsym --to-code j resize shrink height 10 px or 10 ppt
      bindsym --to-code k resize grow height 10 px or 10 ppt
-     bindsym --to-code l resize shrink height 10 px or 10 ppt
-     bindsym semicolon resize grow width 10 px or 10 ppt
+     bindsym --to-code l resize grow width 10 px or 10 ppt
 
      # same bindings, but for the arrow keys
      bindsym Left resize shrink width 10 px or 10 ppt
@@ -148,7 +148,7 @@ mode "resize" {
      bindsym Escape mode "default"
 }
 
-bindsym --to-code $mod+r mode "resize"
+bindsym --to-code $mod+Alt+r mode "resize"
 
 # toggle waybar
 bindsym $mod+grave exec killall -SIGUSR1 waybar
@@ -337,10 +337,13 @@ bindsym --to-code $mod+t exec alacritty -t "Translate" --class "FLOAT" -e trans 
 # clipboard manager
 bindsym --to-code $mod+i exec clipman pick --tool="wofi" --max-items=30 --histpath="~/.local/share/clipman.json" --notify
 bindsym --to-code $mod+Shift+i exec clipman pick --tool="wofi" --max-items=30 --histpath="~/.local/share/clipman-primary.json" --notify
-bindsym --to-code $mod+Mod1+i exec clipman clear --all
+bindsym --to-code $mod+Alt+i exec clipman clear --all
 
 # editor
 bindsym --to-code $mod+e exec alacritty -t Emacs --class Emacs -e emacs -nw
+
+# emoji picker
+bindsym --to-code $mod+Shift+e exec rofimoji
 
 
 # AUTOSTART
