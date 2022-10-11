@@ -552,9 +552,23 @@ narrowed."
          (dbus-get-property :session "nl.whynothugo.darkman" "/nl/whynothugo/darkman" "nl.whynothugo.darkman" "Mode")
        "light")))
 
-  (if mb-is-linux
-      (init-darkman-integration)
-    (activate-mode "light")))
+  (when mb-is-linux
+      (init-darkman-integration)))
+
+
+
+;; Auto dark mode on Macos
+(use-package auto-dark
+  :ensure t
+  :after solarized-theme
+
+  :if mb-is-mac-os
+
+  :config
+  (setq
+   auto-dark--allow-osascript t
+   auto-dark--dark-theme 'solarized-dark
+   auto-dark--light-theme 'solarized-light))
 
 
 
