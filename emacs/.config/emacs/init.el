@@ -1638,7 +1638,7 @@ Clear field placeholder if field was not modified."
   :config
   (evil-define-key 'normal 'lsp-mode-map
     (kbd "<leader>la") 'lsp-execute-code-action
-    (kbd "<leader>ld") 'lsp-find-definition
+    (kbd "<leader>lg") 'lsp-find-definition
     (kbd "<leader>lf") 'lsp-find-references
     (kbd "<leader>lr") 'lsp-rename))
 
