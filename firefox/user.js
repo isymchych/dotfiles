@@ -7,7 +7,7 @@ user_pref("browser.tabs.allowTabDetach", false);
 user_pref("browser.tabs.drawInTitlebar", false);
 
 // make tabs take less space
-user_pref("browser.uidensity", 1);
+// user_pref("browser.uidensity", 1);
 
 // Disable Ctrl-q to close FF
 user_pref("browser.quitShortcut.disabled", true);

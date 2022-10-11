@@ -88,6 +88,7 @@ $ chmod 600 ~/.ssh/key
 * wl-clipboard - cli tools for interacting with clipboard
 * clipman - clipboard manager
 * mako - notification daemon
+* darkman - enable dark mode on sunset
 * wev - monitor keypresses, like xev
 * libnotify
 * light - to control backlight
@@ -100,6 +101,7 @@ $ chmod 600 ~/.ssh/key
 * xorg-xrdb
 * xorg-xhost
 * wmname
+* qt5ct - qt5 configuration tool
 * alacritty - terminal, stow alacritty
 * OR wezterm - terminal, stow wezterm
 * safeeyes - break reminder
@@ -121,7 +123,7 @@ $ chmod 600 ~/.ssh/key
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 
 * nordic - dark GTK3 theme
-* adwaita (gtk default) - light GTK3 theme
+* adwaita, adwaita-qt5 (gtk default) - GTK3 theme
 * papirus-icon-theme - icon theme
 * xcursor-simpleandsoft - cursor theme
 * ttf-jetbrains-mono - JetBrains Mono font

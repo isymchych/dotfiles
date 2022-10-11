@@ -1,8 +1,18 @@
+/*
+* https://docs.gtk.org/gtk3/css-overview.html
+* https://docs.gtk.org/gtk3/css-properties.html
+* https://github.com/Alexays/Waybar/wiki/Styling
+*/
+
+window {
+  font-size: 16px;
+}
+
 * {
   border: none;
   border-radius: 0;
   font-family: JetBrains Mono;
-  font-size: 14px;
+  font-size: 1em;
   min-height: 0;
 }
 
@@ -15,23 +25,23 @@ window#waybar {
 }
 
 #clock {
-  font-size: 18px;
+  font-size: 1.3em;
   padding: 4px 0 4px 4px;
 }
 
 #clock.date {
-  font-size: 14px;
+  font-size: 1em;
   padding-top: 0;
 }
 
 #clock.day-of-week {
-  font-size: 13px;
+  font-size: 1em;
   padding-top: 0;
-  padding-bottom: 20px;
+  padding-bottom: 1.3em;
 }
 
 #workspaces button {
-  padding: 7px 0;
+  padding: 0.7em 0;
   background-color: transparent;
   color: #ffffff;
 }
@@ -52,17 +62,17 @@ window#waybar {
 
 #mode {
   background-color: #64727d;
-  padding: 10px 0;
+  padding: 0.8em 0;
 }
 
 #tray {
-  padding-top: 24px;
+  padding-top: 2em;
 }
 
 #tray * {
   /* set font for tray context menus */
   font-family: DejaVu Sans Bold Semi-Condensed;
-  font-size: 16px;
+  font-size: 22px;
 }
 
 #cpu,
@@ -119,10 +129,10 @@ label:focus {
 }
 
 #pulseaudio {
-  font-size: 15px;
+  font-size: 1.3em;
   padding: 5px;
 }
 
 #language {
-  font-size: 18px;
+  font-size: 1.6em;
 }
