@@ -16,7 +16,6 @@
     brew install aspell editorconfig fd gitui htop jq just nnn nvm ripgrep tokei wget
 * kdiff3 - diff tool
     brew install --cask kdiff3
-* Install Alfred
 * Install Owly - prevent Mac from sleeping in 15 minutes
 * LinearMouse - disable mouse acceleration
     brew install --cask linearmouse --no-quarantine

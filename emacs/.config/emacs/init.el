@@ -553,7 +553,7 @@ narrowed."
        "light")))
 
   (when mb-is-linux
-      (init-darkman-integration)))
+    (init-darkman-integration)))
 
 
 
@@ -1610,29 +1610,43 @@ Clear field placeholder if field was not modified."
         lsp-rust-analyzer-proc-macro-enable t
         lsp-rust-analyzer-cargo-load-out-dirs-from-check t
         lsp-rust-build-on-save t
+        lsp-enable-file-watchers nil
+
         lsp-enable-folding nil
         lsp-enable-snippet nil
         lsp-enable-symbol-highlighting nil
-        lsp-enable-file-watchers nil
         lsp-enable-on-type-formatting  nil
+        lsp-enable-indentation nil
         lsp-completion-provider :capf
 
         lsp-modeline-code-actions-segments '(count name)
 
-        lsp-signature-render-documentation nil
-        lsp-enable-indentation nil
-        lsp-enable-on-type-formatting nil
-
-        lsp-eldoc-render-all nil
-        lsp-eldoc-enable-hover t
-
         ;; UI https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
         lsp-lens-enable nil
-        lsp-headerline-breadcrumb-enable t
-        )
-  :config
-  (evil-define-key 'normal 'global (kbd "<leader>a") 'lsp-execute-code-action))
 
+        lsp-ui-doc-enable nil
+
+        lsp-eldoc-enable-hover nil
+
+        lsp-headerline-breadcrumb-enable t
+        lsp-headerline-breadcrumb-segments '(symbols)
+
+        lsp-ui-sideline-enable t
+        lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-delay 1.0
+        lsp-ui-sideline-show-diagnostics nil)
+  :config
+  (evil-define-key 'normal 'lsp-mode-map
+    (kbd "<leader>la") 'lsp-execute-code-action
+    (kbd "<leader>ld") 'lsp-find-definition
+    (kbd "<leader>lf") 'lsp-find-references
+    (kbd "<leader>lr") 'lsp-rename))
+
+
+;; Advanced UI elements for lsp-mode
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
 
 
 ;; ---------------------------------------- LANGUAGES
