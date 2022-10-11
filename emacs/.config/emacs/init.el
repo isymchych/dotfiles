@@ -1834,6 +1834,7 @@ Clear field placeholder if field was not modified."
 (use-package yaml-mode
   :ensure t
   :defer t
+  :hook (yaml-mode . lsp) ;; https://github.com/redhat-developer/yaml-language-server
   :config (message "mb: YAML MODE"))
 
 
