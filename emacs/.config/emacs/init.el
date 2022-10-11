@@ -449,16 +449,6 @@ narrowed."
     (warn "MB: executable %s not found!" name)))
 
 
-(defmacro mb/load-theme! (theme)
-  "Load THEME even when starting Emacs as a daemon."
-  `(if (daemonp)
-       (add-hook 'after-make-frame-functions
-                 (lambda (frame)
-                   (select-frame frame)
-                   (load-theme ,theme t)))
-     (load-theme ,theme t)))
-
-
 ;; spacemax implementation of kill-this-buffer
 ;; @see https://github.com/syl20bnr/spacemacs/pull/6225
 (defun mb/kill-this-buffer ()
@@ -538,14 +528,33 @@ narrowed."
   :disabled
   :ensure t
   :config
-  (mb/load-theme! 'nord))
+  (load-theme 'nord t))
 
 
 (use-package solarized-theme
-  :disabled
   :ensure t
   :config
-  (mb/load-theme! 'solarized-light))
+  (defun activate-mode (mode)
+    (message "MB: activate %s mode" mode)
+    (load-theme (if (equal mode "dark") 'solarized-dark 'solarized-light) t))
+
+  (defun init-darkman-integration ()
+    (load "dbus.el")
+
+    (defun set-darkman-theme (mode)
+      (message "MB: darkman mode changed to %s" mode)
+      (activate-mode mode))
+
+    (dbus-register-signal :session nil "/nl/whynothugo/darkman" "nl.whynothugo.darkman" "ModeChanged" #'set-darkman-theme)
+
+    (activate-mode
+     (if (member "nl.whynothugo.darkman" (dbus-list-names :session))
+         (dbus-get-property :session "nl.whynothugo.darkman" "/nl/whynothugo/darkman" "nl.whynothugo.darkman" "Mode")
+       "light")))
+
+  (if mb-is-linux
+      (init-darkman-integration)
+    (activate-mode "light")))
 
 
 
@@ -679,11 +688,11 @@ narrowed."
 
   ;; insert tabs only in emacs state
   (define-key evil-motion-state-map (kbd "TAB")
-              (lambda () (interactive) (if (evil-emacs-state-p) (indent-for-tab-command) (evil-jump-forward))))
+    (lambda () (interactive) (if (evil-emacs-state-p) (indent-for-tab-command) (evil-jump-forward))))
 
   ;; insert newline only in emacs state
   (define-key evil-motion-state-map (kbd "RET")
-              (lambda () (interactive) (when (evil-emacs-state-p) (newline))))
+    (lambda () (interactive) (when (evil-emacs-state-p) (newline))))
 
   (define-key evil-motion-state-map (kbd " ") nil)
 
@@ -1597,7 +1606,6 @@ Clear field placeholder if field was not modified."
         lsp-modeline-code-actions-segments '(count name)
 
         lsp-signature-render-documentation nil
-        lsp-headerline-breadcrumb-enable nil
         lsp-enable-indentation nil
         lsp-enable-on-type-formatting nil
 
