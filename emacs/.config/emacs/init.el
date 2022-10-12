@@ -504,8 +504,11 @@ narrowed."
     :disabled
     :ensure t)
 
+  ;; Different background for "unreal" buffers (that aren't files), supported by some themes
   (use-package solaire-mode
-    :ensure t)
+    :ensure t
+    :init
+    (solaire-global-mode +1))
 
   ;; Doom emacs themes https://github.com/doomemacs/themes
   (use-package doom-themes
