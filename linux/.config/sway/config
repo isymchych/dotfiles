@@ -184,6 +184,7 @@ assign [class="^jetbrains-webstorm"] 3
 
 assign [class="Chromium"] 4
 assign [class="chromium"] 4
+assign [app_id="chromium"] 4
 assign [class="Chrome"] 4
 assign [class="Google-chrome-beta"] 4
 assign [class="Google-chrome"] 4
@@ -221,6 +222,7 @@ for_window [app_id="firefox"] border pixel $border
 for_window [app_id="firefox" title="Picture-in-Picture"] floating enable, sticky enable, border pixel $border
 
 for_window [app_id="Chromium"] border pixel $border
+for_window [app_id="chromium"] border pixel $border
 for_window [class="^Chromium"] border pixel $border
 for_window [class="^chromium"] border pixel $border
 for_window [class="^Google-chrome"] border pixel $border
@@ -340,7 +342,7 @@ bindsym --to-code $mod+Shift+i exec clipman pick --tool="wofi" --max-items=30 --
 bindsym --to-code $mod+Alt+i exec clipman clear --all
 
 # editor
-bindsym --to-code $mod+e exec alacritty -t Emacs --class Emacs -e emacs -nw
+bindsym --to-code $mod+e exec gtk-launch emacs
 
 # emoji picker
 bindsym --to-code $mod+Shift+e exec rofimoji

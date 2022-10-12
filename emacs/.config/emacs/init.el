@@ -23,7 +23,7 @@
 
 (defvar mb-terminal (getenv "TERMINAL"))
 
-(defvar mb-font "jetbrains mono-14")
+(defvar mb-font "iosevka term medium-18")
 
 (defvar mb-tab-size        4)
 (defvar mb-web-indent-size 2)
@@ -405,42 +405,6 @@ narrowed."
   ;; revert buffer to see changes in FS
   (revert-buffer t t))
 
-;; @see https://emacs.stackexchange.com/questions/653/how-can-i-find-out-in-which-keymap-a-key-is-bound
-(defun mb/key-binding-at-point (key)
-  "Find keymap by KEY."
-  (mapcar (lambda (keymap) (when (keymapp keymap)
-                             (lookup-key keymap key)))
-          (list
-           ;; More likely
-           (get-text-property (point) 'keymap)
-           (mapcar (lambda (overlay)
-                     (overlay-get overlay 'keymap))
-                   (overlays-at (point)))
-           ;; Less likely
-           (get-text-property (point) 'local-map)
-           (mapcar (lambda (overlay)
-                     (overlay-get overlay 'local-map))
-                   (overlays-at (point))))))
-
-(defun mb/locate-key-binding (key)
-  "Determine in which keymap KEY is defined."
-  (interactive "kPress key: ")
-  (let ((ret
-         (list
-          (mb/key-binding-at-point key)
-          (minor-mode-key-binding key)
-          (local-key-binding key)
-          (global-key-binding key))))
-    (when (called-interactively-p 'any)
-      (message "At Point: %s\nMinor-mode: %s\nLocal: %s\nGlobal: %s"
-               (or (nth 0 ret) "")
-               (or (mapconcat (lambda (x) (format "%s: %s" (car x) (cdr x)))
-                              (nth 1 ret) "\n             ")
-                   "")
-               (or (nth 2 ret) "")
-               (or (nth 3 ret) "")))
-    ret))
-
 
 (defun mb/ensure-bin-tool-exists (name)
   "Check if bin tool `NAME' exists and show warning if it doesn't."
@@ -523,23 +487,39 @@ narrowed."
 
 
 
-;; Nord theme https://github.com/arcticicestudio/nord-emacs
-(use-package nord-theme
-  :disabled
-  :ensure t
+(use-package mb-theme
+  :no-require t
+  :ensure solarized-theme
+
   :config
-  (load-theme 'nord t))
+
+  ;; Nord theme https://github.com/arcticicestudio/nord-emacs
+  (use-package nord-theme
+    :disabled
+    :ensure t)
 
 
-(use-package solarized-theme
-  :ensure t
-  :config
-  (defun activate-mode (mode)
-    (message "MB: activate %s mode" mode)
-    (load-theme (if (equal mode "dark") 'solarized-dark 'solarized-light) t))
+  ;; Solarized theme https://github.com/bbatsov/solarized-emacs
+  (use-package solarized-theme
+    :ensure t)
 
-  (defun init-darkman-integration ()
-    (load "dbus.el")
+  (defvar mb-light-theme 'solarized-light)
+  (defvar mb-dark-theme 'solarized-dark)
+
+  ;; Auto dark mode on Linux
+  (use-package mb-darkman
+    :no-require t
+
+    :if mb-is-linux
+
+    :config
+    (load "dbus")
+
+    (defun activate-mode (mode)
+      (message "MB: activate %s mode" mode)
+      (if (equal mode "dark")
+          (load-theme mb-dark-theme t)
+        (load-theme mb-light-theme t)))
 
     (defun set-darkman-theme (mode)
       (message "MB: darkman mode changed to %s" mode)
@@ -552,23 +532,18 @@ narrowed."
          (dbus-get-property :session "nl.whynothugo.darkman" "/nl/whynothugo/darkman" "nl.whynothugo.darkman" "Mode")
        "light")))
 
-  (when mb-is-linux
-    (init-darkman-integration)))
 
+  ;; Auto dark mode on macOS
+  (use-package auto-dark
+    :ensure t
 
+    :if mb-is-mac-os
 
-;; Auto dark mode on Macos
-(use-package auto-dark
-  :ensure t
-  :after solarized-theme
-
-  :if mb-is-mac-os
-
-  :config
-  (setq
-   auto-dark--allow-osascript t
-   auto-dark--dark-theme 'solarized-dark
-   auto-dark--light-theme 'solarized-light))
+    :config
+    (setq
+     auto-dark--allow-osascript t
+     auto-dark--dark-theme mb-dark-theme
+     auto-dark--light-theme mb-light-theme)))
 
 
 
@@ -1604,6 +1579,7 @@ Clear field placeholder if field was not modified."
   (setq lsp-keymap-prefix "s-l"
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
+        lsp-enable-suggest-server-download nil
         lsp-rust-analyzer-server-display-inlay-hints nil
         ;; lsp-rust-analyzer-cargo-watch-command "clippy"
         lsp-rust-server 'rust-analyzer
