@@ -489,7 +489,6 @@ narrowed."
 
 (use-package mb-theme
   :no-require t
-  :ensure solarized-theme
 
   :config
 
@@ -555,6 +554,11 @@ narrowed."
     :ensure t
 
     :if mb-is-mac-os
+
+    :init
+    ;; HACK: remove the applescript support so that this package doesn't break in CLI mode
+    (unless window-system
+      (fmakunbound 'ns-do-applescript))
 
     :config
     (setq
@@ -892,7 +896,7 @@ narrowed."
 (use-package smex
   :ensure t
   :bind
-  ("M-x" . 'smex)
+  ;; ("M-x" . 'smex)
   ("M-X" . 'smex-major-mode-commands)
   :config
   (setq smex-save-file (expand-file-name  "smex-items"  mb-save-path)))
@@ -905,6 +909,7 @@ narrowed."
   :after ivy
   :ensure t
   :bind*
+  ("M-x" . 'counsel-M-x)
   ("C-x C-f" . 'counsel-find-file)
   ("<f1> f" . 'counsel-describe-function)
   ("<f1> v" . 'counsel-describe-variable)
@@ -1640,6 +1645,15 @@ Clear field placeholder if field was not modified."
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode)
+
+
+;; Jump to workspace symbols
+(use-package lsp-ivy
+  :ensure t
+  :config
+  (evil-define-key 'normal 'lsp-mode-map
+    (kbd "<leader>li") 'lsp-ivy-workspace-symbol))
+
 
 
 ;; ---------------------------------------- LANGUAGES

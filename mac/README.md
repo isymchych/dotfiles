@@ -23,7 +23,8 @@
     brew install --cask rectangle
 * Emacs https://github.com/d12frosted/homebrew-emacs-plus
     brew tap d12frosted/emacs-plus
-    brew install emacs-plus@29 --without-cocoa --with-native-comp
+    brew install emacs-plus --with-modern-purple-flat-icon
+    ln -s /opt/homebrew/opt/emacs-plus@28/Emacs.app /Applications
 * optional git-credentials-manager-core - for passwordless auth
     brew tap microsoft/git
     brew cask install git-credential-manager-core
