@@ -21,8 +21,6 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-(defvar mb-terminal (getenv "TERMINAL"))
-
 (defvar mb-font "iosevka term medium-18")
 
 (defvar mb-tab-size        4)
@@ -317,10 +315,17 @@ It wouldn't be associated with the buffer."
 (defun mb/terminal (&rest args)
   "Launches terminal emulator with ARGS."
   (interactive)
-  (let ((commands (if mb-is-mac-os
-                      (-concat (list "open" "-a" mb-terminal default-directory) args)
-                    (-concat (list mb-terminal) args))))
-    (apply 'mb/launch-application commands)))
+  (if mb-is-mac-os
+      (start-process "terminal" nil "osascript" "-e" (format "
+   tell application \"iTerm2\"
+        set newWindow to (create window with default profile)
+        tell current session of newWindow
+            write text \"cd %s;\"
+        end tell
+      end tell
+" default-directory)) ;; TODO handle args
+
+    (apply 'mb/launch-application (-concat (list (getenv "TERMINAL")) args))))
 
 (defun mb/projectile-base-term (&rest args)
   "Launches terminal in projectile root with ARGS."
@@ -2037,6 +2042,7 @@ Clear field placeholder if field was not modified."
 (global-set-key [M-tab]         'mb/prev-buffer)
 (global-set-key (kbd "M-S-SPC") 'just-one-space)
 (global-set-key (kbd "M-/")     'hippie-expand)
+(global-set-key (kbd "M-u")     'universal-argument)
 
 (global-set-key [f3]    'mb/toggle-verbose-mode)
 (global-set-key [f4]    'mb/terminal)
