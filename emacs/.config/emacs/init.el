@@ -501,10 +501,24 @@ narrowed."
 
   ;; Solarized theme https://github.com/bbatsov/solarized-emacs
   (use-package solarized-theme
+    :disabled
     :ensure t)
 
-  (defvar mb-light-theme 'solarized-light)
-  (defvar mb-dark-theme 'solarized-dark)
+  (use-package solaire-mode
+    :ensure t)
+
+  ;; Doom emacs themes https://github.com/doomemacs/themes
+  (use-package doom-themes
+    :ensure t
+    :config
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+
+  (defvar mb-light-theme 'doom-one-light)
+  (defvar mb-dark-theme 'doom-one)
 
   ;; Auto dark mode on Linux
   (use-package mb-darkman
