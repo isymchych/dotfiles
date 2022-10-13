@@ -1327,7 +1327,7 @@ Clear field placeholder if field was not modified."
       (kill-buffer old)))
 
   (evil-define-key 'normal dired-mode-map
-    " " nil ; unbind Space key for evil <leader>
+    " " 'evil-send-leader
     "h" 'mb/dired-up-directory
     "l" 'dired-find-alternate-file
     "o" 'dired-sort-toggle-or-edit
@@ -1620,7 +1620,10 @@ Clear field placeholder if field was not modified."
         lsp-enable-symbol-highlighting nil
         lsp-enable-on-type-formatting  nil
         lsp-enable-indentation nil
+
         lsp-completion-provider :capf
+        lsp-completion-show-detail t
+        lsp-completion-show-kind t
 
         lsp-modeline-code-actions-segments '(count name)
 
@@ -1962,6 +1965,8 @@ Clear field placeholder if field was not modified."
             (lambda ()
               (define-key eshell-mode-map (kbd "M-<tab>") nil)))
   :config
+  (defalias 'open 'find-file-other-window)
+
   (message "mb: ESHELL MODE"))
 
 
