@@ -1114,14 +1114,13 @@ Clear field placeholder if field was not modified."
                               (setq flyspell-consider-dash-as-word-delimiter-flag t)
                               (flyspell-prog-mode)))
   :config
-  (global-set-key [M-f8]  'flyspell-buffer))
+  (global-set-key [M-f8]  'flyspell-buffer)
+  (global-set-key [f8]    'flyspell-correct-at-point))
 
 
 (use-package flyspell-correct-ivy
   :after flyspell
   :ensure t
-  :bind*
-  ("<f8>" . 'flyspell-correct-at-point)
   :init
   (setq flyspell-correct-interface #'flyspell-correct-ivy))
 
@@ -1252,12 +1251,7 @@ Clear field placeholder if field was not modified."
 (use-package ibuffer
   :bind ([f2] . ibuffer)
   :config
-  (define-key ibuffer-mode-map [f2]      'ibuffer-quit)
-  (define-key ibuffer-mode-map (kbd "j") 'ibuffer-forward-line)
-  (define-key ibuffer-mode-map (kbd "k") 'ibuffer-backward-line)
-  (define-key ibuffer-mode-map (kbd "J") 'ibuffer-jump-to-buffer)
-  (define-key ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer)
-  (define-key ibuffer-mode-map (kbd "v") 'ibuffer-toggle-marks))
+  (define-key ibuffer-mode-map [f2]      'ibuffer-quit))
 
 
 
@@ -1660,6 +1654,7 @@ Clear field placeholder if field was not modified."
 ;; Jump to workspace symbols
 (use-package lsp-ivy
   :ensure t
+  :after (lsp-mode)
   :config
   (evil-define-key 'normal 'lsp-mode-map
     (kbd "<leader>li") 'lsp-ivy-workspace-symbol))
@@ -2070,11 +2065,10 @@ Clear field placeholder if field was not modified."
   (kbd "<leader>e")  'eshell
   (kbd "<leader>lm") 'evil-show-marks
   (kbd "<leader>u")  'undo-tree-visualize
-  (kbd "<leader>i")  'counsel-semantic-or-imenu
+  (kbd "<leader>i")  'imenu
 
   (kbd "<leader>bd") 'mb/delete-current-buffer-file
-  (kbd "<leader>br") 'mb/rename-file-and-buffer
-  (kbd "<leader>bs") 'scratch)
+  (kbd "<leader>br") 'mb/rename-file-and-buffer)
 
 (evil-define-key 'visual 'global
   (kbd "<leader>n") 'mb/narrow-or-widen-dwim
