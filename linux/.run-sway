@@ -48,4 +48,4 @@ export BROWSER=firefox
 # for gnome keyring git/ssh integration
 export SSH_AUTH_SOCK="/run/user/$(id -u)/keyring/ssh"
 
-exec systemd-cat -t sway sway --unsupported-gpu
+exec systemd-cat -t sway sway

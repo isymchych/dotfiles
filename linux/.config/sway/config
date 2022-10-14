@@ -1,6 +1,5 @@
 # Variables
 set $mod Mod4
-set $font pango:Ubuntu Mono 15
 set $border 5
 
 
@@ -45,7 +44,7 @@ xwayland enable
 # Cursor in xwayland
 seat seat0 xcursor_theme Simple-and-Soft 32
 
-font $font
+font pango:Ubuntu Mono 14
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -151,7 +150,7 @@ mode "resize" {
 bindsym --to-code $mod+Alt+r mode "resize"
 
 # toggle waybar
-bindsym $mod+grave exec killall -SIGUSR1 waybar
+bindsym --to-code $mod+grave exec killall -SIGUSR1 waybar
 
 bar {
     swaybar_command waybar
@@ -232,6 +231,7 @@ for_window [class="^/usr/bin/chromium-continuous-bin" title="^Developer Tools"] 
 
 for_window [class="^Emacs"] border pixel $border
 for_window [app_id="Emacs"] border pixel $border
+for_window [app_id="emacs"] border pixel $border
 
 for_window [class="Steam"] border pixel $border
 for_window [class="^Steam" title="Steam - News"] floating enable

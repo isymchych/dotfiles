@@ -21,7 +21,7 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-(defvar mb-font "iosevka term medium-18")
+(defvar mb-font "iosevka term medium-12")
 
 (defvar mb-tab-size        4)
 (defvar mb-web-indent-size 2)
@@ -874,6 +874,8 @@ narrowed."
    ivy-count-format "(%d/%d) "
    ivy-wrap t
    ivy-height 25)
+
+  (evil-set-initial-state 'ivy-occur-grep-mode 'normal)
 
   (define-key ivy-minibuffer-map (kbd "M-j") 'ivy-next-line)
   (define-key ivy-minibuffer-map (kbd "M-k") 'ivy-previous-line)

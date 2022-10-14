@@ -38,3 +38,6 @@ export PAGER=less
 export LESS="-r -i -J" # smart ignore case during search, render color text
 
 export PATH="$PATH:$HOME/bin"
+
+# color of the suggestion color for the zsh-augosuggest
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=cyan"
