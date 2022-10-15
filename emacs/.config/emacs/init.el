@@ -43,8 +43,6 @@
 (require 'package)
 (setq package-enable-at-startup nil)
 
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-
 (package-initialize)
 
 ;; Bootstrap `use-package'
@@ -183,8 +181,6 @@
  auto-save-default nil
  create-lockfiles nil
 
- enable-recursive-minibuffers t
-
  ;; Always rescan buffer for imenu
  imenu-auto-rescan t
 
@@ -247,6 +243,14 @@
 ;; make sure emacs will try to split windows horizontally by default
 (setq split-height-threshold nil)
 (setq split-width-threshold 160)
+
+
+(setq enable-recursive-minibuffers t)
+
+;; Do not allow the cursor in the minibuffer prompt
+(setq minibuffer-prompt-properties
+      '(read-only t cursor-intangible t face minibuffer-prompt))
+(add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
 
 
@@ -327,12 +331,15 @@ It wouldn't be associated with the buffer."
 
     (apply 'mb/launch-application (-concat (list (getenv "TERMINAL")) args))))
 
-(defun mb/projectile-base-term (&rest args)
-  "Launches terminal in projectile root with ARGS."
+(defun mb/project-base-term (&rest args)
+  "Launches terminal in project root with ARGS."
   (interactive)
-  (message default-directory)
-  (let ((default-directory (projectile-project-root)))
-    (apply 'mb/terminal args)))
+
+  (if-let ((fboundp 'project-root)
+           (proj (project-current))
+           (default-directory proj))
+      (apply 'mb/terminal args)
+    (error "MB: buffer is not in the project")))
 
 (defun mb/company-complete-common-or-selection ()
   "Complete common part if there is one, or insert selected candidate."
@@ -393,7 +400,7 @@ narrowed."
   (interactive)
   (when command
     (save-buffer)
-    (mb/projectile-base-term "-e" command "--hold")))
+    (mb/project-base-term "-e" command "--hold")))
 
 (defun mb/display-ansi-colors ()
   "Replace ANSI escape chars with real colors in current buffer."
@@ -448,6 +455,50 @@ narrowed."
     ))
 
 
+
+;; ---------------------------------------- GLOBAL KEYBINDINGS
+
+
+(if (window-system)
+    (progn
+      ;; zoom in / zoom out in editor
+      (global-set-key [C-mouse-4] 'text-scale-increase)
+      (global-set-key [C-mouse-5] 'text-scale-decrease)
+
+      (when mb-is-mac-os
+        (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
+        (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
+
+  (progn
+    ;; activate mouse-based scrolling
+    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+    (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
+
+
+(define-key input-decode-map [?\C-\M-i] [M-tab]) ;; make M-tab work in terminal
+
+;; disable input methods
+(global-unset-key (kbd "C-\\"))
+
+;; prevent accidentally closed frames
+(global-unset-key (kbd "C-x C-z"))
+
+(global-set-key (kbd "C-x e")   'mb/eval-and-replace)
+(global-set-key (kbd "C-x C-f") 'find-file)
+(global-set-key [M-tab]         'mb/prev-buffer)
+(global-set-key (kbd "M-S-SPC") 'just-one-space)
+(global-set-key (kbd "M-/")     'hippie-expand)
+(global-set-key (kbd "M-u")     'universal-argument)
+
+(global-set-key [f3]    'mb/toggle-verbose-mode)
+(global-set-key [f4]    'mb/terminal)
+(global-set-key [M-f4]  'mb/project-base-term)
+(global-set-key [f5]    'make-frame)
+(global-set-key [f6]    'mb/revert-buffer)
+(global-set-key [f12]   'menu-bar-mode)
+
+
+
 ;; ---------------------------------------- PLUGINS
 
 
@@ -489,6 +540,14 @@ narrowed."
 ;; s.el strings manipulation library
 (use-package s
   :ensure t)
+
+
+
+;; writable grep, complementary package for other packages
+(use-package wgrep
+  :ensure t
+  :config
+  (setq wgrep-auto-save-buffer t))
 
 
 
@@ -599,23 +658,27 @@ narrowed."
           undo-tree-visualizer-diff       t)))
 
 
-;; evil uses dabbrev and hippie-expand
 
-;; do not split words on _ and -
-(require 'dabbrev)
-(setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]")
+;; evil uses dabbrev
+(use-package dabbrev
+  :config
+  ;; do not split words on _ and -
+  (setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]"))
 
-;; Hippie expand is dabbrev expand on steroids
-(require 'hippie-exp)
-(setq hippie-expand-try-functions-list '(yas-hippie-try-expand
-                                         try-expand-dabbrev
-                                         try-expand-dabbrev-all-buffers
-                                         try-expand-dabbrev-from-kill
-                                         try-complete-file-name-partially
-                                         try-complete-file-name
-                                         try-expand-all-abbrevs
-                                         try-expand-list
-                                         try-expand-line))
+
+
+;; Hippie expand is dabbrev expand on steroids, used by evil
+(use-package hippie-exp
+  :config
+  (setq hippie-expand-try-functions-list '(yas-hippie-try-expand
+                                           try-expand-dabbrev
+                                           try-expand-dabbrev-all-buffers
+                                           try-expand-dabbrev-from-kill
+                                           try-complete-file-name-partially
+                                           try-complete-file-name
+                                           try-expand-all-abbrevs
+                                           try-expand-list
+                                           try-expand-line)))
 
 
 
@@ -672,7 +735,8 @@ narrowed."
                                    (help-mode . emacs)
                                    (grep-mode . emacs)
                                    (bc-menu-mode . emacs)
-                                   (rdictcc-buffer-mode . emacs))
+                                   (rdictcc-buffer-mode . emacs)
+                                   (recentf-mode . normal))
            do (evil-set-initial-state mode state))
 
   (evil-mode 1)
@@ -700,16 +764,12 @@ narrowed."
 
   ;; disable man look up
   (define-key evil-motion-state-map "K" nil)
+  (define-key evil-motion-state-map (kbd " ") nil)
 
   ;; insert tabs only in emacs state
-  (define-key evil-motion-state-map (kbd "TAB")
-    (lambda () (interactive) (if (evil-emacs-state-p) (indent-for-tab-command) (evil-jump-forward))))
-
+  (define-key evil-emacs-state-map (kbd "TAB") #'indent-for-tab-command)
   ;; insert newline only in emacs state
-  (define-key evil-motion-state-map (kbd "RET")
-    (lambda () (interactive) (when (evil-emacs-state-p) (newline))))
-
-  (define-key evil-motion-state-map (kbd " ") nil)
+  (define-key evil-emacs-state-map (kbd "RET") #'newline)
 
   ;; in many modes q is close/exit etc., so leave it unbound
   (define-key evil-normal-state-map "q" nil)
@@ -746,7 +806,29 @@ narrowed."
   (define-key evil-visual-state-map (kbd "<") 'mb/evil-shift-left-visual)
 
   (add-hook 'evil-insert-state-exit-hook 'company-abort)
-  )
+
+  ;; NOTE: m is reserved for mode-local bindings
+  (evil-define-key 'normal 'global
+    (kbd "<leader>2")  'call-last-kbd-macro
+    (kbd "<leader>q") 'evil-quit
+    (kbd "<leader>n") 'mb/narrow-or-widen-dwim
+    (kbd "<leader>ff") 'find-file
+    (kbd "<leader>bb") 'switch-to-buffer
+    (kbd "<leader>k")  'mb/kill-this-buffer
+    (kbd "<leader>s")  'save-buffer
+    (kbd "<leader>e")  'eshell
+    (kbd "<leader>lm") 'evil-show-marks
+    (kbd "<leader>u")  'undo-tree-visualize
+    (kbd "<leader>i")  'imenu
+
+    (kbd "<leader>bl") 'mb/cleanup-buffer
+    (kbd "<leader>bd") 'mb/delete-current-buffer-file
+    (kbd "<leader>br") 'mb/rename-file-and-buffer)
+
+  (evil-define-key 'visual 'global
+    (kbd "<leader>n") 'mb/narrow-or-widen-dwim
+    (kbd "<leader>ll") 'mb/cleanup-buffer
+    (kbd "<leader>lt") 'mb/sort-columns))
 
 ;; integration of evil with various packages
 (use-package evil-collection
@@ -787,7 +869,9 @@ narrowed."
 ;; xml tag attribute as a text object (bound to x)
 (use-package exato
   :after evil
-  :ensure t)
+  :ensure t
+  :init
+  (setq exato-key "a"))
 
 ;; manage comments
 (use-package evil-commentary
@@ -805,133 +889,242 @@ narrowed."
   (evil-lion-mode))
 
 
+(use-package better-jumper
+  :ensure t
 
-;; Ido mode: text menu item selecting
-(use-package ido
+  :init
+  (global-set-key [remap evil-jump-forward]  #'better-jumper-jump-forward)
+  (global-set-key [remap evil-jump-backward] #'better-jumper-jump-backward)
+  (global-set-key [remap xref-pop-marker-stack] #'better-jumper-jump-backward)
+
   :config
-  (setq
-   ido-enable-prefix          nil
-   ido-enable-flex-matching   t
-   ido-create-new-buffer      'always
-   ido-use-filename-at-point  'guess
+  (setq better-jumper-use-evil-jump-advice t
+        better-jumper-use-savehist t)
 
-   ;; disable ido faces to see flx highlights
-   ido-use-faces                nil
+  (better-jumper-mode 1)
 
-   ido-cannot-complete-command  'ido-next-match
+  ;; Creates a jump point before killing a buffer. This allows you to undo
+  ;; killing a buffer easily (only works with file buffers though; it's not
+  ;; possible to resurrect special buffers).
+  (advice-add #'kill-current-buffer :around #'evil-better-jumper/set-jump-a)
 
-   ;; make ido use completion-ignored-extensions
-   ido-ignore-extensions        t
-
-   ido-max-prospects 10
-
-   ;; do not complete automatically unique result on tab
-   ido-confirm-unique-completion t
-
-   ;; ignore system buffers in ido-switch-buffer
-   ido-ignore-buffers '("^[\s-]*\\*")
-
-   ido-save-directory-list-file  (expand-file-name  "ido.hist"  mb-save-path)
-   ido-default-file-method       'selected-window
-   ido-auto-merge-work-directories-length  -1)
-
-  (add-hook 'ido-setup-hook
-            (lambda()
-              (define-key ido-completion-map (kbd "<backtab>") 'ido-prev-match)
-              (define-key ido-completion-map (kbd "C-w") 'ido-delete-backward-updir)
-              (define-key ido-file-dir-completion-map (kbd "C-w") 'ido-delete-backward-updir)
-              (define-key ido-completion-map (kbd "M-j") 'ido-next-match)
-              (define-key ido-completion-map (kbd "M-k") 'ido-prev-match))))
-
-;; smarter fuzzy matching for ido
-(use-package flx-ido
-  :after ido
-  :ensure t
-  :config (flx-ido-mode 1))
-
-;; vertical menu for ido
-(use-package ido-vertical-mode
-  :after ido
-  :ensure t
-  :config (ido-vertical-mode 1))
+  ;; Create a jump point before jumping with imenu.
+  (advice-add #'imenu :around #'evil-better-jumper/set-jump-a))
 
 
 
-;; Ivy
-(use-package ivy
-  :ensure t
-  :diminish ivy-mode
-  :bind*
-  ("M-`" . 'ivy-resume)
+;; Project management
+(use-package project
+  :init
+  (setq project-list-file (expand-file-name "projects" mb-save-path))
   :config
-  (ivy-mode 1)
-
-  (setq ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
-
-  (setq
-   ivy-initial-inputs-alist nil ; remove the ^ (caret) symbol from the input
-   ivy-use-virtual-buffers t
-   ivy-count-format "(%d/%d) "
-   ivy-wrap t
-   ivy-height 25)
-
-  (evil-set-initial-state 'ivy-occur-grep-mode 'normal)
-
-  (define-key ivy-minibuffer-map (kbd "M-j") 'ivy-next-line)
-  (define-key ivy-minibuffer-map (kbd "M-k") 'ivy-previous-line)
-  (define-key ivy-minibuffer-map (kbd "M-<return>") 'ivy-immediate-done)
-  (define-key ivy-minibuffer-map (kbd "C-j") 'ivy-immediate-done)
-
-  (evil-define-key 'normal 'global (kbd "<leader>`") 'ivy-resume))
+  (push '(project-dired "Root directory") project-switch-commands)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>pp") 'project-switch-project
+    (kbd "<leader>pD") 'project-dired
+    (kbd "<leader>pe") 'project-eshell
+    (kbd "<leader>pk") 'project-kill-buffers))
 
 
-;; show references to variables in ivy
-(use-package ivy-xref
-  :after ivy
+
+;; Vertical completion UI (like ido)
+(use-package vertico
   :ensure t
   :init
-  ;; xref initialization is different in Emacs 27 - there are two different
-  ;; variables which can be set rather than just one
-  (when (>= emacs-major-version 27)
-    (setq xref-show-definitions-function #'ivy-xref-show-defs))
-  ;; Necessary in Emacs <27. In Emacs 27 it will affect all xref-based
-  ;; commands other than xref-find-definitions (e.g. project-find-regexp)
-  ;; as well
-  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  (vertico-mode)
+  ;; Show more candidates
+  (setq vertico-count 25
+        ;; enable cycling for `vertico-next' and `vertico-previous'.
+        vertico-cycle t)
 
-;; counsel use it for M-x
-(use-package smex
-  :ensure t
-  :bind
-  ;; ("M-x" . 'smex)
-  ("M-X" . 'smex-major-mode-commands)
-  :config
-  (setq smex-save-file (expand-file-name  "smex-items"  mb-save-path)))
+  (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
-;; writable grep for counsel
-(use-package wgrep
-  :ensure t)
-
-(use-package counsel
-  :after ivy
-  :ensure t
-  :bind*
-  ("M-x" . 'counsel-M-x)
-  ("C-x C-f" . 'counsel-find-file)
-  ("<f1> f" . 'counsel-describe-function)
-  ("<f1> v" . 'counsel-describe-variable)
-  ("<f1> i" . 'counsel-info-lookup-symbol)
-  ("<f1> u" . 'counsel-unicode-char)
-  :config
-  (setq counsel-yank-pop-truncate-radius 5)
-  (ivy-configure 'counsel-yank-pop :height 25)
+  (define-key vertico-map (kbd "M-j") 'vertico-next)
+  (define-key vertico-map (kbd "M-k") 'vertico-previous)
 
   (evil-define-key 'normal 'global
-    (kbd "<leader>SPC") 'counsel-recentf
-    (kbd "<leader>r") 'counsel-recentf
-    (kbd "<leader>y") 'counsel-yank-pop
-    (kbd "<leader>ff") 'counsel-find-file
-    (kbd "<leader>bb") 'counsel-ibuffer))
+    (kbd "<leader>`") 'vertico-repeat
+    (kbd "<leader>jj") 'evil-avy-goto-char-timer
+    (kbd "<leader>jl") 'evil-avy-goto-line))
+
+
+
+;; Fuzzy matching algorithm
+(use-package orderless
+  :ensure t
+  :init
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+
+
+
+;; Enable rich annotations in the minibuffer
+(use-package marginalia
+  :ensure t
+  :init
+  (marginalia-mode))
+
+
+
+;; Advanced commands in vertical completion UI
+(use-package consult
+  :ensure t
+  :init
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  :config
+  (consult-customize consult-recent-file :preview-key '([M-k] [M-j]))
+
+  ;; make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;;  consult-outline support for eshell prompts
+  (add-hook 'eshell-mode-hook (lambda () (setq outline-regexp eshell-prompt-regexp)))
+
+  (defun consult-ripgrep-symbol-at-point (&optional dir)
+    (interactive)
+    (consult-ripgrep dir (thing-at-point 'symbol)))
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>r") 'consult-recent-file
+    (kbd "<leader>y") 'consult-yank-from-kill-ring
+    (kbd "<leader>i") 'consult-imenu
+    (kbd "<leader>ll") 'consult-line
+    (kbd "<leader>o") 'consult-outline
+    (kbd "<leader>bb") 'consult-buffer
+    (kbd "<leader>SPC") 'consult-buffer
+
+    ;; project
+    (kbd "<leader>pb") 'consult-project-buffer
+    (kbd "<leader>pf") 'consult-fd
+    (kbd "<leader>ps") 'consult-ripgrep
+    (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point))
+
+
+
+;; https://github.com/minad/consult/wiki#find-files-using-fd
+(use-package consult-fd
+  :no-require t
+  :after consult
+  :config
+  (defvar consult--fd-command nil)
+  (defun consult--fd-builder (input)
+    (unless consult--fd-command
+      (setq consult--fd-command
+            (if (eq 0 (call-process-shell-command "fdfind"))
+                "fdfind"
+              "fd")))
+    (pcase-let* ((`(,arg . ,opts) (consult--command-split input))
+                 (`(,re . ,hl) (funcall consult--regexp-compiler
+                                        arg 'extended t)))
+      (when re
+        (list :command (append
+                        (list consult--fd-command
+                              "--color=never" "--full-path"
+                              (consult--join-regexps re 'extended))
+                        opts)
+              :highlight hl))))
+
+  (defun consult-fd (&optional dir initial)
+    (interactive "P")
+    (let* ((prompt-dir (consult--directory-prompt "Fd" dir))
+           (default-directory (cdr prompt-dir)))
+      (find-file (consult--find (car prompt-dir) #'consult--fd-builder initial))))
+
+
+  (defun consult-fd-thing-at-point (&optional dir)
+    (interactive)
+    (consult-fd dir (thing-at-point 'filename)))
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>pf") 'consult-fd
+    (kbd "<leader>pF") 'consult-fd-thing-at-point))
+
+
+
+;; Context commands for things at a point
+(use-package embark
+  :ensure t
+
+  :config
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  (global-set-key (kbd "C-h B") 'embark-bindings-at-point)
+  (global-set-key (kbd "M-.") 'embark-act)
+  (define-key evil-normal-state-map (kbd "M-.") 'embark-act)
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+
+
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+
+
+;; https://github.com/oantolin/embark/wiki/Additional-Configuration#use-which-key-like-a-key-menu-prompt
+(use-package embark-which-key
+  :no-require t
+  :after (embark which-key)
+  :config
+  (defun embark-which-key-indicator ()
+    "An embark indicator that displays keymaps using which-key.
+The which-key help message will show the type and value of the
+current target followed by an ellipsis if there are further
+targets."
+    (lambda (&optional keymap targets prefix)
+      (if (null keymap)
+          (which-key--hide-popup-ignore-command)
+        (which-key--show-keymap
+         (if (eq (plist-get (car targets) :type) 'embark-become)
+             "Become"
+           (format "Act on %s '%s'%s"
+                   (plist-get (car targets) :type)
+                   (embark--truncate-target (plist-get (car targets) :target))
+                   (if (cdr targets) "…" "")))
+         (if prefix
+             (pcase (lookup-key keymap prefix 'accept-default)
+               ((and (pred keymapp) km) km)
+               (_ (key-binding prefix 'accept-default)))
+           keymap)
+         nil nil t (lambda (binding)
+                     (not (string-suffix-p "-argument" (cdr binding))))))))
+
+  (setq embark-indicators
+        '(embark-which-key-indicator
+          embark-highlight-indicator
+          embark-isearch-highlight-indicator))
+
+  (defun embark-hide-which-key-indicator (fn &rest args)
+    "Hide the which-key indicator immediately when using the completing-read prompter."
+    (which-key--hide-popup-ignore-command)
+    (let ((embark-indicators
+           (remq #'embark-which-key-indicator embark-indicators)))
+      (apply fn args)))
+
+  (advice-add #'embark-completing-read-prompter
+              :around #'embark-hide-which-key-indicator))
 
 
 
@@ -942,57 +1135,6 @@ narrowed."
   (evil-define-key 'normal 'global
     (kbd "<leader>jj") 'evil-avy-goto-char-timer
     (kbd "<leader>jl") 'evil-avy-goto-line))
-
-
-
-;; Projectile: project management tool
-(use-package projectile
-  :after ivy
-  :ensure t
-  :init
-  ;; variables must be set BEFORE requiring projectile
-  (setq-default
-   projectile-cache-file          (expand-file-name "projectile.cache"         mb-save-path)
-   projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" mb-save-path)
-
-   projectile-mode-line          '(:eval (format " [%s]" (projectile-project-name)))
-
-   projectile-completion-system  'ivy
-   projectile-sort-order         'modification-time)
-
-  :config
-  (projectile-mode)
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>pD") 'projectile-dired
-    (kbd "<leader>pe") 'projectile-run-eshell
-    (kbd "<leader>pr") 'projectile-recentf
-    (kbd "<leader>pR") 'projectile-replace
-    (kbd "<leader>pk") 'projectile-kill-buffers))
-
-
-(use-package counsel-projectile
-  :after projectile
-  :ensure t
-  :config
-  (mb/ensure-bin-tool-exists "rg") ; use ripgrep
-  (defun mb/counsel-projectile-rg-dwim ()
-    "Search in the project with ag using thing at the point"
-    (interactive)
-    (let ((counsel-projectile-rg-initial-input '(let ((value (projectile-symbol-or-selection-at-point)))
-                                                  (if (string= value "")
-                                                      value
-                                                    (shell-quote-argument value)))))
-      (counsel-projectile-rg)))
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>pd") 'counsel-projectile-find-dir
-    (kbd "<leader>pf") 'counsel-projectile-find-file
-    (kbd "<leader>pF") 'counsel-projectile-find-file-dwim
-    (kbd "<leader>ps") 'counsel-projectile-rg
-    (kbd "<leader>pS") 'mb/counsel-projectile-rg-dwim
-    (kbd "<leader>pb") 'counsel-projectile-switch-to-buffer
-    (kbd "<leader>pp") 'counsel-projectile-switch-project))
 
 
 
@@ -1118,13 +1260,6 @@ Clear field placeholder if field was not modified."
   (global-set-key [f8]    'flyspell-correct-at-point))
 
 
-(use-package flyspell-correct-ivy
-  :after flyspell
-  :ensure t
-  :init
-  (setq flyspell-correct-interface #'flyspell-correct-ivy))
-
-
 
 ;; Recentf: show recent files
 (use-package recentf
@@ -1222,13 +1357,14 @@ Clear field placeholder if field was not modified."
 
 
 ;; Uniquify: unique buffer names
-(require 'uniquify)
-(setq uniquify-buffer-name-style 'forward
-      uniquify-separator "/"
-      ;; rename after killing uniquified
-      uniquify-after-kill-buffer-p t
-      ;; don't muck with special buffers
-      uniquify-ignore-buffers-re "^\\*")
+(use-package uniquify
+  :config
+  (setq uniquify-buffer-name-style 'forward
+        uniquify-separator "/"
+        ;; rename after killing uniquified
+        uniquify-after-kill-buffer-p t
+        ;; don't muck with special buffers
+        uniquify-ignore-buffers-re "^\\*"))
 
 
 
@@ -1243,22 +1379,26 @@ Clear field placeholder if field was not modified."
 
 
 ;; IBuffer (local)
-;; use ibuffer on C-x C-b
-(defalias 'list-buffers 'ibuffer)
-;; use ibuffer as default buffers list (:ls)
-(defalias 'buffer-menu 'ibuffer)
-
 (use-package ibuffer
   :bind ([f2] . ibuffer)
+  :init
+  ;; use ibuffer on C-x C-b
+  (defalias 'list-buffers 'ibuffer)
+  ;; use ibuffer as default buffers list (:ls)
+  (defalias 'buffer-menu 'ibuffer)
+
   :config
   (define-key ibuffer-mode-map [f2]      'ibuffer-quit))
 
 
 
 ;; Saveplace: save cursor position
-(require 'saveplace)
-(setq-default save-place t
-              save-place-file (expand-file-name "saveplace" mb-save-path))
+(use-package saveplace
+  :init
+  (setq-default save-place-file (expand-file-name "saveplace" mb-save-path))
+
+  :config
+  (save-place-mode t))
 
 
 
@@ -1305,15 +1445,12 @@ Clear field placeholder if field was not modified."
 
 
 ;; Dired
-(use-package dired
-  :defer t
+(use-package dired-x
   :config
-  (require 'dired-x)
-
   (setq dired-auto-revert-buffer t)    ; automatically revert buffer
 
   (evil-set-initial-state 'wdired-mode 'normal)
-  (evil-define-key 'normal 'global (kbd "<leader>d" )'dired-jump)
+  (evil-define-key 'normal 'global (kbd "<leader>d") 'dired-jump)
 
   (defun mb/dired-up-directory ()
     "Take dired up one directory, but behave like dired-find-alternate-file."
@@ -1535,6 +1672,9 @@ Clear field placeholder if field was not modified."
 
   (diminish 'auto-revert-mode)
 
+  ;; make <leader> work in magit
+  (define-key magit-mode-map (kbd "SPC") nil)
+
   (message "mb: initialized MAGIT"))
 
 
@@ -1649,15 +1789,6 @@ Clear field placeholder if field was not modified."
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode)
-
-
-;; Jump to workspace symbols
-(use-package lsp-ivy
-  :ensure t
-  :after (lsp-mode)
-  :config
-  (evil-define-key 'normal 'lsp-mode-map
-    (kbd "<leader>li") 'lsp-ivy-workspace-symbol))
 
 
 
@@ -2012,68 +2143,7 @@ Clear field placeholder if field was not modified."
   :config
   (message "mb: PKGBUILD MODE"))
 
-;; ---------------------------------------- GLOBAL KEYBINDINGS
 
-
-;; disable input methods
-(global-set-key (kbd "C-\\") nil)
-
-;; prevent accidentally closed frames
-(global-unset-key (kbd "C-x C-z"))
-
-
-(if (window-system)
-    (progn
-      ;; zoom in / zoom out in editor
-      (global-set-key [C-mouse-4] 'text-scale-increase)
-      (global-set-key [C-mouse-5] 'text-scale-decrease)
-
-      (when mb-is-mac-os
-        (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
-        (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
-
-  (progn
-    ;; activate mouse-based scrolling
-    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
-    (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
-
-
-(define-key input-decode-map [?\C-\M-i] [M-tab]) ;; make M-tab work in terminal
-
-(global-set-key (kbd "C-x e")   'mb/eval-and-replace)
-(global-set-key [M-tab]         'mb/prev-buffer)
-(global-set-key (kbd "M-S-SPC") 'just-one-space)
-(global-set-key (kbd "M-/")     'hippie-expand)
-(global-set-key (kbd "M-u")     'universal-argument)
-
-(global-set-key [f3]    'mb/toggle-verbose-mode)
-(global-set-key [f4]    'mb/terminal)
-(global-set-key [M-f4]  'mb/projectile-base-term)
-(global-set-key [f5]    'make-frame)
-(global-set-key [f6]    'mb/revert-buffer)
-(global-set-key [f12]   'menu-bar-mode)
-
-
-;; NOTE: m is reserved for mode-local bindings
-(evil-define-key 'normal 'global
-  (kbd "<leader>2")  'call-last-kbd-macro
-  (kbd "<leader>q") 'evil-quit
-  (kbd "<leader>n") 'mb/narrow-or-widen-dwim
-  (kbd "<leader>ll") 'mb/cleanup-buffer
-  (kbd "<leader>k")  'mb/kill-this-buffer
-  (kbd "<leader>s")  'save-buffer
-  (kbd "<leader>e")  'eshell
-  (kbd "<leader>lm") 'evil-show-marks
-  (kbd "<leader>u")  'undo-tree-visualize
-  (kbd "<leader>i")  'imenu
-
-  (kbd "<leader>bd") 'mb/delete-current-buffer-file
-  (kbd "<leader>br") 'mb/rename-file-and-buffer)
-
-(evil-define-key 'visual 'global
-  (kbd "<leader>n") 'mb/narrow-or-widen-dwim
-  (kbd "<leader>ll") 'mb/cleanup-buffer
-  (kbd "<leader>lt") 'mb/sort-columns)
 
 (provide 'init)
 ;;; init.el ends here
