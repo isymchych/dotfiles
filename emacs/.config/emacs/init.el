@@ -346,16 +346,6 @@ It wouldn't be associated with the buffer."
       (apply 'mb/terminal args)
     (error "MB: buffer is not in the project")))
 
-(defun mb/company-complete-common-or-selection ()
-  "Complete common part if there is one, or insert selected candidate."
-  (interactive)
-  (when (company-manual-begin)
-    (let ((tick (buffer-chars-modified-tick)))
-      (call-interactively 'company-complete-common)
-      (when (eq tick (buffer-chars-modified-tick))
-        (call-interactively 'company-complete-selection)))))
-
-
 (defun mb/eval-and-replace ()
   "Replace the preceding sexp with its value."
   (interactive)
@@ -770,6 +760,9 @@ narrowed."
   (define-key evil-motion-state-map "K" nil)
   (define-key evil-motion-state-map (kbd " ") nil)
 
+  ;; Replace Emacs kill-ring-save with window management commands
+  (global-set-key (kbd "M-w") 'evil-window-map)
+
   ;; insert tabs only in emacs state
   (define-key evil-emacs-state-map (kbd "TAB") #'indent-for-tab-command)
   ;; insert newline only in emacs state
@@ -808,8 +801,6 @@ narrowed."
     (evil-visual-restore))
   (define-key evil-visual-state-map (kbd ">") 'mb/evil-shift-right-visual)
   (define-key evil-visual-state-map (kbd "<") 'mb/evil-shift-left-visual)
-
-  (add-hook 'evil-insert-state-exit-hook 'company-abort)
 
   ;; NOTE: m is reserved for mode-local bindings
   (evil-define-key 'normal 'global
@@ -1153,33 +1144,32 @@ targets."
   (setq
    company-idle-delay                0.1
    company-tooltip-limit             20
+   company-tooltip-align-annotations t
    company-minimum-prefix-length     2
    company-echo-delay                0
-   company-auto-commit               nil
    company-selection-wrap-around     t
 
    company-dabbrev-ignore-case       nil
    company-dabbrev-downcase          nil
 
-   company-require-match             nil
-   company-tooltip-align-annotations t
+   company-require-match             ':never
    company-show-quick-access         t)
-
-  ;; Sort completion candidates that already occur in the current
-  ;; buffer at the top of the candidate list.
-  (setq company-transformers '(company-sort-by-occurrence))
 
   (delete 'company-xcode company-backends)
   (delete 'company-ropemacs company-backends)
 
+  (add-hook 'evil-insert-state-exit-hook 'company-abort)
+
+  (eval-after-load 'eldoc
+    (eldoc-add-command 'company-complete-selection
+                       'company-complete-common
+                       'company-capf
+                       'company-abort))
+
   (global-company-mode 1)
 
-  ;; (define-key company-active-map (kbd "TAB") 'mb/company-complete-common-or-selection)
-  ;; (define-key company-active-map (kbd "<tab>") 'mb/company-complete-common-or-selection)
   (define-key company-active-map (kbd "C-w") nil)
   (define-key company-active-map (kbd "C-j") nil)
-
-  ;; (define-key company-active-map (kbd "<f1>") nil)
 
   (global-set-key (kbd "M-p") 'company-manual-begin))
 
@@ -1189,17 +1179,22 @@ targets."
 (use-package yasnippet
   :ensure t
   :config
-  (setq yas-verbosity          2
-        yas-wrap-around-region t)
+  (setq
+   yas-snippet-dirs (list (expand-file-name "snippets" mb-save-path))
+   yas-verbosity          2
+   yas-wrap-around-region t)
 
   (yas-global-mode)
 
   ;; expand snippets with hippie expand
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
+  ;; Remove GUI dropdown prompt (prefer ivy/helm)
+  (delq 'yas-dropdown-prompt yas-prompt-functions)
+
   ;; free up the binding for a prefix
   (global-set-key (kbd "M-y") nil)
- 
+
   (global-set-key (kbd "M-y i") 'yas-insert-snippet)
   (global-set-key (kbd "M-y e") 'yas-visit-snippet-file)
   (global-set-key (kbd "M-y n") 'yas-new-snippet))
@@ -1207,8 +1202,17 @@ targets."
 (use-package consult-yasnippet
   :ensure t
   :config
+  ;; free up the binding for a prefix
+  (global-set-key (kbd "M-y") nil)
+
   (global-set-key (kbd "M-y i") 'consult-yasnippet)
   (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file))
+
+(use-package yasnippet-snippets
+  :after (yasnippet)
+  :ensure t
+  :config
+  (yasnippet-snippets-initialize))
 
 
 
@@ -1688,7 +1692,8 @@ targets."
   :defer t
   :hook (lsp-mode . lsp-enable-which-key-integration)
   :init
-  (setq lsp-keymap-prefix "s-l"
+  (setq lsp-session-file (expand-file-name "lsp-session-v1" mb-save-path)
+        lsp-keymap-prefix "s-l"
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
