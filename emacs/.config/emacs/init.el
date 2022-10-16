@@ -41,6 +41,11 @@
 
 
 (require 'package)
+
+;; this is needed to install use-package
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+
 (setq package-enable-at-startup nil)
 
 (package-initialize)
@@ -1328,31 +1333,6 @@ Clear field placeholder if field was not modified."
 (use-package evil-anzu
   :after (evil anzu)
   :ensure t)
-
-
-;; Ace-window: switch windows
-(use-package ace-window
-  :ensure t
-  :bind
-  ("M-w" . ace-window)
-  :config
-  (defun mb/other-window ()
-    (other-window 1))
-  (setq aw-keys '(?a ?s ?d ?f ?g ?j ?k ?l))
-  (setq aw-scope 'frame)
-  (setq aw-dispatch-always t)
-  (setq aw-dispatch-alist
-        '((?w mb/other-window)
-          (?q evil-window-delete) ; delete focused window
-          (?Q aw-delete-window " Ace - Delete Window") ; select which window to delete
-          (?p aw-flip-window) ; focus previous window
-          (?m aw-swap-window " Ace - Swap Window")
-
-          (?v aw-split-window-vert " Ace - Split Vert Window")
-          (?h aw-split-window-horz " Ace - Split Horz Window")
-
-          (?o delete-other-windows)
-          (?O delete-other-windows " Ace - Maximize Window"))))
 
 
 
