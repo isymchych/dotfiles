@@ -1152,7 +1152,7 @@ targets."
    company-dabbrev-ignore-case       nil
    company-dabbrev-downcase          nil
 
-   company-require-match             ':never
+   company-require-match             nil
    company-show-quick-access         t)
 
   (delete 'company-xcode company-backends)
