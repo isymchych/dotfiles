@@ -675,8 +675,7 @@ narrowed."
 ;; Hippie expand is dabbrev expand on steroids, used by evil
 (use-package hippie-exp
   :config
-  (setq hippie-expand-try-functions-list '(yas-hippie-try-expand
-                                           try-expand-dabbrev
+  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
                                            try-expand-dabbrev-all-buffers
                                            try-expand-dabbrev-from-kill
                                            try-complete-file-name-partially
@@ -824,7 +823,7 @@ narrowed."
     (kbd "<leader>e")  'eshell
     (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>u")  'undo-tree-visualize
-    (kbd "<leader>i")  'imenu
+    (kbd "<leader>li")  'imenu
 
     (kbd "<leader>bl") 'mb/cleanup-buffer
     (kbd "<leader>bd") 'mb/delete-current-buffer-file
@@ -1003,7 +1002,7 @@ narrowed."
   (evil-define-key 'normal 'global
     (kbd "<leader>r") 'consult-recent-file
     (kbd "<leader>y") 'consult-yank-from-kill-ring
-    (kbd "<leader>i") 'consult-imenu
+    (kbd "<leader>li") 'consult-imenu
     (kbd "<leader>ll") 'consult-line
     (kbd "<leader>o") 'consult-outline
     (kbd "<leader>bb") 'consult-buffer
@@ -1189,57 +1188,27 @@ targets."
 ;; YASnippet: snippets
 (use-package yasnippet
   :ensure t
-  :diminish yas-minor-mode
   :config
-  (setq yas-verbosity                       1
-        yas-wrap-around-region              t)
+  (setq yas-verbosity          2
+        yas-wrap-around-region t)
 
   (yas-global-mode)
 
-  ;; disable `yas-expand` on TAB
-  (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  (define-key yas-minor-mode-map (kbd "TAB") nil)
+  ;; expand snippets with hippie expand
+  (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
-  (defun mb/yas-next-field ()
-    "Switch to next yasnippet field.
-Clear field placeholder if field was not modified."
-    (interactive)
-    (let ((field (and yas--active-field-overlay
-                      (overlay-buffer yas--active-field-overlay)
-                      (overlay-get yas--active-field-overlay 'yas--field))))
-      (if (and field
-               (not (yas--field-modified-p field))
-               (eq (point) (marker-position (yas--field-start field))))
-          (progn
-            (yas--skip-and-clear field)
-            (yas-next-field 1))
-        (yas-next-field-or-maybe-expand))))
+  ;; free up the binding for a prefix
+  (global-set-key (kbd "M-y") nil)
+ 
+  (global-set-key (kbd "M-y i") 'yas-insert-snippet)
+  (global-set-key (kbd "M-y e") 'yas-visit-snippet-file)
+  (global-set-key (kbd "M-y n") 'yas-new-snippet))
 
-  (defun mb/complete-common-or-yas-next-field ()
-    "Complete common prefix in company-mode or switch to next yasnippet field."
-    (interactive)
-    (if (> (or company-candidates-length 0) 0)
-        (mb/company-complete-common-or-selection)
-      (yas-next-field)))
-
-  (defun mb/complete-selection-or-yas-next-field ()
-    "Complete selection in company-mode or switch to next yasnippet field."
-    (interactive)
-    (if (> (or company-candidates-length 0) 0)
-        (company-complete-selection)
-      (mb/yas-next-field)))
-
-  (setq yas-keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "RET")   'mb/complete-selection-or-yas-next-field)
-          (define-key map [return]      'mb/complete-selection-or-yas-next-field)
-
-          (define-key map (kbd "TAB")   'mb/complete-common-or-yas-next-field)
-          (define-key map (kbd "<tab>") 'mb/complete-common-or-yas-next-field)
-
-          (define-key map (kbd "<backtab>") 'yas-prev-field)
-          (define-key map (kbd "C-g") 'yas-abort-snippet)
-          map)))
+(use-package consult-yasnippet
+  :ensure t
+  :config
+  (global-set-key (kbd "M-y i") 'consult-yasnippet)
+  (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file))
 
 
 
