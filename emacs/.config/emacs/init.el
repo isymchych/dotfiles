@@ -935,7 +935,8 @@ narrowed."
 (use-package orderless
   :ensure t
   :init
-  (setq completion-styles '(orderless basic)
+  (setq completion-styles '(basic orderless)
+        orderless-matching-styles '(orderless-literal orderless-flex)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion)))))
 
@@ -976,6 +977,8 @@ narrowed."
   (defun consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
     (consult-ripgrep dir (thing-at-point 'symbol)))
+
+  (global-set-key (kbd "M-X") 'consult-mode-command)
 
   (evil-define-key 'normal 'global
     (kbd "<leader>r") 'consult-recent-file
@@ -1124,9 +1127,6 @@ targets."
 (use-package company
   :ensure t
   :diminish company-mode
-  :defines
-  company-dabbrev-ignore-case
-  company-dabbrev-downcase
   :config
   (setq
    company-idle-delay                0.1
@@ -1142,8 +1142,12 @@ targets."
    company-require-match             nil
    company-show-quick-access         t)
 
-  (delete 'company-xcode company-backends)
-  (delete 'company-ropemacs company-backends)
+  (setq company-backends
+        '((company-files
+           company-keywords
+           company-capf
+           company-dabbrev-code
+           company-dabbrev)))
 
   (add-hook 'evil-insert-state-exit-hook 'company-abort)
 
