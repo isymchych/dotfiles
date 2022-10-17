@@ -198,7 +198,7 @@
  ;; compilation mode
  compilation-scroll-output t
  compilation-ask-about-save nil
- compilation-save-buffers-predicate '(lambda () nil)
+ compilation-save-buffers-predicate (lambda () nil)
 
  ;; move files to trash when deleting
  delete-by-moving-to-trash t)
@@ -413,13 +413,6 @@ narrowed."
   (revert-buffer t t))
 
 
-(defun mb/ensure-bin-tool-exists (name)
-  "Check if bin tool `NAME' exists and show warning if it doesn't."
-  (if (executable-find name)
-      (message "MB: found required bin tool %s" name)
-    (warn "MB: executable %s not found!" name)))
-
-
 ;; spacemax implementation of kill-this-buffer
 ;; @see https://github.com/syl20bnr/spacemacs/pull/6225
 (defun mb/kill-this-buffer ()
@@ -470,7 +463,8 @@ narrowed."
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
 
 
-(define-key input-decode-map [?\C-\M-i] [M-tab]) ;; make M-tab work in terminal
+;; make M-tab work in terminal
+(define-key input-decode-map [?\C-\M-i] [M-tab])
 
 ;; disable input methods
 (global-unset-key (kbd "C-\\"))
@@ -912,10 +906,12 @@ narrowed."
   :ensure t
   :init
   (vertico-mode)
-  ;; Show more candidates
-  (setq vertico-count 20
-        ;; enable cycling for `vertico-next' and `vertico-previous'.
-        vertico-cycle t)
+
+  (setq
+   ;; Show more candidates
+   vertico-count 20
+   ;; enable cycling for `vertico-next' and `vertico-previous'.
+   vertico-cycle t)
 
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
@@ -1140,14 +1136,14 @@ targets."
    company-dabbrev-downcase          nil
 
    company-require-match             nil
-   company-show-quick-access         t)
+   company-show-quick-access         t
+   company-transformers             '(delete-dups)
 
-  (setq company-backends
-        '((company-files
-           company-keywords
-           company-capf
-           company-dabbrev-code
-           company-dabbrev)))
+   company-backends '((company-files
+                       company-keywords
+                       company-capf
+                       company-dabbrev-code
+                       company-dabbrev)))
 
   (add-hook 'evil-insert-state-exit-hook 'company-abort)
 
@@ -1171,7 +1167,7 @@ targets."
   :ensure t
   :config
   (setq
-   yas-snippet-dirs (list (expand-file-name "snippets" mb-save-path))
+   yas-snippet-dirs (list (expand-file-name "snippets" mb-dotfiles-dir))
    yas-verbosity          2
    yas-wrap-around-region t)
 
@@ -1265,7 +1261,6 @@ targets."
   :defer t
   :diminish editorconfig-mode
   :init
-  (mb/ensure-bin-tool-exists "editorconfig")
   (add-hook 'prog-mode-hook 'editorconfig-mode)
 
   (defun mb/reload-editorconfig ( )
@@ -1371,10 +1366,10 @@ targets."
   (modify-category-entry (cons ?a ?z) ?u)
   (make-variable-buffer-local 'evil-cjk-word-separating-categories)
   (add-hook 'subword-mode-hook
-            '(lambda ()
-               (if subword-mode
-                   (push '(?u . ?U) evil-cjk-word-separating-categories)
-                 (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories))))))
+            (lambda ()
+              (if subword-mode
+                  (push '(?u . ?U) evil-cjk-word-separating-categories)
+                (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories))))))
 
 
 
@@ -1594,6 +1589,7 @@ targets."
 (use-package magit
   :ensure t
   :defer t
+  :diminish auto-revert-mode
   :defines
   magit-last-seen-setup-instructions
   magit-status-buffer-switch-function
@@ -1604,20 +1600,22 @@ targets."
   magit-set-upstream-on-push
 
   :init
-  (mb/ensure-bin-tool-exists "git")
   (evil-define-key 'normal 'global
     (kbd "<leader>gs") 'magit-status
     (kbd "<leader>gl") 'magit-log-all
     (kbd "<leader>gL") 'magit-log-buffer-file
     (kbd "<leader>gb") 'magit-blame)
 
+  ;; Must be set early to prevent ~/.emacs.d/transient from being created
+  (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
+        transient-values-file  (expand-file-name "transient/values" mb-save-path)
+        transient-history-file (expand-file-name "transient/history" mb-save-path))
+
   :config
   (setq vc-follow-symlinks nil
 
         ;; open magit status in same window as current buffer
         magit-status-buffer-switch-function 'switch-to-buffer
-        ;; highlight word/letter changes in hunk diffs
-        magit-diff-refine-hunk 'all
         ;; ask me if I want to include a revision when rewriting
         magit-rewrite-inclusive 'ask
         ;; ask me to save buffers
@@ -1632,9 +1630,23 @@ targets."
         git-commit-summary-max-length 70
 
         ;; ask me if I want a tracking upstream
-        magit-set-upstream-on-push 'askifnotset)
+        magit-set-upstream-on-push 'askifnotset
 
-  (diminish 'auto-revert-mode)
+        transient-default-level 5
+
+        magit-diff-refine-hunk t ; show granular diffs in selected hunk
+        ;; Don't autosave repo buffers. This is too magical, and saving can
+        ;; trigger a bunch of unwanted side-effects, like save hooks and
+        ;; formatters. Trust the user to know what they're doing.
+        magit-save-repository-buffers nil
+        ;; Don't display parent/related refs in commit buffers; they are rarely
+        ;; helpful and only add to runtime costs.
+        magit-revision-insert-related-refs nil)
+
+  (add-hook 'magit-process-mode-hook #'goto-address-mode)
+
+  ;; Close transient with ESC
+  (define-key transient-map [escape] #'transient-quit-one)
 
   ;; make <leader> work in magit
   (define-key magit-mode-map (kbd "SPC") nil)
@@ -2054,13 +2066,13 @@ targets."
 (use-package eshell
   :defer t
   :init
+  (setq
+   eshell-directory-name          (expand-file-name "eshell" mb-save-path)
+   eshell-aliases-file            (expand-file-name "eshell-aliases" mb-dotfiles-dir))
+
   (add-hook 'eshell-mode-hook
             (lambda ()
-              (define-key eshell-mode-map (kbd "M-<tab>") nil)))
-  :config
-  (defalias 'open 'find-file-other-window)
-
-  (message "mb: ESHELL MODE"))
+              (define-key eshell-mode-map (kbd "M-<tab>") nil))))
 
 
 ;; Lua mode
