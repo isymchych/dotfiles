@@ -903,15 +903,10 @@ narrowed."
 
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
-  (setq completion-in-region-function #'consult-completion-in-region)
-
   (define-key vertico-map (kbd "M-j") 'vertico-next)
   (define-key vertico-map (kbd "M-k") 'vertico-previous)
 
-  (evil-define-key 'normal 'global
-    (kbd "<leader>`") 'vertico-repeat
-    (kbd "<leader>jj") 'evil-avy-goto-char-timer
-    (kbd "<leader>jl") 'evil-avy-goto-line))
+  (evil-define-key 'normal 'global (kbd "<leader>`") 'vertico-repeat))
 
 
 
@@ -950,6 +945,8 @@ narrowed."
 
   :config
   (consult-customize consult-recent-file :preview-key '([M-k] [M-j]))
+
+  (setq completion-in-region-function #'consult-completion-in-region)
 
   ;; make narrowing help available in the minibuffer.
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
