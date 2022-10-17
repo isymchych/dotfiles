@@ -481,7 +481,6 @@ narrowed."
 (global-set-key (kbd "C-x e")   'mb/eval-and-replace)
 (global-set-key (kbd "C-x C-f") 'find-file)
 (global-set-key [M-tab]         'mb/prev-buffer)
-(global-set-key (kbd "M-S-SPC") 'just-one-space)
 (global-set-key (kbd "M-/")     'hippie-expand)
 (global-set-key (kbd "M-u")     'universal-argument)
 
@@ -677,19 +676,6 @@ narrowed."
 
 
 ;; Evil: vim mode
-
-;; enable subword mode CamelCase movement in evil
-(define-category ?U "Uppercase")
-(define-category ?u "Lowercase")
-(modify-category-entry (cons ?A ?Z) ?U)
-(modify-category-entry (cons ?a ?z) ?u)
-(make-variable-buffer-local 'evil-cjk-word-separating-categories)
-(add-hook 'subword-mode-hook
-          '(lambda ()
-             (if subword-mode
-                 (push '(?u . ?U) evil-cjk-word-separating-categories)
-               (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories)))))
-
 (use-package evil
   :ensure t
   :after undo-tree
@@ -729,8 +715,7 @@ narrowed."
                                    (help-mode . emacs)
                                    (grep-mode . emacs)
                                    (bc-menu-mode . emacs)
-                                   (rdictcc-buffer-mode . emacs)
-                                   (recentf-mode . normal))
+                                   (rdictcc-buffer-mode . emacs))
            do (evil-set-initial-state mode state))
 
   (evil-mode 1)
@@ -808,30 +793,30 @@ narrowed."
     (kbd "<leader>q") 'evil-quit
     (kbd "<leader>n") 'mb/narrow-or-widen-dwim
     (kbd "<leader>ff") 'find-file
-    (kbd "<leader>bb") 'switch-to-buffer
     (kbd "<leader>k")  'mb/kill-this-buffer
     (kbd "<leader>s")  'save-buffer
     (kbd "<leader>e")  'eshell
-    (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>u")  'undo-tree-visualize
-    (kbd "<leader>li")  'imenu
 
+    (kbd "<leader>lm") 'evil-show-marks
+    (kbd "<leader>li")  'imenu
+    (kbd "<leader> l <SPC>") 'just-one-space
+
+    (kbd "<leader>bb") 'switch-to-buffer
     (kbd "<leader>bl") 'mb/cleanup-buffer
     (kbd "<leader>bd") 'mb/delete-current-buffer-file
     (kbd "<leader>br") 'mb/rename-file-and-buffer)
 
   (evil-define-key 'visual 'global
     (kbd "<leader>n") 'mb/narrow-or-widen-dwim
-    (kbd "<leader>ll") 'mb/cleanup-buffer
     (kbd "<leader>lt") 'mb/sort-columns))
 
 ;; integration of evil with various packages
 (use-package evil-collection
   :after evil
   :ensure t
-  :custom
-  (evil-collection-setup-minibuffer nil)
   :init
+  (setq evil-collection-setup-minibuffer nil)
   (evil-collection-init))
 
 ;; match visual selection with * and #
@@ -928,11 +913,13 @@ narrowed."
   :init
   (vertico-mode)
   ;; Show more candidates
-  (setq vertico-count 25
+  (setq vertico-count 20
         ;; enable cycling for `vertico-next' and `vertico-previous'.
         vertico-cycle t)
 
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+
+  (setq completion-in-region-function #'consult-completion-in-region)
 
   (define-key vertico-map (kbd "M-j") 'vertico-next)
   (define-key vertico-map (kbd "M-k") 'vertico-previous)
@@ -1192,6 +1179,10 @@ targets."
   ;; Remove GUI dropdown prompt (prefer ivy/helm)
   (delq 'yas-dropdown-prompt yas-prompt-functions)
 
+  ;; disable `yas-expand` on TAB
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+
   ;; free up the binding for a prefix
   (global-set-key (kbd "M-y") nil)
 
@@ -1256,6 +1247,8 @@ targets."
   (add-hook 'server-done-hook 'recentf-save-list)
   (add-hook 'server-visit-hook 'recentf-save-list)
   (add-hook 'delete-frame-hook 'recentf-save-list)
+
+  (evil-set-initial-state 'recentf-mode 'normal)
 
   (recentf-mode t)
   (recentf-track-opened-file))
@@ -1362,8 +1355,22 @@ targets."
 
 ;; Subword-mode: navigate in CamelCase words
 ;; http://ergoemacs.org/emacs/emacs_subword-mode_superword-mode.html
-(global-subword-mode t)
-(diminish 'subword-mode)
+(use-package subword
+  :diminish subword-mode
+  :init
+  (global-subword-mode t)
+
+  ;; enable subword mode CamelCase movement in evil
+  (define-category ?U "Uppercase")
+  (define-category ?u "Lowercase")
+  (modify-category-entry (cons ?A ?Z) ?U)
+  (modify-category-entry (cons ?a ?z) ?u)
+  (make-variable-buffer-local 'evil-cjk-word-separating-categories)
+  (add-hook 'subword-mode-hook
+            '(lambda ()
+               (if subword-mode
+                   (push '(?u . ?U) evil-cjk-word-separating-categories)
+                 (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories))))))
 
 
 
