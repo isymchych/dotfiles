@@ -144,7 +144,7 @@
 (setq enable-local-variables :all)
 
 ;; make urls in comments/strings clickable
-(add-hook 'find-file-hooks 'goto-address-prog-mode)
+(add-hook 'find-file-hook 'goto-address-prog-mode)
 
 ;; Font
 (setq font-use-system-font nil)
@@ -317,8 +317,7 @@
   "Asynchronously start application APPLICATION-NAME with ARGS.
 It wouldn't be associated with the buffer."
   (interactive)
-  (apply 'start-process
-         (-concat (list application-name nil application-name) args))
+  (apply 'start-process application-name nil application-name args)
   (message "mb: started %s %S" application-name args))
 
 (defun mb/terminal (&rest args)
@@ -334,7 +333,8 @@ It wouldn't be associated with the buffer."
       end tell
 " default-directory)) ;; TODO handle args
 
-    (apply 'mb/launch-application (-concat (list (getenv "TERMINAL")) args))))
+    (apply 'mb/launch-application (getenv "TERMINAL") args)))
+
 
 (defun mb/project-base-term (&rest args)
   "Launches terminal in project root with ARGS."
@@ -342,7 +342,7 @@ It wouldn't be associated with the buffer."
 
   (if-let ((fboundp 'project-root)
            (proj (project-current))
-           (default-directory proj))
+           (default-directory (project-root proj)))
       (apply 'mb/terminal args)
     (error "MB: buffer is not in the project")))
 
@@ -518,22 +518,10 @@ narrowed."
 
 
 
-;; Dash.el modern list library (helpers)
-(use-package dash
-  :ensure t
-  :config (dash-enable-font-lock))
-
-
-
-;; s.el strings manipulation library
-(use-package s
-  :ensure t)
-
-
-
 ;; writable grep, complementary package for other packages
 (use-package wgrep
   :ensure t
+  :defer t
   :config
   (setq wgrep-auto-save-buffer t))
 
@@ -932,7 +920,7 @@ narrowed."
   :ensure t
   :init
   (setq completion-styles '(basic orderless)
-        orderless-matching-styles '(orderless-literal orderless-flex)
+        orderless-matching-styles '(orderless-literal)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion)))))
 
@@ -981,7 +969,7 @@ narrowed."
     (kbd "<leader>y") 'consult-yank-from-kill-ring
     (kbd "<leader>li") 'consult-imenu
     (kbd "<leader>ll") 'consult-line
-    (kbd "<leader>o") 'consult-outline
+    (kbd "<leader>lo") 'consult-outline
     (kbd "<leader>bb") 'consult-buffer
     (kbd "<leader>SPC") 'consult-buffer
 
@@ -1145,6 +1133,13 @@ targets."
                        company-dabbrev-code
                        company-dabbrev)))
 
+  (defun mb/use-custom-matching-style (fn &rest args)
+    "Use custom completion style specifically for the company-capf."
+    (let ((orderless-matching-styles '(orderless-literal orderless-flex)))
+      (apply fn args)))
+
+  (advice-add #'company-capf :around #'mb/use-custom-matching-style)
+
   (add-hook 'evil-insert-state-exit-hook 'company-abort)
 
   (eval-after-load 'eldoc
@@ -1209,13 +1204,12 @@ targets."
 
 ;; Flyspell-mode: spell-checking on the fly as you type
 (use-package flyspell
-  :ensure t
   :diminish flyspell-mode
   :init
 
   (when (executable-find "aspell")
     (setq ispell-program-name "aspell") ; use aspell instead of ispell
-    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-dotfiles-dir))
+    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-save-path))
     (setq-default ispell-extra-args '("--sug-mode=ultra"
                                       "--lang=en_GB"
                                       "--camel-case")))
@@ -1225,7 +1219,12 @@ targets."
                               (setq flyspell-consider-dash-as-word-delimiter-flag t)
                               (flyspell-prog-mode)))
   :config
-  (global-set-key [M-f8]  'flyspell-buffer)
+  (global-set-key [M-f8]  'flyspell-buffer))
+
+;; Correct word at point
+(use-package flyspell-correct
+  :ensure t
+  :config
   (global-set-key [f8]    'flyspell-correct-at-point))
 
 
@@ -2060,7 +2059,7 @@ targets."
   :after (company sh-script)
   :ensure t
   :config
-  (setq company-shell-dont-fetch-meta t) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
+  (setq company-shell-dont-fetch-meta mb-is-mac-os) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
   (add-to-list 'company-backends 'company-shell))
 
 (use-package eshell
@@ -2068,11 +2067,7 @@ targets."
   :init
   (setq
    eshell-directory-name          (expand-file-name "eshell" mb-save-path)
-   eshell-aliases-file            (expand-file-name "eshell-aliases" mb-dotfiles-dir))
-
-  (add-hook 'eshell-mode-hook
-            (lambda ()
-              (define-key eshell-mode-map (kbd "M-<tab>") nil))))
+   eshell-aliases-file            (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
 
 
 ;; Lua mode
