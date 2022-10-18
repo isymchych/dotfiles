@@ -486,8 +486,193 @@ narrowed."
 (global-set-key [f12]   'menu-bar-mode)
 
 
+;; ---------------------------------------- PACKAGES
 
-;; ---------------------------------------- PLUGINS
+;; evil uses dabbrev
+(use-package dabbrev
+  :config
+  ;; do not split words on _ and -
+  (setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]"))
+
+
+
+;; Hippie expand is dabbrev expand on steroids, used by evil
+(use-package hippie-exp
+  :config
+  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+                                           try-expand-dabbrev-all-buffers
+                                           try-expand-dabbrev-from-kill
+                                           try-complete-file-name-partially
+                                           try-complete-file-name
+                                           try-expand-all-abbrevs
+                                           try-expand-list
+                                           try-expand-line)))
+
+
+
+;; Project management
+(use-package project
+  :init
+  (setq project-list-file (expand-file-name "projects" mb-save-path))
+  :config
+  (push '(project-dired "Root directory") project-switch-commands))
+
+
+
+;; Flyspell-mode: spell-checking on the fly as you type
+(use-package flyspell
+  :diminish flyspell-mode
+  :init
+
+  (when (executable-find "aspell")
+    (setq ispell-program-name "aspell") ; use aspell instead of ispell
+    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-save-path))
+    (setq-default ispell-extra-args '("--sug-mode=ultra"
+                                      "--lang=en_GB"
+                                      "--camel-case")))
+
+  (add-hook 'text-mode-hook 'flyspell-mode)
+  (add-hook 'prog-mode-hook (lambda ()
+                              (setq flyspell-consider-dash-as-word-delimiter-flag t)
+                              (flyspell-prog-mode)))
+  :config
+  (global-set-key [M-f8]  'flyspell-buffer))
+
+
+
+;; Recentf: show recent files
+(use-package recentf
+  :config
+  (setq recentf-save-file (expand-file-name "recentf" mb-save-path)
+        recentf-max-menu-items 25
+        recentf-max-saved-items 1000
+        ;; cleanup non-existing files on startup
+        ;; may have problems with remote files
+        recentf-auto-cleanup 'mode)
+  ;; Ignore ephemeral git commit message files
+  (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
+  (add-to-list 'recentf-exclude "/elpa/")
+  (add-to-list 'recentf-exclude ".recentf")
+
+  (add-hook 'server-done-hook 'recentf-save-list)
+  (add-hook 'server-visit-hook 'recentf-save-list)
+  (add-hook 'delete-frame-hook 'recentf-save-list)
+
+  (recentf-mode t)
+  (recentf-track-opened-file))
+
+
+
+;; Uniquify: unique buffer names
+(use-package uniquify
+  :config
+  (setq uniquify-buffer-name-style 'forward
+        uniquify-separator "/"
+        ;; rename after killing uniquified
+        uniquify-after-kill-buffer-p t
+        ;; don't muck with special buffers
+        uniquify-ignore-buffers-re "^\\*"))
+
+
+
+;; IBuffer (local)
+(use-package ibuffer
+  :bind ([f2] . ibuffer)
+  :init
+  ;; use ibuffer on C-x C-b
+  (defalias 'list-buffers 'ibuffer)
+  ;; use ibuffer as default buffers list (:ls)
+  (defalias 'buffer-menu 'ibuffer)
+
+  :config
+  (define-key ibuffer-mode-map [f2]      'ibuffer-quit))
+
+
+
+;; Saveplace: save cursor position
+(use-package saveplace
+  :init
+  (setq-default save-place-file (expand-file-name "saveplace" mb-save-path))
+
+  :config
+  (save-place-mode t))
+
+
+
+;; Subword-mode: navigate in CamelCase words
+;; http://ergoemacs.org/emacs/emacs_subword-mode_superword-mode.html
+(use-package subword
+  :diminish subword-mode
+  :init
+  (global-subword-mode t))
+
+
+
+;; Delete-selection mode: delete seleted text when typing
+(delete-selection-mode t)
+
+
+
+;; Electric indent mode: enable autoindent on enter etc.
+(electric-indent-mode 1)
+
+
+
+;; Electric-pair mode: auto insert closing brackets
+;; skip over and delete white space if it stands between the cursor and the closing delimiter
+(use-package elec-pair
+  :init
+  (setq electric-pair-skip-whitespace 'chomp)
+  :config
+  (electric-pair-mode 1)
+  (defun mb/emulate-disabled-electric-pair ()
+    "Disable auto-inserting parens."
+    (setq-local electric-pair-pairs nil)
+    (setq-local electric-pair-text-pairs nil)
+    (setq-local electric-pair-inhibit-predicate #'identity))
+  (add-hook 'minibuffer-setup-hook 'mb/emulate-disabled-electric-pair))
+
+
+
+;; Eldoc: documentation messages
+(use-package eldoc
+  :diminish eldoc-mode
+  :init
+  (add-hook  'emacs-lisp-mode-hook        'turn-on-eldoc-mode)
+  (add-hook  'lisp-interaction-mode-hook  'turn-on-eldoc-mode)
+  (add-hook  'ielm-mode-hook              'turn-on-eldoc-mode))
+
+
+
+;; Dired
+(use-package dired-x
+  :after evil
+  :config
+  (setq dired-auto-revert-buffer t)    ; automatically revert buffer
+
+  (defun mb/dired-up-directory ()
+    "Take dired up one directory, but behave like dired-find-alternate-file."
+    (interactive)
+    (let ((old (current-buffer)))
+      (dired-up-directory)
+      (kill-buffer old)))
+
+  (evil-define-key 'normal dired-mode-map
+    " " 'evil-send-leader
+    "h" 'mb/dired-up-directory
+    "l" 'dired-find-alternate-file
+    "o" 'dired-sort-toggle-or-edit
+    "v" 'dired-toggle-marks
+    "m" 'dired-mark
+    "u" 'dired-unmark
+    "U" 'dired-unmark-all-marks
+    "n" 'evil-search-next
+    "N" 'evil-search-previous
+    "q" 'mb/kill-this-buffer))
+
+
+
+;; ---------------------------------------- 3rd PARTY PACKAGES
 
 
 ;; Diminish: cleanup mode line
@@ -635,28 +820,6 @@ narrowed."
 
 
 
-;; evil uses dabbrev
-(use-package dabbrev
-  :config
-  ;; do not split words on _ and -
-  (setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]"))
-
-
-
-;; Hippie expand is dabbrev expand on steroids, used by evil
-(use-package hippie-exp
-  :config
-  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                           try-expand-dabbrev-all-buffers
-                                           try-expand-dabbrev-from-kill
-                                           try-complete-file-name-partially
-                                           try-complete-file-name
-                                           try-expand-all-abbrevs
-                                           try-expand-list
-                                           try-expand-line)))
-
-
-
 ;; Evil: vim mode
 (use-package evil
   :ensure t
@@ -670,6 +833,17 @@ narrowed."
   (defvar evil-want-keybinding nil)
   (defvar evil-undo-system 'undo-tree)
 
+  ;; enable subword mode CamelCase movement in evil
+  (define-category ?U "Uppercase")
+  (define-category ?u "Lowercase")
+  (modify-category-entry (cons ?A ?Z) ?U)
+  (modify-category-entry (cons ?a ?z) ?u)
+  (make-variable-buffer-local 'evil-cjk-word-separating-categories)
+  (add-hook 'subword-mode-hook
+            (lambda ()
+              (if subword-mode
+                  (push '(?u . ?U) evil-cjk-word-separating-categories)
+                (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories)))))
   :config
   (setq
    evil-shift-width mb-tab-size
@@ -689,16 +863,17 @@ narrowed."
   ;; Exit to normal state after save
   (add-hook 'after-save-hook 'evil-normal-state)
 
-  (cl-loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
-                                   (pylookup-mode . emacs)
-                                   (comint-mode . normal)
-                                   (shell-mode . insert)
-                                   (term-mode . emacs)
-                                   (help-mode . emacs)
-                                   (grep-mode . emacs)
-                                   (bc-menu-mode . emacs)
-                                   (rdictcc-buffer-mode . emacs))
-           do (evil-set-initial-state mode state))
+  (evil-set-initial-state 'inferior-emacs-lisp-mode  'emacs)
+  (evil-set-initial-state 'pylookup-mode             'emacs)
+  (evil-set-initial-state 'term-mode                 'emacs)
+  (evil-set-initial-state 'help-mode                 'emacs)
+  (evil-set-initial-state 'grep-mode                 'emacs)
+  (evil-set-initial-state 'bc-menu-mode              'emacs)
+  (evil-set-initial-state 'rdictcc-buffer-mode       'emacs)
+  (evil-set-initial-state 'comint-mode               'normal)
+  (evil-set-initial-state 'recentf-mode              'normal)
+  (evil-set-initial-state 'wdired-mode               'normal)
+  (evil-set-initial-state 'shell-mode                'insert)
 
   (evil-mode 1)
 
@@ -771,14 +946,15 @@ narrowed."
 
   ;; NOTE: m is reserved for mode-local bindings
   (evil-define-key 'normal 'global
-    (kbd "<leader>2")  'call-last-kbd-macro
-    (kbd "<leader>q") 'evil-quit
-    (kbd "<leader>n") 'mb/narrow-or-widen-dwim
-    (kbd "<leader>ff") 'find-file
-    (kbd "<leader>k")  'mb/kill-this-buffer
-    (kbd "<leader>s")  'save-buffer
-    (kbd "<leader>e")  'eshell
-    (kbd "<leader>u")  'undo-tree-visualize
+    (kbd "<leader>2")   'call-last-kbd-macro
+    (kbd "<leader>q")   'evil-quit
+    (kbd "<leader>n")   'mb/narrow-or-widen-dwim
+    (kbd "<leader>ff")  'find-file
+    (kbd "<leader>k")   'mb/kill-this-buffer
+    (kbd "<leader>s")   'save-buffer
+    (kbd "<leader>e")   'eshell
+    (kbd "<leader>d")   'dired-jump
+    (kbd "<leader>u")   'undo-tree-visualize
 
     (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>li")  'imenu
@@ -787,10 +963,15 @@ narrowed."
     (kbd "<leader>bb") 'switch-to-buffer
     (kbd "<leader>bl") 'mb/cleanup-buffer
     (kbd "<leader>bd") 'mb/delete-current-buffer-file
-    (kbd "<leader>br") 'mb/rename-file-and-buffer)
+    (kbd "<leader>br") 'mb/rename-file-and-buffer
+
+    (kbd "<leader>pp") 'project-switch-project
+    (kbd "<leader>pD") 'project-dired
+    (kbd "<leader>pe") 'project-eshell
+    (kbd "<leader>pk") 'project-kill-buffers)
 
   (evil-define-key 'visual 'global
-    (kbd "<leader>n") 'mb/narrow-or-widen-dwim
+    (kbd "<leader>n")  'mb/narrow-or-widen-dwim
     (kbd "<leader>lt") 'mb/sort-columns))
 
 ;; integration of evil with various packages
@@ -872,20 +1053,6 @@ narrowed."
 
   ;; Create a jump point before jumping with imenu.
   (advice-add #'imenu :around #'evil-better-jumper/set-jump-a))
-
-
-
-;; Project management
-(use-package project
-  :init
-  (setq project-list-file (expand-file-name "projects" mb-save-path))
-  :config
-  (push '(project-dired "Root directory") project-switch-commands)
-  (evil-define-key 'normal 'global
-    (kbd "<leader>pp") 'project-switch-project
-    (kbd "<leader>pD") 'project-dired
-    (kbd "<leader>pe") 'project-eshell
-    (kbd "<leader>pk") 'project-kill-buffers))
 
 
 
@@ -1153,6 +1320,14 @@ targets."
   (global-set-key (kbd "M-p") 'company-manual-begin))
 
 
+(use-package company-shell
+  :after (company sh-script)
+  :ensure t
+  :config
+  (setq company-shell-dont-fetch-meta mb-is-mac-os) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
+  (add-to-list 'company-backends 'company-shell))
+
+
 
 ;; YASnippet: snippets
 (use-package yasnippet
@@ -1199,55 +1374,11 @@ targets."
 
 
 
-;; Flyspell-mode: spell-checking on the fly as you type
-(use-package flyspell
-  :diminish flyspell-mode
-  :init
-
-  (when (executable-find "aspell")
-    (setq ispell-program-name "aspell") ; use aspell instead of ispell
-    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-save-path))
-    (setq-default ispell-extra-args '("--sug-mode=ultra"
-                                      "--lang=en_GB"
-                                      "--camel-case")))
-
-  (add-hook 'text-mode-hook 'flyspell-mode)
-  (add-hook 'prog-mode-hook (lambda ()
-                              (setq flyspell-consider-dash-as-word-delimiter-flag t)
-                              (flyspell-prog-mode)))
-  :config
-  (global-set-key [M-f8]  'flyspell-buffer))
-
 ;; Correct word at point
 (use-package flyspell-correct
   :ensure t
   :config
   (global-set-key [f8]    'flyspell-correct-at-point))
-
-
-
-;; Recentf: show recent files
-(use-package recentf
-  :config
-  (setq recentf-save-file (expand-file-name "recentf" mb-save-path)
-        recentf-max-menu-items 25
-        recentf-max-saved-items 1000
-        ;; cleanup non-existing files on startup
-        ;; may have problems with remote files
-        recentf-auto-cleanup 'mode)
-  ;; Ignore ephemeral git commit message files
-  (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
-  (add-to-list 'recentf-exclude "/elpa/")
-  (add-to-list 'recentf-exclude ".recentf")
-
-  (add-hook 'server-done-hook 'recentf-save-list)
-  (add-hook 'server-visit-hook 'recentf-save-list)
-  (add-hook 'delete-frame-hook 'recentf-save-list)
-
-  (evil-set-initial-state 'recentf-mode 'normal)
-
-  (recentf-mode t)
-  (recentf-track-opened-file))
 
 
 
@@ -1297,18 +1428,6 @@ targets."
 
 
 
-;; Uniquify: unique buffer names
-(use-package uniquify
-  :config
-  (setq uniquify-buffer-name-style 'forward
-        uniquify-separator "/"
-        ;; rename after killing uniquified
-        uniquify-after-kill-buffer-p t
-        ;; don't muck with special buffers
-        uniquify-ignore-buffers-re "^\\*"))
-
-
-
 ;; Show available keybindings in a separate window
 (use-package which-key
   :ensure t
@@ -1316,116 +1435,6 @@ targets."
   :init
   (which-key-mode)
   (evil-define-key nil 'global (kbd "<leader><escape>") 'which-key-abort))
-
-
-
-;; IBuffer (local)
-(use-package ibuffer
-  :bind ([f2] . ibuffer)
-  :init
-  ;; use ibuffer on C-x C-b
-  (defalias 'list-buffers 'ibuffer)
-  ;; use ibuffer as default buffers list (:ls)
-  (defalias 'buffer-menu 'ibuffer)
-
-  :config
-  (define-key ibuffer-mode-map [f2]      'ibuffer-quit))
-
-
-
-;; Saveplace: save cursor position
-(use-package saveplace
-  :init
-  (setq-default save-place-file (expand-file-name "saveplace" mb-save-path))
-
-  :config
-  (save-place-mode t))
-
-
-
-;; Delete-selection mode: delete seleted text when typing
-(delete-selection-mode t)
-
-
-
-;; Subword-mode: navigate in CamelCase words
-;; http://ergoemacs.org/emacs/emacs_subword-mode_superword-mode.html
-(use-package subword
-  :diminish subword-mode
-  :init
-  (global-subword-mode t)
-
-  ;; enable subword mode CamelCase movement in evil
-  (define-category ?U "Uppercase")
-  (define-category ?u "Lowercase")
-  (modify-category-entry (cons ?A ?Z) ?U)
-  (modify-category-entry (cons ?a ?z) ?u)
-  (make-variable-buffer-local 'evil-cjk-word-separating-categories)
-  (add-hook 'subword-mode-hook
-            (lambda ()
-              (if subword-mode
-                  (push '(?u . ?U) evil-cjk-word-separating-categories)
-                (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories))))))
-
-
-
-;; Electric indent mode: enable autoindent on enter etc.
-(electric-indent-mode 1)
-
-
-
-;; Electric-pair mode: auto insert closing brackets
-;; skip over and delete white space if it stands between the cursor and the closing delimiter
-(use-package elec-pair
-  :init
-  (setq electric-pair-skip-whitespace 'chomp)
-  :config
-  (electric-pair-mode 1)
-  (defun mb/emulate-disabled-electric-pair ()
-    "Disable auto-inserting parens."
-    (setq-local electric-pair-pairs nil)
-    (setq-local electric-pair-text-pairs nil)
-    (setq-local electric-pair-inhibit-predicate #'identity))
-  (add-hook 'minibuffer-setup-hook 'mb/emulate-disabled-electric-pair))
-
-
-
-;; Eldoc
-(add-hook  'emacs-lisp-mode-hook        'turn-on-eldoc-mode)
-(add-hook  'lisp-interaction-mode-hook  'turn-on-eldoc-mode)
-(add-hook  'ielm-mode-hook              'turn-on-eldoc-mode)
-(add-hook 'eldoc-mode-hook
-          (lambda() (diminish 'eldoc-mode)))
-
-
-
-;; Dired
-(use-package dired-x
-  :config
-  (setq dired-auto-revert-buffer t)    ; automatically revert buffer
-
-  (evil-set-initial-state 'wdired-mode 'normal)
-  (evil-define-key 'normal 'global (kbd "<leader>d") 'dired-jump)
-
-  (defun mb/dired-up-directory ()
-    "Take dired up one directory, but behave like dired-find-alternate-file."
-    (interactive)
-    (let ((old (current-buffer)))
-      (dired-up-directory)
-      (kill-buffer old)))
-
-  (evil-define-key 'normal dired-mode-map
-    " " 'evil-send-leader
-    "h" 'mb/dired-up-directory
-    "l" 'dired-find-alternate-file
-    "o" 'dired-sort-toggle-or-edit
-    "v" 'dired-toggle-marks
-    "m" 'dired-mark
-    "u" 'dired-unmark
-    "U" 'dired-unmark-all-marks
-    "n" 'evil-search-next
-    "N" 'evil-search-previous
-    "q" 'mb/kill-this-buffer))
 
 
 
@@ -1768,23 +1777,24 @@ targets."
 ;; ---------------------------------------- LANGUAGES
 
 
-
 ;; Makefile mode
+(use-package makefile-mode
+  :no-require t
+  :init
+  (defun mb/use-tabs ()
+    "Use tabs."
+    (setq tab-width        8
+          indent-tabs-mode 1))
 
-(defun mb/use-tabs ()
-  "Use tabs."
-  (setq tab-width        8
-        indent-tabs-mode 1))
+  (add-hook 'makefile-mode-hook 'mb/use-tabs)
+  (add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs))
 
-(add-hook 'makefile-mode-hook 'mb/use-tabs)
-(add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs)
 
 
 ;; Justfile mode
 (use-package just-mode
   :ensure t
   :defer t)
-
 
 
 ;; Python mode
@@ -1829,14 +1839,6 @@ targets."
 
 
 
-(use-package json-mode
-  :ensure t
-  :defer t
-  :config
-  (message "mb: JSON MODE"))
-
-
-
 ;; Javascript
 (use-package js
   :defines javascript-indent-level js-indent-level js-switch-indent-offset
@@ -1859,6 +1861,84 @@ targets."
 
 
   (message "mb: JS MODE"))
+
+
+
+;; XML
+(use-package nxml-mode
+  :mode ("\\.xml\\'" . nxml-mode)
+  :mode ("\\.svg\\'" . nxml-mode)
+  :config
+
+  (setq nxml-child-indent  mb-tab-size)
+
+  (message "mb: nXML MODE"))
+
+
+
+;; Css
+(use-package css-mode
+  :mode ("\\.css\\'" . css-mode)
+  :config
+  (setq css-indent-offset mb-web-indent-size)
+
+  (add-hook 'css-mode-hook 'rainbow-mode)
+
+  (message "mb: CSS MODE"))
+
+
+
+;; Emacs Lisp
+(use-package elisp-mode
+  :init
+  (evil-define-key 'normal 'emacs-lisp-mode
+    (kbd "<leader>meb") 'eval-buffer
+    (kbd "<leader>mer") 'eval-region
+    (kbd "<leader>mes") 'eval-last-sexp)
+
+  (add-hook 'emacs-lisp-mode-hook
+            (lambda()
+              (setq mode-name "ELisp")))
+  (add-hook 'lisp-interaction-mode-hook
+            (lambda() (setq mode-name "λ"))))
+
+
+
+;; Shell mode
+(use-package sh-script
+  :defer t
+  :init
+  ;; Use sh-mode when opening `.zsh' files, and when opening Prezto runcoms.
+  (dolist (pattern '("\\.zsh\\'"
+                     "zlogin\\'"
+                     "zlogout\\'"
+                     "zpreztorc\\'"
+                     "zprofile\\'"
+                     "zshenv\\'"
+                     "zshrc\\'"))
+    (add-to-list 'auto-mode-alist (cons pattern 'sh-mode)))
+  :config
+  (message "mb: SH MODE"))
+
+
+
+(use-package eshell
+  :defer t
+  :init
+  (setq
+   eshell-directory-name          (expand-file-name "eshell" mb-save-path)
+   eshell-aliases-file            (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
+
+
+
+;; ---------------------------------------- 3rd PARTY LANGUAGES
+
+
+(use-package json-mode
+  :ensure t
+  :defer t
+  :config
+  (message "mb: JSON MODE"))
 
 
 
@@ -1946,35 +2026,11 @@ targets."
 
 
 
-;; XML
-(use-package nxml-mode
-  :mode ("\\.xml\\'" . nxml-mode)
-  :mode ("\\.svg\\'" . nxml-mode)
-  :config
-
-  (setq nxml-child-indent  mb-tab-size)
-
-  (message "mb: nXML MODE"))
-
-
-
-;; Css
-(use-package css-mode
-  :mode ("\\.css\\'" . css-mode)
-  :config
-  (setq css-indent-offset mb-web-indent-size)
-
-  (add-hook 'css-mode-hook 'rainbow-mode)
-
-  (message "mb: CSS MODE"))
-
-
-
 ;; SCSS-mode
 (use-package scss-mode
   :ensure t
-  :mode ("\\.scss\\'" . scss-mode)
   :defer t
+  :mode ("\\.scss\\'" . scss-mode)
   :config
   (add-hook 'scss-mode-hook 'rainbow-mode)
   (setq scss-compile-at-save nil)
@@ -2020,51 +2076,6 @@ targets."
   (add-hook 'markdown-mode-hook 'flyspell-mode)
   (message "mb: MARKDOWN MODE"))
 
-
-
-;; Emacs Lisp
-(evil-define-key 'normal 'emacs-lisp-mode
-  (kbd "<leader>meb") 'eval-buffer
-  (kbd "<leader>mer") 'eval-region
-  (kbd "<leader>mes") 'eval-last-sexp)
-
-(add-hook 'emacs-lisp-mode-hook
-          (lambda()
-            (setq mode-name "ELisp")))
-(add-hook 'lisp-interaction-mode-hook
-          (lambda() (setq mode-name "λ")))
-
-
-
-;; Shell mode
-(use-package sh-script
-  :defer t
-  :init
-  ;; Use sh-mode when opening `.zsh' files, and when opening Prezto runcoms.
-  (dolist (pattern '("\\.zsh\\'"
-                     "zlogin\\'"
-                     "zlogout\\'"
-                     "zpreztorc\\'"
-                     "zprofile\\'"
-                     "zshenv\\'"
-                     "zshrc\\'"))
-    (add-to-list 'auto-mode-alist (cons pattern 'sh-mode)))
-  :config
-  (message "mb: SH MODE"))
-
-(use-package company-shell
-  :after (company sh-script)
-  :ensure t
-  :config
-  (setq company-shell-dont-fetch-meta mb-is-mac-os) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
-  (add-to-list 'company-backends 'company-shell))
-
-(use-package eshell
-  :defer t
-  :init
-  (setq
-   eshell-directory-name          (expand-file-name "eshell" mb-save-path)
-   eshell-aliases-file            (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
 
 
 ;; Lua mode
