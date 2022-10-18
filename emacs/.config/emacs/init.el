@@ -128,15 +128,28 @@
  ;; file to save customizations done through UI
  custom-file mb-customizations-file
 
+ ;; skip duplicates from the kill-ring to simplify yanking
+ kill-do-not-save-duplicates t
+
+ ;; Don't prompt for confirmation when we create a new file or buffer (assume the
+ ;; user knows what they're doing).
+ confirm-nonexistent-file-or-buffer nil
+
+ ;; middle-click paste at point, not at click
+ mouse-yank-at-point t
+
  ;; do not break line even if its too long
  truncate-lines t
  truncate-partial-width-windows t)
 
+;; use keyboard dialogs instead of popups
+(setq use-dialog-box nil)
 (tooltip-mode -1)
+
 (blink-cursor-mode t)
 
 ;; take the short answer, y/n is yes/no
-(defalias 'yes-or-no-p 'y-or-n-p)
+(setq use-short-answers t)
 
 ;; do not ask if I want to execute `eval' from dir-locals
 (setq enable-local-eval t)
@@ -218,8 +231,12 @@
 ;; Transparently open compressed files
 (auto-compression-mode t)
 
-;; Automatically update unmodified buffers whose files have changed.
-(global-auto-revert-mode t)
+;; Delete-selection mode: delete selected text when typing
+(delete-selection-mode t)
+
+;; Electric indent mode: enable autoindent on enter etc.
+(electric-indent-mode 1)
+
 
 ;; Tabs: use only spaces for indent
 (setq-default
@@ -252,10 +269,14 @@
 
 (setq enable-recursive-minibuffers t)
 
-;; Do not allow the cursor in the minibuffer prompt
-(setq minibuffer-prompt-properties
-      '(read-only t cursor-intangible t face minibuffer-prompt))
+;; Try to keep the cursor out of the read-only portions of the minibuffer.
+(setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
 (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+
+;; Default to soft line-wrapping in text modes. It is more sensibile for text
+;; modes, even if hard wrapping is more performant.
+(add-hook 'text-mode-hook #'visual-line-mode)
 
 
 
@@ -486,7 +507,7 @@ narrowed."
 (global-set-key [f12]   'menu-bar-mode)
 
 
-;; ---------------------------------------- PACKAGES
+;; ---------------------------------------- BUILT-IN PACKAGES
 
 ;; evil uses dabbrev
 (use-package dabbrev
@@ -540,29 +561,6 @@ narrowed."
 
 
 
-;; Recentf: show recent files
-(use-package recentf
-  :config
-  (setq recentf-save-file (expand-file-name "recentf" mb-save-path)
-        recentf-max-menu-items 25
-        recentf-max-saved-items 1000
-        ;; cleanup non-existing files on startup
-        ;; may have problems with remote files
-        recentf-auto-cleanup 'mode)
-  ;; Ignore ephemeral git commit message files
-  (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
-  (add-to-list 'recentf-exclude "/elpa/")
-  (add-to-list 'recentf-exclude ".recentf")
-
-  (add-hook 'server-done-hook 'recentf-save-list)
-  (add-hook 'server-visit-hook 'recentf-save-list)
-  (add-hook 'delete-frame-hook 'recentf-save-list)
-
-  (recentf-mode t)
-  (recentf-track-opened-file))
-
-
-
 ;; Uniquify: unique buffer names
 (use-package uniquify
   :config
@@ -589,6 +587,44 @@ narrowed."
 
 
 
+;; Recentf: save recent files
+(use-package recentf
+  :config
+  (setq recentf-save-file (expand-file-name "recentf" mb-save-path)
+        recentf-max-menu-items 25
+        recentf-max-saved-items 1000
+        ;; cleanup non-existing files on startup
+        ;; may have problems with remote files
+        recentf-auto-cleanup 'mode)
+  ;; Ignore ephemeral git commit message files
+  (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
+  (add-to-list 'recentf-exclude "/elpa/")
+  (add-to-list 'recentf-exclude ".recentf")
+
+  (add-hook 'server-done-hook 'recentf-save-list)
+  (add-hook 'server-visit-hook 'recentf-save-list)
+  (add-hook 'delete-frame-hook 'recentf-save-list)
+
+  (recentf-mode t)
+  (recentf-track-opened-file))
+
+
+
+;; Save search history
+(use-package savehist
+  :config
+  (setq savehist-file (expand-file-name "savehist" mb-save-path)
+        savehist-save-minibuffer-history t
+        savehist-autosave-interval nil ; save on kill only
+        savehist-additional-variables
+        '(
+          mark-ring global-mark-ring       ; persist marks
+          search-ring regexp-search-ring)) ; persist searches
+
+  (savehist-mode t))
+
+
+
 ;; Saveplace: save cursor position
 (use-package saveplace
   :init
@@ -599,22 +635,25 @@ narrowed."
 
 
 
+;; Automatically update unmodified buffers whose files have changed.
+(use-package autorevert
+  :diminish auto-revert-mode
+  :config
+  (setq auto-revert-verbose t ; let us know when it happens
+        auto-revert-use-notify nil
+        auto-revert-stop-on-user-input nil
+        ;; Only prompts for confirmation when buffer is unsaved.
+        revert-without-query (list "."))
+  (global-auto-revert-mode t))
+
+
+
 ;; Subword-mode: navigate in CamelCase words
 ;; http://ergoemacs.org/emacs/emacs_subword-mode_superword-mode.html
 (use-package subword
   :diminish subword-mode
   :init
   (global-subword-mode t))
-
-
-
-;; Delete-selection mode: delete selected text when typing
-(delete-selection-mode t)
-
-
-
-;; Electric indent mode: enable autoindent on enter etc.
-(electric-indent-mode 1)
 
 
 
@@ -870,6 +909,9 @@ narrowed."
    evil-want-visual-char-semi-exclusive t
    ;; do not move cursor back 1 position when exiting insert mode
    evil-move-cursor-back nil
+
+   evil-kbd-macro-suppress-motion-error t
+
    ;; search for whole words not only for part
    evil-symbol-word-search 'symbol)
 
@@ -991,6 +1033,7 @@ narrowed."
 (use-package evil-collection
   :after evil
   :ensure t
+  :diminish evil-collection-unimpaired-mode
   :init
   (setq evil-collection-setup-minibuffer nil)
   (evil-collection-init))
@@ -1049,11 +1092,13 @@ narrowed."
 ;; better jump list
 (use-package better-jumper
   :ensure t
-
+  :diminish better-jumper-local-mode
   :init
   (global-set-key [remap evil-jump-forward]  #'better-jumper-jump-forward)
   (global-set-key [remap evil-jump-backward] #'better-jumper-jump-backward)
   (global-set-key [remap xref-pop-marker-stack] #'better-jumper-jump-backward)
+  (global-set-key [remap xref-go-back] #'better-jumper-jump-backward)
+  (global-set-key [remap xref-go-forward] #'better-jumper-jump-forward)
 
   :config
   (setq better-jumper-use-evil-jump-advice t
@@ -1348,6 +1393,7 @@ targets."
 ;; YASnippet: snippets
 (use-package yasnippet
   :ensure t
+  :diminish yas-minor-mode
   :config
   (setq
    yas-snippet-dirs (list (expand-file-name "snippets" mb-dotfiles-dir))
@@ -1470,6 +1516,7 @@ targets."
         doom-modeline-icon nil
         doom-modeline-unicode-fallback nil
         doom-modeline-buffer-encoding nil
+        doom-modeline-minor-modes t
         doom-modeline-env-version nil)
   (doom-modeline-mode 1))
 
@@ -1478,6 +1525,7 @@ targets."
 ;; Flycheck: error checking on the fly
 (use-package flycheck
   :ensure t
+  :diminish flycheck-mode
   :init
   (global-flycheck-mode)
 
@@ -1603,7 +1651,6 @@ targets."
 (use-package magit
   :ensure t
   :defer t
-  :diminish auto-revert-mode
   :defines
   magit-last-seen-setup-instructions
   magit-status-buffer-switch-function
@@ -1787,7 +1834,7 @@ targets."
 
 
 
-;; ---------------------------------------- LANGUAGES
+;; ---------------------------------------- BUILT-IN LANGUAGES
 
 
 ;; Makefile mode
