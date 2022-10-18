@@ -608,7 +608,7 @@ narrowed."
 
 
 
-;; Delete-selection mode: delete seleted text when typing
+;; Delete-selection mode: delete selected text when typing
 (delete-selection-mode t)
 
 
@@ -631,6 +631,19 @@ narrowed."
     (setq-local electric-pair-text-pairs nil)
     (setq-local electric-pair-inhibit-predicate #'identity))
   (add-hook 'minibuffer-setup-hook 'mb/emulate-disabled-electric-pair))
+
+
+
+;; Show parens mode: highlight matching parens
+(use-package paren
+  :config
+  (setq show-paren-delay 0
+        ;; decrease overlay priority because
+        ;; it's higher than selection
+        show-paren-priority 10
+        ;; highlight everything inside parens
+        show-paren-style 'expression)
+  (show-paren-mode 1))
 
 
 
@@ -993,7 +1006,8 @@ narrowed."
 (use-package evil-surround
   :after evil
   :ensure t
-  :config (global-evil-surround-mode 1))
+  :config
+  (global-evil-surround-mode 1))
 
 ;; match braces/tags with %
 (use-package evil-matchit
@@ -1007,7 +1021,8 @@ narrowed."
 (use-package evil-exchange
   :after evil
   :ensure t
-  :config (evil-exchange-install))
+  :config
+  (evil-exchange-install))
 
 ;; xml tag attribute as a text object (bound to x)
 (use-package exato
@@ -1031,7 +1046,7 @@ narrowed."
   :config
   (evil-lion-mode))
 
-
+;; better jump list
 (use-package better-jumper
   :ensure t
 
@@ -1266,6 +1281,7 @@ targets."
   :ensure t
   :config
   (evil-define-key 'normal 'global
+    (kbd "<leader>jr") 'avy-resume
     (kbd "<leader>jj") 'evil-avy-goto-char-timer
     (kbd "<leader>jl") 'evil-avy-goto-line))
 
@@ -1388,15 +1404,7 @@ targets."
   :defer t
   :diminish editorconfig-mode
   :init
-  (add-hook 'prog-mode-hook 'editorconfig-mode)
-
-  (defun mb/reload-editorconfig ( )
-    "Reload editorconfig file and set variables for current major mode."
-    (interactive)
-    (message "mb: reloading EditorConfig...")
-    (editorconfig-apply))
-
-  (evil-define-key 'normal 'prog-mode (kbd "<leader>le") 'mb/reload-editorconfig))
+  (add-hook 'prog-mode-hook 'editorconfig-mode))
 
 
 
@@ -1470,12 +1478,18 @@ targets."
 ;; Flycheck: error checking on the fly
 (use-package flycheck
   :ensure t
-  :defer t
   :init
-  (setq flycheck-indication-mode 'right-margin)
   (global-flycheck-mode)
 
   :config
+  (setq
+   flycheck-check-syntax-automatically '(mode-enabled save)
+
+   ;; Display errors a little quicker (default is 0.9s)
+   flycheck-display-errors-delay 0.25
+
+   flycheck-temp-prefix "FLYCHECK_XXY")
+
   (evil-define-key 'normal 'global
     (kbd "M-e 1") 'flycheck-first-error
     (kbd "M-e j") 'flycheck-next-error
@@ -1489,9 +1503,6 @@ targets."
       (setq flycheck-indication-mode 'right-fringe)
     (progn
       (setq flycheck-indication-mode 'right-margin)))
-
-  (setq flycheck-temp-prefix "FLYCHECK_XXY")
-  (setq flycheck-check-syntax-automatically '(mode-enable save))
 
   (evil-add-command-properties #'flycheck-first-error :jump t)
   (evil-add-command-properties #'flycheck-next-error :jump t)
@@ -1524,6 +1535,13 @@ targets."
   )
 
 
+;; Display flycheck errors in a popup
+(use-package flycheck-popup-tip
+  :ensure t
+  :init
+  (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+
+
 
 ;; Expand-region: expand selection like C-w in intellij idea
 (use-package expand-region
@@ -1539,23 +1557,14 @@ targets."
 
 
 
-;; Show parens mode: highlight matching parens
-(use-package paren
-  :config
-  (setq show-paren-delay 0
-        ;; decrease overlay priority because
-        ;; it's higher than selection
-        show-paren-priority 10
-        ;; highlight everything inside parens
-        show-paren-style 'expression)
-  (show-paren-mode 1))
-
-
-
 ;; Rainbow-mode: highlight colors in text (e.g "red" or #3332F3)
 (use-package rainbow-mode
   :ensure t
   :defer t
+  :hook ((web-mode . rainbow-mode)
+         (css-mode . rainbow-mode)
+         (scss-mode . rainbow-mode)
+         (js-mode . rainbow-mode))
   :diminish rainbow-mode)
 
 
@@ -1702,7 +1711,16 @@ targets."
     (kbd "<leader>gr") 'diff-hl-revert-hunk
     (kbd "<leader>gd") 'diff-hl-diff-goto-hunk)
 
+  (add-hook 'magit-pre-refresh-hook  'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+
+  ;; UX: Don't delete the current hunk's indicators while we're editing
+  ;; https://github.com/doomemacs/doomemacs/blob/master/modules/ui/vc-gutter/config.el#L204
+  (add-hook 'diff-hl-flydiff-mode-hook
+            (defun +vc-gutter-init-flydiff-mode-h ()
+              (if (not diff-hl-flydiff-mode)
+                  (remove-hook 'evil-insert-state-exit-hook #'diff-hl-flydiff-update)
+                (add-hook 'evil-insert-state-exit-hook #'diff-hl-flydiff-update))))
 
   (diff-hl-flydiff-mode)
 
@@ -1733,44 +1751,39 @@ targets."
         lsp-rust-build-on-save t
         lsp-enable-file-watchers nil
 
+        lsp-auto-execute-action nil
+
+        lsp-eldoc-enable-hover t
+        lsp-eldoc-render-all t
+
+        lsp-signature-render-documentation t
+
         lsp-enable-folding nil
-        lsp-enable-snippet nil
-        lsp-enable-symbol-highlighting nil
-        lsp-enable-on-type-formatting  nil
+        lsp-enable-imenu t
         lsp-enable-indentation nil
+        lsp-enable-links t
+        lsp-enable-on-type-formatting  nil
+        lsp-enable-symbol-highlighting nil
+        lsp-enable-text-document-color t
+        lsp-enable-xref t
 
         lsp-completion-provider :capf
         lsp-completion-show-detail t
         lsp-completion-show-kind t
+        lsp-enable-snippet nil
 
         lsp-modeline-code-actions-segments '(count name)
 
-        ;; UI https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
         lsp-lens-enable nil
 
-        lsp-ui-doc-enable nil
-
-        lsp-eldoc-enable-hover nil
-
         lsp-headerline-breadcrumb-enable t
-        lsp-headerline-breadcrumb-segments '(symbols)
-
-        lsp-ui-sideline-enable t
-        lsp-ui-sideline-show-hover t
-        lsp-ui-sideline-delay 1.0
-        lsp-ui-sideline-show-diagnostics nil)
+        lsp-headerline-breadcrumb-segments '(symbols))
   :config
   (evil-define-key 'normal 'lsp-mode-map
     (kbd "<leader>la") 'lsp-execute-code-action
     (kbd "<leader>lg") 'lsp-find-definition
     (kbd "<leader>lf") 'lsp-find-references
     (kbd "<leader>lr") 'lsp-rename))
-
-
-;; Advanced UI elements for lsp-mode
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
 
 
 
@@ -1817,20 +1830,6 @@ targets."
         '((awk-mode . "awk")
           (other . "java")))
 
-  (defvar flycheck-antrc "build.xml" "Ant build file name.")
-
-  (flycheck-define-checker java
-    "Java syntax checker using ant."
-    :command ("ant" "-e"
-              (config-file "-buildfile"flycheck-antrc)
-              "compile")
-    :error-patterns
-    ((error line-start (file-name) ":" line ": error:"
-            (message (zero-or-more not-newline)) line-end))
-    :modes java-mode)
-
-  (add-to-list 'flycheck-checkers 'java)
-
   (add-hook 'java-mode-hook (lambda ()
                               ;; disable auto-indent
                               (electric-indent-local-mode 0)))
@@ -1851,11 +1850,9 @@ targets."
         js-switch-indent-offset mb-web-indent-size
         js-indent-level         mb-web-indent-size)
 
-  (add-hook 'js-mode-hook 'rainbow-mode)
   (add-hook 'js-mode-hook (lambda ()
                             (when (not (eq major-mode 'json-mode))
                               (lsp)
-                              (lsp-diagnostics-mode)
                               (flycheck-add-next-checker 'lsp '(warning . javascript-eslint) 'append))
                             ))
 
@@ -1881,8 +1878,6 @@ targets."
   :mode ("\\.css\\'" . css-mode)
   :config
   (setq css-indent-offset mb-web-indent-size)
-
-  (add-hook 'css-mode-hook 'rainbow-mode)
 
   (message "mb: CSS MODE"))
 
@@ -1975,33 +1970,18 @@ targets."
         )
 
   :config
-
-  (add-hook 'web-mode-hook 'rainbow-mode)
-
   (add-hook 'web-mode-hook (lambda ()
                              (when (or
                                     (string-equal "ts" (file-name-extension buffer-file-name))
                                     (string-equal "tsx" (file-name-extension buffer-file-name))
                                     (string-equal "js" (file-name-extension buffer-file-name))
                                     (string-equal "jsx" (file-name-extension buffer-file-name))
-                                    (string-equal "svelte" (file-name-extension buffer-file-name))
-                                    )
+                                    (string-equal "svelte" (file-name-extension buffer-file-name)))
 
                                (flycheck-add-mode 'javascript-eslint 'web-mode)
 
                                (lsp)
-                               (lsp-diagnostics-mode)
-                               (flycheck-add-next-checker 'lsp '(warning . javascript-eslint) 'append)
-                               )))
-
-  ;; (add-hook 'web-mode-hook
-  ;;           (lambda ()
-  ;;             (when (or (string-equal "tsx" (file-name-extension buffer-file-name))
-  ;;                       (string-equal "ts" (file-name-extension buffer-file-name)))
-
-  ;;               (tide-setup)
-  ;;               (eldoc-mode)
-  ;;               (message "mb: WEB MODE FOR TS(X)"))))
+                               (flycheck-add-next-checker 'lsp '(warning . javascript-eslint) 'append))))
 
   (message "mb: WEB MODE"))
 
@@ -2032,7 +2012,6 @@ targets."
   :defer t
   :mode ("\\.scss\\'" . scss-mode)
   :config
-  (add-hook 'scss-mode-hook 'rainbow-mode)
   (setq scss-compile-at-save nil)
   (message "mb: SCSS MODE"))
 
