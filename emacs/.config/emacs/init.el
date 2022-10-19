@@ -172,7 +172,6 @@
 (put 'downcase-region           'disabled nil)
 (put 'upcase-region             'disabled nil)
 (put 'narrow-to-region          'disabled nil)
-(put 'dired-find-alternate-file 'disabled nil)
 
 (setq-default
  ;; disable startup screen
@@ -698,8 +697,9 @@ narrowed."
 
 ;; Dired
 (use-package dired-x
-  :after evil
   :config
+  (put 'dired-find-alternate-file 'disabled nil)
+
   (setq dired-auto-revert-buffer t)    ; automatically revert buffer
 
   (defun mb/dired-up-directory ()
@@ -709,18 +709,14 @@ narrowed."
       (dired-up-directory)
       (kill-buffer old)))
 
-  (evil-define-key 'normal dired-mode-map
-    " " 'evil-send-leader
-    "h" 'mb/dired-up-directory
-    "l" 'dired-find-alternate-file
-    "o" 'dired-sort-toggle-or-edit
-    "v" 'dired-toggle-marks
-    "m" 'dired-mark
-    "u" 'dired-unmark
-    "U" 'dired-unmark-all-marks
-    "n" 'evil-search-next
-    "N" 'evil-search-previous
-    "q" 'mb/kill-this-buffer))
+  (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
+
+  ;; called after evil-collection makes its keybindings
+  (add-hook 'evil-collection-setup-hook
+            (lambda (_mode _keymaps)
+              (evil-define-key 'normal 'dired-mode-map
+                " " 'evil-send-leader
+                "q" 'mb/kill-this-buffer))))
 
 
 
@@ -1782,6 +1778,7 @@ targets."
 ;; Language server protocol
 (use-package lsp-mode
   :ensure t
+  :diminish lsp-mode
   :defer t
   :hook (lsp-mode . lsp-enable-which-key-integration)
   :init
