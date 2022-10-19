@@ -710,13 +710,12 @@ narrowed."
       (kill-buffer old)))
 
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
+  (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
 
   ;; called after evil-collection makes its keybindings
   (add-hook 'evil-collection-setup-hook
             (lambda (_mode _keymaps)
-              (evil-define-key 'normal 'dired-mode-map
-                " " 'evil-send-leader
-                "q" 'mb/kill-this-buffer))))
+              (evil-define-key 'normal 'dired-mode-map " " 'evil-send-leader))))
 
 
 
@@ -1316,6 +1315,29 @@ targets."
               :around #'embark-hide-which-key-indicator))
 
 
+;; Better control for "virtual" (temporary) windows
+(use-package popper
+  :ensure t
+  :bind (("M-`"   . popper-toggle-latest)
+         ("C-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq
+   popper-display-control nil
+   popper-reference-buffers
+        '("\\*Messages\\*"
+          "\\*Apropos\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          "\\*Flycheck"
+          "\\magit: "
+          help-mode
+          compilation-mode))
+
+  (popper-mode +1)
+  (popper-echo-mode +1))
+
+
 
 ;; Avy: jump to char/line
 (use-package avy
@@ -1582,7 +1604,9 @@ targets."
 ;; Display flycheck errors in a popup
 (use-package flycheck-popup-tip
   :ensure t
+  :custom-face (popup-tip-face ((t (:background "yellow" :foreground "black"))))
   :init
+  (setq popup-tip-max-width 100)
   (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 
 
