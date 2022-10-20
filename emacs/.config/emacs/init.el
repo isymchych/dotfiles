@@ -532,7 +532,7 @@ narrowed."
 
 
 
-;; Project management
+;; Project.el: project management
 (use-package project
   :init
   (setq project-list-file (expand-file-name "projects" mb-save-path))
@@ -1197,7 +1197,23 @@ narrowed."
   :config
   (consult-customize consult-recent-file :preview-key '([M-k] [M-j]))
 
+  (setq
+   consult-line-numbers-widen t
+   consult-async-min-input 1
+   consult-async-refresh-delay  0.15
+   consult-async-input-throttle 0.2
+   consult-async-input-debounce 0.1)
+
+  ;; use consult instead of the standard *Completions* buffer
   (setq completion-in-region-function #'consult-completion-in-region)
+
+  ;; These commands are problematic and automatically show the *Completions* buffer
+  (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
+  (advice-add #'ffap-menu-ask :around (lambda (&rest args)
+                                        (cl-letf (((symbol-function #'minibuffer-completion-help)
+                                                   #'ignore))
+                                          (apply args))))
+
 
   ;; make narrowing help available in the minibuffer.
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
@@ -1211,6 +1227,25 @@ narrowed."
     (consult-ripgrep dir (thing-at-point 'symbol)))
 
   (global-set-key (kbd "M-X") 'consult-mode-command)
+
+  ;; remap existing commands
+  (global-set-key [remap apropos]                       #'consult-apropos)
+  (global-set-key [remap bookmark-jump]                 #'consult-bookmark)
+  (global-set-key [remap evil-show-marks]               #'consult-mark)
+  (global-set-key [remap evil-show-jumps]               #'evil-collection-consult-jump-list)
+  (global-set-key [remap evil-show-registers]           #'consult-register)
+  (global-set-key [remap goto-line]                     #'consult-goto-line)
+  (global-set-key [remap imenu]                         #'consult-imenu)
+  (global-set-key [remap locate]                        #'consult-locate)
+  (global-set-key [remap load-theme]                    #'consult-theme)
+  (global-set-key [remap man]                           #'consult-man)
+  (global-set-key [remap recentf-open-files]            #'consult-recent-file)
+  (global-set-key [remap switch-to-buffer]              #'consult-buffer)
+  (global-set-key [remap switch-to-buffer-other-window] #'consult-buffer-other-window)
+  (global-set-key [remap switch-to-buffer-other-frame]  #'consult-buffer-other-frame)
+  (global-set-key [remap yank-pop]                      #'consult-yank-pop)
+
+  (advice-add #'multi-occur :override #'consult-multi-occur)
 
   (evil-define-key 'normal 'global
     (kbd "<leader>r") 'consult-recent-file
@@ -1266,6 +1301,14 @@ narrowed."
   (evil-define-key 'normal 'global
     (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>pF") 'consult-fd-thing-at-point))
+
+
+;; Jump to Flycheck error
+(use-package consult-flycheck
+  :ensure t
+  :after (consult flycheck)
+  :config
+  (evil-define-key 'normal 'global (kbd "<leader>le") #'consult-flycheck))
 
 
 
