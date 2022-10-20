@@ -1440,9 +1440,6 @@ targets."
 (use-package consult-yasnippet
   :ensure t
   :config
-  ;; free up the binding for a prefix
-  (global-set-key (kbd "M-y") nil)
-
   (global-set-key (kbd "M-y i") 'consult-yasnippet)
   (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file))
 
