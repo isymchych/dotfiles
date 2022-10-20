@@ -73,9 +73,11 @@
 
 
 ;; Turn off mouse interface early in startup to avoid momentary display
-(if (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
+;; keep menu bar enabled only on mac since it doesn't take vertical space
+(if (and (fboundp 'menu-bar-mode) (not mb-is-mac-os))   (menu-bar-mode   -1))
 
 ;; Terminal mouse support
 (unless window-system
@@ -719,6 +721,15 @@ narrowed."
 
 
 
+;; Emacs shell
+(use-package eshell
+  :defer t
+  :init
+  (setq eshell-directory-name (expand-file-name "eshell" mb-save-path)
+        eshell-aliases-file   (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
+
+
+
 ;; ---------------------------------------- 3rd PARTY PACKAGES
 
 
@@ -848,29 +859,37 @@ narrowed."
 
 
 
-;; Undo-tree: save/show undo tree
-;; also required by evil
-(use-package undo-tree
+;; Improved undo/redo system (used by evil)
+(use-package undo-fu
   :ensure t
-  :diminish undo-tree-mode
+
+  :init
+  ;; increase emacs default undo limits
+  (setq undo-limit 6710886400) ;; 64mb.
+  (setq undo-strong-limit 100663296) ;; 96mb.
+  (setq undo-outer-limit 1006632960) ;; 960mb.
+
   :config
-  (global-undo-tree-mode)
+  (global-set-key [remap undo] #'undo-fu-only-undo)
+  (global-set-key (kbd "C-S-z") #'undo-fu-only-redo))
 
-  (let ((history-dir (expand-file-name "undo-tree-history" mb-save-path)))
-    ;; create temp dir if it does not exists
-    (unless (file-exists-p history-dir)
-      (make-directory history-dir))
 
-    (setq undo-tree-history-directory-alist (list `(".*" . ,history-dir))
-          undo-tree-visualizer-timestamps t
-          undo-tree-visualizer-diff       t)))
+;; Save & restore undo/redo state
+(use-package undo-fu-session
+  :ensure t
+  :after undo-fu
+  :config
+  (setq undo-fu-session-directory (expand-file-name "undo-fu-session" mb-save-path)
+        undo-fu-session-compression 'zst
+        undo-fu-session-incompatible-files '("\\.gpg$" "/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+
+  (global-undo-fu-session-mode))
 
 
 
 ;; Evil: vim mode
 (use-package evil
   :ensure t
-  :after undo-tree
   ;; this must be set before loading evil
   :init
   ;; use C-u as scroll-up
@@ -878,7 +897,7 @@ narrowed."
   (defvar evil-want-Y-yank-to-eol t)
   (defvar evil-want-C-i-jump t)
   (defvar evil-want-keybinding nil)
-  (defvar evil-undo-system 'undo-tree)
+  (defvar evil-undo-system 'undo-fu)
 
   ;; enable subword mode CamelCase movement in evil
   (define-category ?U "Uppercase")
@@ -1004,7 +1023,6 @@ narrowed."
     (kbd "<leader>s")   'save-buffer
     (kbd "<leader>e")   'eshell
     (kbd "<leader>d")   'dired-jump
-    (kbd "<leader>u")   'undo-tree-visualize
 
     (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>li")  'imenu
@@ -1108,6 +1126,17 @@ narrowed."
 
   ;; Create a jump point before jumping with imenu.
   (advice-add #'imenu :around #'evil-better-jumper/set-jump-a))
+
+
+
+;; Visualise the undo history
+(use-package vundo
+  :ensure t
+  :config
+  (setq vundo-glyph-alist vundo-unicode-symbols
+        vundo-compact-display t)
+
+  (evil-define-key 'normal 'vundo-mode-map (kbd "<leader>u") 'vundo))
 
 
 
@@ -1325,14 +1354,14 @@ targets."
   (setq
    popper-display-control nil
    popper-reference-buffers
-        '("\\*Messages\\*"
-          "\\*Apropos\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
-          "\\*Flycheck"
-          "\\magit: "
-          help-mode
-          compilation-mode))
+   '("\\*Messages\\*"
+     "\\*Apropos\\*"
+     "Output\\*$"
+     "\\*Async Shell Command\\*"
+     "\\*Flycheck"
+     "\\magit: "
+     help-mode
+     compilation-mode))
 
   (popper-mode +1)
   (popper-echo-mode +1))
@@ -1979,15 +2008,6 @@ targets."
     (add-to-list 'auto-mode-alist (cons pattern 'sh-mode)))
   :config
   (message "mb: SH MODE"))
-
-
-
-(use-package eshell
-  :defer t
-  :init
-  (setq
-   eshell-directory-name          (expand-file-name "eshell" mb-save-path)
-   eshell-aliases-file            (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
 
 
 
