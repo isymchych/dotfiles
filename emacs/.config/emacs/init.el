@@ -70,14 +70,21 @@
 
 ;; ---------------------------------------- CONFIG
 
-
+;; in GUI change default frame background to dark color
+;; to avoid momentary white bg flashes in dark mode
+(when window-system
+  (set-background-color "#2e3440")
+  (set-foreground-color "white"))
 
 ;; Turn off mouse interface early in startup to avoid momentary display
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 ;; keep menu bar enabled only on mac since it doesn't take vertical space
-(if (and (fboundp 'menu-bar-mode) (not mb-is-mac-os))   (menu-bar-mode   -1))
+(if (and
+     (fboundp 'menu-bar-mode)
+     (not mb-is-mac-os))
+    (menu-bar-mode   -1))
 
 ;; Terminal mouse support
 (unless window-system
@@ -713,11 +720,7 @@ narrowed."
 
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
   (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
-
-  ;; called after evil-collection makes its keybindings
-  (add-hook 'evil-collection-setup-hook
-            (lambda (_mode _keymaps)
-              (evil-define-key 'normal 'dired-mode-map " " 'evil-send-leader))))
+  (define-key dired-mode-map [remap dired-find-file]    'dired-find-alternate-file))
 
 
 
@@ -1049,7 +1052,15 @@ narrowed."
   :diminish evil-collection-unimpaired-mode
   :init
   (setq evil-collection-setup-minibuffer nil)
-  (evil-collection-init))
+
+  :config
+  (evil-collection-init)
+
+  (evil-define-key 'normal dired-mode-map
+    " " 'evil-send-leader
+    "h" 'mb/dired-up-directory
+    "l" 'dired-find-alternate-file))
+
 
 ;; match visual selection with * and #
 (use-package evil-visualstar
@@ -1199,7 +1210,7 @@ narrowed."
 
   (setq
    consult-line-numbers-widen t
-   consult-async-min-input 1
+   consult-async-min-input 2
    consult-async-refresh-delay  0.15
    consult-async-input-throttle 0.2
    consult-async-input-debounce 0.1)
@@ -1880,20 +1891,21 @@ targets."
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
+        lsp-enable-file-watchers nil
+        lsp-auto-execute-action nil
+
         lsp-rust-analyzer-server-display-inlay-hints nil
         ;; lsp-rust-analyzer-cargo-watch-command "clippy"
         lsp-rust-server 'rust-analyzer
         lsp-rust-analyzer-proc-macro-enable t
         lsp-rust-analyzer-cargo-load-out-dirs-from-check t
+        lsp-rust-analyzer-call-info-full t
         lsp-rust-build-on-save t
-        lsp-enable-file-watchers nil
-
-        lsp-auto-execute-action nil
 
         lsp-eldoc-enable-hover t
-        lsp-eldoc-render-all t
-
+        lsp-eldoc-render-all nil
         lsp-signature-render-documentation t
+        lsp-signature-doc-lines 4 ;; render everything
 
         lsp-enable-folding nil
         lsp-enable-imenu t
@@ -1903,15 +1915,14 @@ targets."
         lsp-enable-symbol-highlighting nil
         lsp-enable-text-document-color t
         lsp-enable-xref t
+        lsp-enable-snippet nil
+        lsp-lens-enable nil
 
         lsp-completion-provider :capf
         lsp-completion-show-detail t
         lsp-completion-show-kind t
-        lsp-enable-snippet nil
 
         lsp-modeline-code-actions-segments '(count name)
-
-        lsp-lens-enable nil
 
         lsp-headerline-breadcrumb-enable t
         lsp-headerline-breadcrumb-segments '(symbols))

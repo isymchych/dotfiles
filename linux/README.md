@@ -208,3 +208,6 @@ $ chmod 600 ~/.ssh/key
 * create swapfile
 * add `resume` and `resume_offset` kernel parameters
 * add `resume` hook into `/etc/mkinitcpio.conf` and run `# mkinitcpio -P`
+
+## Tips
+* configure max login attempts and login block time in `/etc/security/faillock.conf` [more info](https://wiki.archlinux.org/title/security#Lock_out_user_after_three_failed_login_attempts)
