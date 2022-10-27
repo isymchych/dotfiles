@@ -103,6 +103,10 @@
 
 (setq-default
  frame-title-format '(buffer-file-name "%f" ("%b"))
+
+ ;; avoid some initial frame resizing to speed up startup
+ frame-inhibit-implied-resize t
+
  ;; no beep and blinking
  visible-bell       nil
  ring-bell-function 'ignore

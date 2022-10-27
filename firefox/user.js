@@ -55,3 +55,7 @@ user_pref("browser.search.context.loadInBackground", true);
 // strip query params used for tracking
 user_pref("privacy.query_stripping.enabled", true);
 user_pref("privacy.query_stripping.enabled.pbmode", true);
+
+// disable tab history prev/next with left/right swipe
+user_pref("browser.gesture.swipe.left", "");
+user_pref("browser.gesture.swipe.right", "");
