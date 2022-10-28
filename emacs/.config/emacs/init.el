@@ -1060,6 +1060,9 @@ narrowed."
   :config
   (evil-collection-init)
 
+  (evil-define-key 'normal view-mode-map
+    " " 'evil-send-leader)
+
   (evil-define-key 'normal dired-mode-map
     " " 'evil-send-leader
     "h" 'mb/dired-up-directory
