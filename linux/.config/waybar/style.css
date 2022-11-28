@@ -16,6 +16,11 @@ window {
   min-height: 0;
 }
 
+/* FIXME https://github.com/Alexays/Waybar/issues/1741 */
+button, label {
+  all: unset;
+}
+
 window#waybar {
   background-color: #2e3440;
   color: #ffffff;

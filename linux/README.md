@@ -169,7 +169,7 @@ $ chmod 600 ~/.ssh/key
 * zathura, zathura-pdf-mupdf - pdf viewer
 * mpv - video player
 * imv - image viewer
-* youtube-dl - download videos from video hosting services
+* yt-dlp - download videos from video hosting services
 
 * slack
 * skype

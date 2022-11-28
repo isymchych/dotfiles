@@ -194,6 +194,7 @@ assign [class="Steam"] 5
 assign [class="Skype"] 7
 assign [class="TelegramDesktop"] 7
 assign [app_id="telegramdesktop"] 7
+assign [app_id="org.telegram.desktop"] 7
 assign [class="Slack"] 7
 assign [class="discord"] 7
 assign [class="Franz"] 7
@@ -331,7 +332,7 @@ bindsym $mod+Shift+Escape exec makoctl restore
 bindsym --release Print exec mb-screenshot
 
 # file manager
-bindsym --to-code $mod+n exec alacritty -e nnn
+bindsym --to-code $mod+n exec alacritty -t "NNN" -e nnn
 
 # google translate
 bindsym --to-code $mod+t exec alacritty -t "Translate" --class "FLOAT" -e trans -shell
