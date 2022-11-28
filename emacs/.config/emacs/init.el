@@ -852,9 +852,11 @@ narrowed."
 
     :config
     (setq
-     auto-dark--allow-osascript t
-     auto-dark--dark-theme mb-dark-theme
-     auto-dark--light-theme mb-light-theme)))
+     auto-dark-allow-osascript t
+     auto-dark-dark-theme mb-dark-theme
+     auto-dark-light-theme mb-light-theme)
+
+    (auto-dark-mode t)))
 
 
 
@@ -1061,6 +1063,9 @@ narrowed."
   (evil-collection-init)
 
   (evil-define-key 'normal view-mode-map
+    " " 'evil-send-leader)
+
+  (evil-define-key 'normal image-mode-map
     " " 'evil-send-leader)
 
   (evil-define-key 'normal dired-mode-map
