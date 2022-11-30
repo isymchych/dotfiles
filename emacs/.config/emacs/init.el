@@ -2002,6 +2002,7 @@ targets."
   :mode
   ("\\.cjs\\'" . js-mode)
   ("\\.js\\'"  . js-mode)
+  ("\\.mjs\\'" . js-mode)
   ("\\.jsx\\'" . js-mode)
   :config
   (setq javascript-indent-level mb-web-indent-size
