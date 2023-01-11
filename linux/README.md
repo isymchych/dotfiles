@@ -209,5 +209,10 @@ $ chmod 600 ~/.ssh/key
 * add `resume` and `resume_offset` kernel parameters
 * add `resume` hook into `/etc/mkinitcpio.conf` and run `# mkinitcpio -P`
 
+## Printing
+* install cups, avahi, nss-mdns
+* edit `/etc/nsswitch.conf` and change the hosts line to include `mdns_minimal [NOTFOUND=return] before resolve and dns`  [source](https://wiki.archlinux.org/title/avahi#Hostname_resolution)
+* disable `systemd-resolved` service due to conflict with avahi
+
 ## Tips
 * configure max login attempts and login block time in `/etc/security/faillock.conf` [more info](https://wiki.archlinux.org/title/security#Lock_out_user_after_three_failed_login_attempts)
