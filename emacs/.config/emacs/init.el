@@ -1218,7 +1218,7 @@ narrowed."
         xref-show-definitions-function #'consult-xref)
 
   :config
-  (consult-customize consult-recent-file :preview-key '([M-k] [M-j]))
+  ;; (consult-customize consult-recent-file :preview-key '([M-k] [M-j]))
 
   (setq
    consult-line-numbers-widen t

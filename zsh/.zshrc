@@ -42,6 +42,7 @@ alias -r g='git'
 alias gp='git push'
 alias gpull='git pull'
 alias tree='tree -hsFC --du --dirsfirst'
+alias -r jsut='just'
 
 
 
