@@ -1218,8 +1218,6 @@ narrowed."
         xref-show-definitions-function #'consult-xref)
 
   :config
-  ;; (consult-customize consult-recent-file :preview-key '([M-k] [M-j]))
-
   (setq
    consult-line-numbers-widen t
    consult-async-min-input 2
@@ -1303,19 +1301,18 @@ narrowed."
                  (`(,re . ,hl) (funcall consult--regexp-compiler
                                         arg 'extended t)))
       (when re
-        (list :command (append
-                        (list consult--fd-command
-                              "--color=never" "--full-path"
-                              (consult--join-regexps re 'extended))
-                        opts)
-              :highlight hl))))
+        (cons (append
+               (list consult--fd-command
+                     "--color=never" "--full-path"
+                     (consult--join-regexps re 'extended))
+               opts)
+              hl))))
 
   (defun consult-fd (&optional dir initial)
     (interactive "P")
     (let* ((prompt-dir (consult--directory-prompt "Fd" dir))
            (default-directory (cdr prompt-dir)))
       (find-file (consult--find (car prompt-dir) #'consult--fd-builder initial))))
-
 
   (defun consult-fd-thing-at-point (&optional dir)
     (interactive)
