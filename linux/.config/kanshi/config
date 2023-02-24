@@ -7,13 +7,14 @@ profile laptopROG {
 profile laptop {
     output eDP-1 enable mode 1920x1080
 }
-profile home2k {
+profile home2k60 {
     output eDP-1 disable
-    output "Unknown AG271QG " enable mode 2560x1440
+    output "AOC AG271QG Unknown" enable mode 2560x1440
+    # exec swaymsg 'output "AOC AG271QG Unknown" enable mode --custom "2560x1440@144Hz"'
 }
 profile home2k144 {
     output eDP-1 disable
-    output "Unknown AG271QG #ASNxuIWF8vrd" enable mode 2560x1440@144
+    output "AOC AG271QG Unknown" enable mode 2560x1440@144
 }
 profile projector {
     output eDP-1 disable

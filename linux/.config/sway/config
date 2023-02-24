@@ -338,9 +338,7 @@ bindsym --to-code $mod+n exec alacritty -t "NNN" -e nnn
 bindsym --to-code $mod+t exec alacritty -t "Translate" --class "FLOAT" -e trans -shell
 
 # clipboard manager
-bindsym --to-code $mod+i exec clipman pick --tool="wofi" --max-items=30 --histpath="~/.local/share/clipman.json" --notify
-bindsym --to-code $mod+Shift+i exec clipman pick --tool="wofi" --max-items=30 --histpath="~/.local/share/clipman-primary.json" --notify
-bindsym --to-code $mod+Alt+i exec clipman clear --all
+bindsym --to-code $mod+i exec cliphist list | wofi -d -p "Select item to copy" | cliphist decode | wl-copy
 
 # editor
 bindsym --to-code $mod+e exec gtk-launch emacs
@@ -366,8 +364,7 @@ exec swayidle -w \
     before-sleep 'mb-lock-screen' \
     lock 'mb-lock-screen'
 
-exec wl-paste -t text --watch clipman store --max-items=30 --histpath="~/.local/share/clipman.json"
-exec wl-paste -p -t text --watch clipman store -P --max-items=30 --histpath="~/.local/share/clipman-primary.json"
+exec wl-paste --watch cliphist store
 
 # Forward bluetooth midi controls via mpris2 so they are picked up by supporting media players
 # exec mpris-proxy
