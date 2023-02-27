@@ -961,10 +961,6 @@ narrowed."
   ;; set leader key in normal & visual state
   (evil-set-leader '(normal visual) (kbd "SPC"))
 
-  (add-hook 'view-mode-hook
-            (lambda()
-              (define-key view-mode-map (kbd "SPC") nil)))
-
   ;; Use escape to quit, and not as a meta-key.
   (define-key evil-normal-state-map           [escape] 'keyboard-quit)
   (define-key evil-visual-state-map           [escape] 'keyboard-quit)
@@ -1062,16 +1058,14 @@ narrowed."
   :config
   (evil-collection-init)
 
-  (evil-define-key 'normal view-mode-map
-    " " 'evil-send-leader)
-
-  (evil-define-key 'normal image-mode-map
-    " " 'evil-send-leader)
-
-  (evil-define-key 'normal dired-mode-map
-    " " 'evil-send-leader
+  (evil-collection-define-key 'normal 'view-mode-map
+    " " 'nil)
+  (evil-collection-define-key 'normal 'image-mode-map
+    " " 'nil)
+  (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'mb/dired-up-directory
-    "l" 'dired-find-alternate-file))
+    "l" 'dired-find-alternate-file
+    " " 'nil))
 
 
 ;; match visual selection with * and #
@@ -2120,6 +2114,7 @@ targets."
   ("\\.vue\\'"        . web-mode)
   ("\\.ts\\'"         . web-mode)
   ("\\.tsx\\'"        . web-mode)
+  ("\\.cts\\'"        . web-mode)
   ("\\.svelte\\'"     . web-mode)
   :init
   (setq web-mode-enable-auto-pairing  nil
@@ -2134,6 +2129,7 @@ targets."
                              (when (or
                                     (string-equal "ts" (file-name-extension buffer-file-name))
                                     (string-equal "tsx" (file-name-extension buffer-file-name))
+                                    (string-equal "cts" (file-name-extension buffer-file-name))
                                     (string-equal "js" (file-name-extension buffer-file-name))
                                     (string-equal "jsx" (file-name-extension buffer-file-name))
                                     (string-equal "svelte" (file-name-extension buffer-file-name)))
