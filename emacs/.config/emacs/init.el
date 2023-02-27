@@ -1279,7 +1279,6 @@ narrowed."
 
     ;; project
     (kbd "<leader>pb") 'consult-project-buffer
-    (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>ps") 'consult-ripgrep
     (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point))
 
@@ -1310,9 +1309,9 @@ narrowed."
 
   (defun consult-fd (&optional dir initial)
     (interactive "P")
-    (let* ((prompt-dir (consult--directory-prompt "Fd" dir))
-           (default-directory (cdr prompt-dir)))
-      (find-file (consult--find (car prompt-dir) #'consult--fd-builder initial))))
+    (pcase-let* ((`(,prompt ,paths ,dir) (consult--directory-prompt "Find" dir))
+                 (default-directory dir))
+      (find-file (consult--find prompt #'consult--fd-builder initial))))
 
   (defun consult-fd-thing-at-point (&optional dir)
     (interactive)
