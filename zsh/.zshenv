@@ -41,3 +41,9 @@ export PATH="$PATH:$HOME/bin"
 
 # color of the suggestion color for the zsh-augosuggest
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=cyan"
+
+# Source local configs
+# (N) at the end of the glob suppresses the error when no matches
+for file in $HOME/.zshenv_*(N); do
+    source "$file"
+done

@@ -207,6 +207,7 @@ assign [class="Thunderbird" instance="Mail"] 8
 assign [app_id="thunderbird"] 8
 
 assign [app_id="transmission-gtk"]  9
+assign [app_id="com.transmissionbt.transmission.*"]  9
 assign [class="Quodlibet"]  9
 
 

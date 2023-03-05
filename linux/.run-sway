@@ -51,6 +51,6 @@ export SSH_AUTH_SOCK="/run/user/$(id -u)/keyring/ssh"
 # export WLR_NO_HARDWARE_CURSORS=1
 # export WLR_DRM_NO_MODIFIERS=1
 # export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/nvidia_icd.json" # NVIDIA vulkan driver
-export WLR_RENDERER=vulkan
+# export WLR_RENDERER=vulkan
 
 exec systemd-cat -t sway sway --unsupported-gpu
