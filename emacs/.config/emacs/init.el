@@ -1201,8 +1201,10 @@ narrowed."
 (use-package consult
   :ensure t
   :init
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
+  (setq
+   consult-preview-key (list :debounce 1 'any)
+   register-preview-delay 0.5
+   register-preview-function #'consult-register-format)
 
   ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
@@ -1214,7 +1216,7 @@ narrowed."
   :config
   (setq
    consult-line-numbers-widen t
-   consult-async-min-input 2
+   consult-async-min-input 3
    consult-async-refresh-delay  0.15
    consult-async-input-throttle 0.2
    consult-async-input-debounce 0.1)
@@ -1439,6 +1441,7 @@ targets."
 
 ;; Company-mode: autocomplete
 (use-package company
+  :disabled t
   :ensure t
   :diminish company-mode
   :config
@@ -1487,11 +1490,45 @@ targets."
 
 
 (use-package company-shell
+  :disabled t
   :after (company sh-script)
   :ensure t
   :config
   (setq company-shell-dont-fetch-meta mb-is-mac-os) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
   (add-to-list 'company-backends 'company-shell))
+
+
+;; Completion-at-point (CAPF)
+(use-package corfu
+  :ensure t
+  :init
+  (setq corfu-cycle t
+        corfu-auto t
+        corfu-auto-delay 0.1
+        corfu-auto-prefix 1
+        )
+  (global-corfu-mode)
+  (corfu-indexed-mode)
+  (corfu-popupinfo-mode)
+
+  (corfu-history-mode 1)
+  (add-to-list 'savehist-additional-variables 'corfu-history)
+
+  ;; https://github.com/minad/corfu#completing-in-the-eshell-or-shell
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (setq-local corfu-auto nil)
+              (corfu-mode)))
+
+  (defun corfu-send-shell (&rest _)
+    "Send completion candidate when inside comint/eshell."
+    (cond
+     ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
+      (eshell-send-input))
+     ((and (derived-mode-p 'comint-mode)  (fboundp 'comint-send-input))
+      (comint-send-input))))
+
+  (advice-add #'corfu-insert :after #'corfu-send-shell))
 
 
 
