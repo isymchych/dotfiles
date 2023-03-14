@@ -842,6 +842,7 @@ narrowed."
   ;; Auto dark mode on macOS
   (use-package auto-dark
     :ensure t
+    :diminish auto-dark-mode
 
     :if mb-is-mac-os
 
@@ -1506,7 +1507,7 @@ targets."
         corfu-auto t
         corfu-auto-delay 0.1
         corfu-auto-prefix 1
-        )
+        corfu-indexed-start 1)
   (global-corfu-mode)
   (corfu-indexed-mode)
   (corfu-popupinfo-mode)
@@ -2011,6 +2012,7 @@ targets."
 
 ;; Python mode
 (use-package python
+  :disabled t
   :interpreter ("python" . python-mode)
   :config
   (setq python-indent-offset mb-tab-size)
@@ -2182,20 +2184,11 @@ targets."
 
 ;; Run code formatters like Prettier
 (use-package apheleia
-  :disabled t ;; buggy, prettier doesn't works
   :ensure t
+  :diminish apheleia-mode
   :init (apheleia-global-mode +1)
   :config
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("yarn" "run" "-s" "prettier" "--stdin-filepath" filepath)))
-
-(use-package prettier
-  :ensure t
-  :defer t
-  :hook ((web-mode . prettier-mode)
-         (css-mode . prettier-mode)
-         (js-mode . prettier-mode))
-  )
+  (add-hook 'apheleia-post-format-hook 'flycheck-buffer))
 
 
 
@@ -2252,6 +2245,7 @@ targets."
 
 ;; Lua mode
 (use-package lua-mode
+  :disabled t
   :ensure t
   :defer t
   :config
@@ -2261,6 +2255,7 @@ targets."
 
 ;; Groovy mode (for Jenkinsfile)
 (use-package groovy-mode
+  :disabled t
   :ensure t
   :defer t
   :config
@@ -2270,6 +2265,7 @@ targets."
 
 ;; Dockerfile mode
 (use-package dockerfile-mode
+  :disabled t
   :ensure t
   :defer t
   :config
@@ -2279,6 +2275,7 @@ targets."
 
 ;; Graphql mode
 (use-package graphql-mode
+  :disabled t
   :ensure t
   :defer t
   :config
