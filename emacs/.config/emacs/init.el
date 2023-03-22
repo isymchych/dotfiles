@@ -2188,7 +2188,9 @@ targets."
   :diminish apheleia-mode
   :init (apheleia-global-mode +1)
   :config
-  (add-hook 'apheleia-post-format-hook 'flycheck-buffer))
+  (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("npx" "prettier" "--stdin-filepath" filepath)))
 
 
 
