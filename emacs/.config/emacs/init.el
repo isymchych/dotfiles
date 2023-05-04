@@ -1244,6 +1244,10 @@ narrowed."
     (interactive)
     (consult-ripgrep dir (thing-at-point 'symbol)))
 
+  (defun consult-ripgrep-in-current-dir ()
+    (interactive)
+    (consult-ripgrep default-directory))
+
   (global-set-key (kbd "M-X") 'consult-mode-command)
 
   ;; remap existing commands
@@ -1273,6 +1277,8 @@ narrowed."
     (kbd "<leader>lo") 'consult-outline
     (kbd "<leader>bb") 'consult-buffer
     (kbd "<leader>SPC") 'consult-buffer
+
+    (kbd "<leader>Ds") 'consult-ripgrep-in-current-dir
 
     ;; project
     (kbd "<leader>pb") 'consult-project-buffer
