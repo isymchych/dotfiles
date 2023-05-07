@@ -15,7 +15,7 @@ font:
     family: Iosevka Term Medium
     style: Bold Italic
 
-  size: 18
+  size: 20
 
 # need this so that solarized ls looks good
 draw_bold_text_with_bright_colors: false

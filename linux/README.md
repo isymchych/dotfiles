@@ -127,11 +127,10 @@ $ chmod 600 ~/.ssh/key
 * nordic - dark GTK3 theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme
 * papirus-icon-theme - icon theme
-* xcursor-simpleandsoft - cursor theme
 * ttf-jetbrains-mono - JetBrains Mono font
 * ttf-droid - Droid font
 * ttf-fira-mono - Fira Mono font
-* noto-fonts, noto-fonts-emoji, noto-fonts-extra, noto-fonts-cjk - Noto fonts
+* noto-fonts, noto-fonts-emoji - Noto fonts (and maybe noto-fonts-cjk)
 * ttc-iosevka - Iosevka Term mono font
 
 * if bluetooth

@@ -6,5 +6,5 @@ Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 
-Xcursor.theme: Simple-and-Soft
+Xcursor.theme: Adwaita
 Xcursor.size: 32

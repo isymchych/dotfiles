@@ -2196,7 +2196,10 @@ targets."
   :config
   (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
   (setf (alist-get 'prettier apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath)))
+        '("npx" "prettier" "--stdin-filepath" filepath))
+  (setf (alist-get 'prettier-json apheleia-formatters)
+        '("npx" "prettier" "--stdin-filepath" filepath "--parser=json"))
+  )
 
 
 
