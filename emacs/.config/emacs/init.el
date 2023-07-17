@@ -1535,7 +1535,18 @@ targets."
      ((and (derived-mode-p 'comint-mode)  (fboundp 'comint-send-input))
       (comint-send-input))))
 
-  (advice-add #'corfu-insert :after #'corfu-send-shell))
+  (advice-add #'corfu-insert :after #'corfu-send-shell)
+
+  (mapc #'evil-declare-ignore-repeat
+        '(corfu-next
+          corfu-previous
+          corfu-first
+          corfu-last))
+
+  (mapc #'evil-declare-change-repeat
+        '(corfu-insert
+          corfu-insert-exact
+          corfu-complete)))
 
 
 
@@ -1962,7 +1973,8 @@ targets."
         lsp-enable-snippet nil
         lsp-lens-enable nil
 
-        lsp-completion-provider :capf
+        lsp-completion-default-behaviour :insert
+        lsp-completion-provider :none ;; use Corfu
         lsp-completion-show-detail t
         lsp-completion-show-kind t
 
@@ -1984,6 +1996,10 @@ targets."
                     (replace-match "" nil t)))
                 (apply oldfn args)))
 
+  (defun mb/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless)))
+  (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion)
 
   (evil-define-key 'normal 'lsp-mode-map
     (kbd "<leader>la") 'lsp-execute-code-action
