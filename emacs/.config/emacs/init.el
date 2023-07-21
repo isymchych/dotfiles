@@ -1448,7 +1448,6 @@ targets."
 
 ;; Company-mode: autocomplete
 (use-package company
-  :disabled t
   :ensure t
   :diminish company-mode
   :config
@@ -1507,6 +1506,7 @@ targets."
 
 ;; Completion-at-point (CAPF)
 (use-package corfu
+  :disabled t
   :ensure t
   :init
   (setq corfu-cycle t
@@ -1974,7 +1974,8 @@ targets."
         lsp-lens-enable nil
 
         lsp-completion-default-behaviour :insert
-        lsp-completion-provider :none ;; use Corfu
+        lsp-completion-provider :capf
+        ;; lsp-completion-provider :none ;; use Corfu
         lsp-completion-show-detail t
         lsp-completion-show-kind t
 
