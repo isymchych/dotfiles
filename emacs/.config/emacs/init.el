@@ -869,6 +869,16 @@ narrowed."
 
 
 
+;; sync emacs input mode with OS keyboard layout
+(use-package reverse-im
+  :ensure t
+  :custom
+  (reverse-im-input-methods '("ukrainian-computer"))
+  :config
+  (reverse-im-mode t))
+
+
+
 ;; Improved undo/redo system (used by evil)
 (use-package undo-fu
   :ensure t
