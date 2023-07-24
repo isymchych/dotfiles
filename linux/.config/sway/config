@@ -13,7 +13,8 @@ set  $c_urgent      #cb4b16
 
 # Input configuration, for all options see `man xkeyboard-config`
 input type:keyboard {
-    xkb_layout us,ua(winkeys)
+    xkb_layout us,ua
+    xkb_variant winkeys
     xkb_options grp:win_space_toggle,grp_led:caps,caps:escape
 
     # chars per second
@@ -267,6 +268,7 @@ for_window [class="^dota_linux"]  floating enable
 for_window [app_id="nm-connection-editor"]  floating enable
 for_window [class="^Gtk-recordMyDesktop"] floating enable
 # for_window [class="^Termite"]     floating enable
+for_window [app_id="com.github.wwmm.easyeffects"]  border pixel $border
 
 for_window [class="^Gnome-calculator"] floating enable border pixel $border
 for_window [class="^Gcr-prompter"]     floating enable
@@ -372,7 +374,7 @@ exec wl-paste --watch cliphist store
 
 exec nm-applet --indicator
 exec blueman-applet
-exec safeeyes -d
+# exec safeeyes -d
 exec udiskie --appindicator
 
 # https://github.com/swaywm/sway/wiki#gtk-applications-take-20-seconds-to-start
