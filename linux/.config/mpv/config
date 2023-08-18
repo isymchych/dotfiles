@@ -8,6 +8,8 @@ ao=pulse
 af=acompressor
 audio-normalize-downmix=yes
 
+alang=ukr
+
 #no-sub-auto
 #no-sub-ass
 no-sub

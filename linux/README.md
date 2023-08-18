@@ -166,7 +166,7 @@ $ chmod 600 ~/.ssh/key
 * gparted
 * wdisplays-git - display configuration GUI
 * zathura, zathura-pdf-mupdf - pdf viewer
-* mpv - video player
+* mpv, mpv-mpris - video player
 * imv - image viewer
 * yt-dlp - download videos from video hosting services
 
