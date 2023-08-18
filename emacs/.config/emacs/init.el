@@ -736,6 +736,28 @@ narrowed."
         eshell-aliases-file   (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
 
 
+;; Flymake
+(use-package flymake
+  :defer t
+  :init
+  ;; as flymakes fail silently there is no need to activate it on a per major mode basis
+  (add-hook 'prog-mode-hook #'flymake-mode)
+  (add-hook 'text-mode-hook #'flymake-mode)
+  :config
+  (setq flymake-fringe-indicator-position 'right-fringe)
+
+  (evil-add-command-properties #'flymake-goto-next-error :jump t)
+  (evil-add-command-properties #'flymake-goto-prev-error :jump t)
+
+  (evil-define-key 'normal 'global
+    (kbd "M-e j") 'flymake-goto-next-error
+    (kbd "M-e M-j") 'flymake-goto-next-error
+    (kbd "M-e k") 'flymake-goto-prev-error
+    (kbd "M-e l") 'flymake-show-project-diagnostics
+    (kbd "M-e M-k") 'flymake-goto-prev-error
+    (kbd "M-e b") 'flymake-start))
+
+
 
 ;; ---------------------------------------- 3rd PARTY PACKAGES
 
@@ -750,21 +772,22 @@ narrowed."
 
 
 ;; Fix PATH on Mac
-(use-package exec-path-from-shell
-  :ensure t
+;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
+;; (use-package exec-path-from-shell
+;;   :ensure t
 
-  :if mb-is-mac-os
+;;   :if mb-is-mac-os
 
-  :config
-  (exec-path-from-shell-initialize)
-  ;; Use GNU ls as `gls' from `coreutils' if available.  Add `(setq
-  ;; dired-use-ls-dired nil)' to your config to suppress the Dired warning when
-  ;; not using GNU ls.  We must look for `gls' after `exec-path-from-shell' was
-  ;; initialized to make sure that `gls' is in `exec-path'
-  (let ((gls (executable-find "gls")))
-    (when gls
-      (setq insert-directory-program gls
-            dired-listing-switches "-aBhl --group-directories-first"))))
+;;   :config
+;;   (exec-path-from-shell-initialize)
+;;   ;; Use GNU ls as `gls' from `coreutils' if available.  Add `(setq
+;;   ;; dired-use-ls-dired nil)' to your config to suppress the Dired warning when
+;;   ;; not using GNU ls.  We must look for `gls' after `exec-path-from-shell' was
+;;   ;; initialized to make sure that `gls' is in `exec-path'
+;;   (let ((gls (executable-find "gls")))
+;;     (when gls
+;;       (setq insert-directory-program gls
+;;             dired-listing-switches "-aBhl --group-directories-first"))))
 
 
 
@@ -1283,6 +1306,7 @@ narrowed."
     (kbd "<leader>r") 'consult-recent-file
     (kbd "<leader>y") 'consult-yank-from-kill-ring
     (kbd "<leader>li") 'consult-imenu
+    (kbd "<leader>le") 'consult-flymake
     (kbd "<leader>ll") 'consult-line
     (kbd "<leader>lo") 'consult-outline
     (kbd "<leader>bb") 'consult-buffer
@@ -1333,14 +1357,6 @@ narrowed."
   (evil-define-key 'normal 'global
     (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>pF") 'consult-fd-thing-at-point))
-
-
-;; Jump to Flycheck error
-(use-package consult-flycheck
-  :ensure t
-  :after (consult flycheck)
-  :config
-  (evil-define-key 'normal 'global (kbd "<leader>le") #'consult-flycheck))
 
 
 
@@ -1434,7 +1450,6 @@ targets."
      "\\*Apropos\\*"
      "Output\\*$"
      "\\*Async Shell Command\\*"
-     "\\*Flycheck"
      "\\*rustfmt\\*"
      "\\magit: "
      help-mode
@@ -1689,77 +1704,6 @@ targets."
 
 
 
-;; Flycheck: error checking on the fly
-(use-package flycheck
-  :ensure t
-  :diminish flycheck-mode
-  :init
-  (global-flycheck-mode)
-
-  :config
-  (setq
-   flycheck-check-syntax-automatically '(mode-enabled save)
-
-   ;; Display errors a little quicker (default is 0.9s)
-   flycheck-display-errors-delay 0.25
-
-   flycheck-temp-prefix "FLYCHECK_XXY")
-
-  (evil-define-key 'normal 'global
-    (kbd "M-e 1") 'flycheck-first-error
-    (kbd "M-e j") 'flycheck-next-error
-    (kbd "M-e M-j") 'flycheck-next-error
-    (kbd "M-e k") 'flycheck-previous-error
-    (kbd "M-e M-k") 'flycheck-previous-error
-    (kbd "M-e l") 'mb/toggle-flyckeck-errors-list
-    (kbd "M-e b") 'flycheck-buffer)
-
-  (if (display-graphic-p)
-      (setq flycheck-indication-mode 'right-fringe)
-    (progn
-      (setq flycheck-indication-mode 'right-margin)))
-
-  (evil-add-command-properties #'flycheck-first-error :jump t)
-  (evil-add-command-properties #'flycheck-next-error :jump t)
-  (evil-add-command-properties #'flycheck-previous-error :jump t)
-
-  ;; from Spacemacs
-  (defun mb/toggle-flyckeck-errors-list ()
-    "Toggle flycheck's error list window."
-    (interactive)
-    (-if-let (window (flycheck-get-error-list-window))
-        (quit-window nil window)
-      (flycheck-list-errors)))
-
-
-  ;; https://github.com/flycheck/flycheck/issues/1428#issuecomment-591320954
-  (defun flycheck-node_modules-executable-find (executable)
-    (or
-     (let* ((base (locate-dominating-file buffer-file-name "node_modules"))
-            (cmd  (if base (expand-file-name (concat "node_modules/.bin/" executable)  base))))
-       (if (and cmd (file-exists-p cmd))
-           cmd))
-     (flycheck-default-executable-find executable)))
-
-  (defun my-node_modules-flycheck-hook ()
-    (setq-local flycheck-executable-find #'flycheck-node_modules-executable-find))
-
-  (add-hook 'js2-mode-hook 'my-node_modules-flycheck-hook)
-  (add-hook 'js-mode-hook 'my-node_modules-flycheck-hook)
-  (add-hook 'web-mode-hook 'my-node_modules-flycheck-hook)
-  )
-
-
-;; Display flycheck errors in a popup
-(use-package flycheck-popup-tip
-  :ensure t
-  :custom-face (popup-tip-face ((t (:background "yellow" :foreground "black"))))
-  :init
-  (setq popup-tip-max-width 100)
-  (add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
-
-
-
 ;; Expand-region: expand selection like C-w in intellij idea
 (use-package expand-region
   :ensure t
@@ -1959,6 +1903,9 @@ targets."
         lsp-enable-file-watchers nil
         lsp-auto-execute-action nil
 
+        lsp-diagnostics-provider :flymake
+        lsp-diagnostic-clean-after-change nil
+
         lsp-rust-analyzer-server-display-inlay-hints nil
         ;; lsp-rust-analyzer-cargo-watch-command "clippy"
         lsp-rust-server 'rust-analyzer
@@ -2017,6 +1964,24 @@ targets."
     (kbd "<leader>lg") 'lsp-find-definition
     (kbd "<leader>lf") 'lsp-find-references
     (kbd "<leader>lr") 'lsp-rename))
+
+
+
+;; Flymake eslint integration
+(use-package flymake-eslint
+  :ensure t
+  :config
+  (defun mb/flymake-eslint-enable ()
+    "Enable flymake-eslint in current buffer."
+    (interactive)
+    (push
+     (file-name-concat
+      (locate-dominating-file
+       (buffer-file-name)
+       "package.json")
+      "node_modules" ".bin")
+     exec-path)
+    (flymake-eslint-enable)))
 
 
 
@@ -2088,7 +2053,7 @@ targets."
   (add-hook 'js-mode-hook (lambda ()
                             (when (not (eq major-mode 'json-mode))
                               (lsp)
-                              (flycheck-add-next-checker 'lsp '(warning . javascript-eslint) 'append))
+                              (mb/flymake-eslint-enable))
                             ))
 
 
@@ -2158,7 +2123,9 @@ targets."
 (use-package json-mode
   :ensure t
   :defer t
+  :after flymake-eslint
   :config
+  (add-hook 'json-mode-hook #'mb/flymake-eslint-enable)
   (message "mb: JSON MODE"))
 
 
@@ -2206,10 +2173,10 @@ targets."
                                     (string-equal "jsx" (file-name-extension buffer-file-name))
                                     (string-equal "svelte" (file-name-extension buffer-file-name)))
 
-                               (flycheck-add-mode 'javascript-eslint 'web-mode)
 
                                (lsp)
-                               (flycheck-add-next-checker 'lsp '(warning . javascript-eslint) 'append))))
+                               (mb/flymake-eslint-enable)
+                               )))
 
   (message "mb: WEB MODE"))
 
@@ -2221,12 +2188,10 @@ targets."
   :diminish apheleia-mode
   :init (apheleia-global-mode +1)
   :config
-  (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
   (setf (alist-get 'prettier apheleia-formatters)
         '("npx" "prettier" "--stdin-filepath" filepath))
   (setf (alist-get 'prettier-json apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath "--parser=json"))
-  )
+        '("npx" "prettier" "--stdin-filepath" filepath "--parser=json")))
 
 
 
@@ -2317,7 +2282,7 @@ targets."
   :ensure t
   :defer t
   :config
-  (flycheck-add-mode 'javascript-eslint 'graphql-mode)
+  (add-hook 'graphql-mode-hook #'mb/flymake-eslint-enable)
   (message "mb: GRAPHQL MODE"))
 
 
