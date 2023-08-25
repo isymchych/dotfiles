@@ -929,6 +929,13 @@ narrowed."
   (global-undo-fu-session-mode))
 
 
+;; manage comments
+(use-package comment-dwim-2
+  :after evil
+  :ensure t
+  :config
+  (global-set-key [remap comment-line] 'comment-dwim-2))
+
 
 ;; Evil: vim mode
 (use-package evil
@@ -1052,6 +1059,8 @@ narrowed."
   (define-key evil-visual-state-map (kbd ">") 'mb/evil-shift-right-visual)
   (define-key evil-visual-state-map (kbd "<") 'mb/evil-shift-left-visual)
 
+  (define-key evil-normal-state-map "gc" 'comment-dwim-2)
+
   ;; NOTE: m is reserved for mode-local bindings
   (evil-define-key 'normal 'global
     (kbd "<leader>2")   'call-last-kbd-macro
@@ -1137,15 +1146,6 @@ narrowed."
   :ensure t
   :init
   (setq exato-key "a"))
-
-;; manage comments
-(use-package evil-commentary
-  :after evil
-  :ensure t
-  :diminish evil-commentary-mode
-  :config
-  (evil-commentary-mode)
-  (define-key evil-commentary-mode-map (kbd "M-;") 'evil-commentary-line))
 
 ;; align text into columns - gl<space> or gL<space>
 (use-package evil-lion
