@@ -21,7 +21,7 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-(defvar mb-font "iosevka term medium-12")
+(defvar mb-font "iosevka term medium-15")
 
 (defvar mb-tab-size        4)
 (defvar mb-web-indent-size 2)
@@ -168,6 +168,9 @@
 (setq enable-local-eval t)
 ;; do not ask if I want to set variables from dir-locals
 (setq enable-local-variables :all)
+
+;; disable only critical messages
+(setq warning-minimum-level :emergency)
 
 ;; make urls in comments/strings clickable
 (add-hook 'find-file-hook 'goto-address-prog-mode)
@@ -739,6 +742,7 @@ narrowed."
 ;; Flymake
 (use-package flymake
   :defer t
+  :after (evil)
   :init
   ;; as flymakes fail silently there is no need to activate it on a per major mode basis
   (add-hook 'prog-mode-hook #'flymake-mode)
@@ -1101,8 +1105,11 @@ narrowed."
   :config
   (evil-collection-init)
 
-  (evil-collection-define-key 'normal 'view-mode-map
-    " " 'nil)
+  (add-hook 'view-mode-hook
+            (lambda ()
+              (evil-collection-define-key 'normal 'view-mode-map
+                " " 'nil)))
+
   (evil-collection-define-key 'normal 'image-mode-map
     " " 'nil)
   (evil-collection-define-key 'normal 'dired-mode-map

@@ -176,7 +176,7 @@ $ chmod 600 ~/.ssh/key
 
 
 ## Dev tools
-* emacs, aspell, aspell-en
+* emacs-wayland, aspell, aspell-en
 * ripgrep - search in files
 * jq - filter json
 * fd - better "find"
