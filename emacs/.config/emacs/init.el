@@ -1503,7 +1503,7 @@ targets."
    company-dabbrev-downcase          nil
 
    company-require-match             nil
-   company-show-numbers              t
+   company-show-numbers             'left
    company-transformers             '(delete-dups)
 
    company-backends '((company-files
