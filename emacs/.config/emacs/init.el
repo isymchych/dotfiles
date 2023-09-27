@@ -1223,8 +1223,16 @@ narrowed."
 (use-package orderless
   :ensure t
   :init
+  (defun without-if-bang (pattern _index _total)
+    (cond
+     ((equal "!" pattern)
+      '(orderless-literal . ""))
+     ((string-prefix-p "!" pattern)
+      `(orderless-without-literal . ,(substring pattern 1)))))
+
   (setq completion-styles '(basic orderless)
         orderless-matching-styles '(orderless-literal)
+        orderless-style-dispatchers '(without-if-bang)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion)))))
 
@@ -1495,7 +1503,7 @@ targets."
    company-dabbrev-downcase          nil
 
    company-require-match             nil
-   company-show-quick-access         t
+   company-show-numbers              t
    company-transformers             '(delete-dups)
 
    company-backends '((company-files
