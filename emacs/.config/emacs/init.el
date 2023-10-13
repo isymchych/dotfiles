@@ -1620,6 +1620,7 @@ targets."
   (global-set-key (kbd "M-y n") 'yas-new-snippet))
 
 (use-package consult-yasnippet
+  :after (yasnippet)
   :ensure t
   :config
   (global-set-key (kbd "M-y i") 'consult-yasnippet)
@@ -1627,9 +1628,7 @@ targets."
 
 (use-package yasnippet-snippets
   :after (yasnippet)
-  :ensure t
-  :config
-  (yasnippet-snippets-initialize))
+  :ensure t)
 
 
 
