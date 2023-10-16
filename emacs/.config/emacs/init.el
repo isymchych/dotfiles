@@ -1223,8 +1223,16 @@ narrowed."
 (use-package orderless
   :ensure t
   :init
+  (defun without-if-bang (pattern _index _total)
+    (cond
+     ((equal "!" pattern)
+      '(orderless-literal . ""))
+     ((string-prefix-p "!" pattern)
+      `(orderless-without-literal . ,(substring pattern 1)))))
+
   (setq completion-styles '(basic orderless)
         orderless-matching-styles '(orderless-literal)
+        orderless-style-dispatchers '(without-if-bang)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion)))))
 
@@ -1495,7 +1503,7 @@ targets."
    company-dabbrev-downcase          nil
 
    company-require-match             nil
-   company-show-quick-access         t
+   company-show-numbers             'left
    company-transformers             '(delete-dups)
 
    company-backends '((company-files
@@ -1587,12 +1595,10 @@ targets."
   :ensure t
   :diminish yas-minor-mode
   :config
+  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" mb-dotfiles-dir) t)
   (setq
-   yas-snippet-dirs (list (expand-file-name "snippets" mb-dotfiles-dir))
    yas-verbosity          2
    yas-wrap-around-region t)
-
-  (yas-global-mode)
 
   ;; expand snippets with hippie expand
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
@@ -1612,6 +1618,7 @@ targets."
   (global-set-key (kbd "M-y n") 'yas-new-snippet))
 
 (use-package consult-yasnippet
+  :after (yasnippet)
   :ensure t
   :config
   (global-set-key (kbd "M-y i") 'consult-yasnippet)
@@ -1621,7 +1628,8 @@ targets."
   :after (yasnippet)
   :ensure t
   :config
-  (yasnippet-snippets-initialize))
+  (yasnippet-snippets-initialize)
+  (yas-global-mode))
 
 
 
