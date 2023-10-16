@@ -1595,12 +1595,10 @@ targets."
   :ensure t
   :diminish yas-minor-mode
   :config
+  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" mb-dotfiles-dir) t)
   (setq
-   yas-snippet-dirs (list (expand-file-name "snippets" mb-dotfiles-dir))
    yas-verbosity          2
    yas-wrap-around-region t)
-
-  (yas-global-mode)
 
   ;; expand snippets with hippie expand
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
@@ -1628,7 +1626,10 @@ targets."
 
 (use-package yasnippet-snippets
   :after (yasnippet)
-  :ensure t)
+  :ensure t
+  :config
+  (yasnippet-snippets-initialize)
+  (yas-global-mode))
 
 
 
