@@ -1838,6 +1838,11 @@ targets."
 
   (message "mb: initialized MAGIT"))
 
+;; Magit-delta: use delta for displaying diffs in magit
+(use-package magit-delta
+  :ensure t
+  :hook (magit-mode . magit-delta-mode))
+
 
 
 ;; Git-modes: modes for .gitattributes, .gitconfig and .gitignore
