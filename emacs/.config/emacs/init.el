@@ -1975,8 +1975,8 @@ targets."
   (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion)
 
   (evil-define-key 'normal 'lsp-mode-map
+    (kbd "gd") 'lsp-find-definition
     (kbd "<leader>la") 'lsp-execute-code-action
-    (kbd "<leader>lg") 'lsp-find-definition
     (kbd "<leader>lf") 'lsp-find-references
     (kbd "<leader>lr") 'lsp-rename))
 

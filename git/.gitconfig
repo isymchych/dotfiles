@@ -4,7 +4,7 @@
 [core]
 	autocrlf = input
 	editor = vim
-	pager = less -r
+	pager = delta
 	excludesfile = ~/.gitignore_global
 
 [color]
@@ -58,6 +58,7 @@
 	features = decorations
 	side-by-side = false
 	syntax-theme = Solarized (light)
+	navigate = true    # use n and N to move between diff sections
 
 [delta "interactive"]
 	keep-plus-minus-markers = false
