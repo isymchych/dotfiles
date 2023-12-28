@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sed -i 's/colors: \*.*/colors: \*solarized-light/' ~/.config/alacritty/alacritty.yml
+sed -i 's/solarized_dark/solarized_light/' ~/.config/alacritty/alacritty.toml
