@@ -250,6 +250,7 @@ for_window [app_id="thunderbird"] border pixel $border
 
 for_window [class="^jetbrains-idea"]     border pixel $border
 for_window [class="^jetbrains-webstorm"] border pixel $border
+for_window [class="^jetbrains-studio"]   border pixel $border
 
 for_window [app_id="liferea"]   border pixel $border
 for_window [app_id="gsimplecal"] border pixel $border
@@ -353,7 +354,7 @@ bindsym --to-code $mod+Shift+e exec rofimoji
 # AUTOSTART
 
 exec_always wmname Sawfish
-exec_always xrdb -merge ~/.Xresources
+exec_always xrdb -load ~/.Xdefaults
 exec_always ~/.config/sway/kanshi.sh
 exec_always ~/.config/sway/wlsunset.sh
 
@@ -381,6 +382,8 @@ exec udiskie --appindicator
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
 exec hash dbus-update-activation-environment 2>/dev/null && \
      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec systemctl --user start mako.service # it depends on WAYLAND_DISPLAY
+exec asusctl profile -P Quiet
 
 
 exec_always {

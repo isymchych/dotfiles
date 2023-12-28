@@ -87,7 +87,7 @@ $ chmod 600 ~/.ssh/key
 * kanshi - automatically switch display configurations
 * wl-clipboard - cli tools for interacting with clipboard
 * cliphist - clipboard manager
-* mako - notification daemon
+* mako - notification daemon; enable and start mako service
 * darkman - enable dark mode on sunset
 * wev - monitor keypresses, like xev
 * wtype - xdotool type for wayland

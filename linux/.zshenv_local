@@ -1,1 +1,2 @@
 export NNN_BMS="m:/run/media/$USER;s:/mnt/shares"
+export ARHIV_ROOT=~/arhiv
