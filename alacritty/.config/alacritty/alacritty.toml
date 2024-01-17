@@ -38,10 +38,3 @@ mods = "Alt"
 # need this so that solarized ls looks good
 draw_bold_text_with_bright_colors = false
 
-
-# spawn new instance in the same dir on Alt-Enter
-[[keyboard.bindings]]
-action = "SpawnNewInstance"
-key = "Return"
-mods = "Alt"
-
