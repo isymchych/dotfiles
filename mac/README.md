@@ -13,7 +13,7 @@
 * stow vim, zsh, emacs, git, mac, tools, kdiff
 * Use zsh as a shell `chsh -s /bin/zsh`
 * CLI tools
-    brew install aspell editorconfig fd gitui htop jq just nnn fnm ripgrep tokei wget
+    brew install aspell editorconfig fd gitui htop jq just yazi fnm ripgrep tokei wget
 * kdiff3 - diff tool
     brew install --cask kdiff3
 * Install Owly - prevent Mac from sleeping in 15 minutes

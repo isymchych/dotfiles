@@ -336,7 +336,7 @@ bindsym $mod+Shift+Escape exec makoctl restore
 bindsym --release Print exec mb-screenshot
 
 # file manager
-bindsym --to-code $mod+n exec alacritty -t "NNN" -e nnn
+bindsym --to-code $mod+n exec alacritty -t "Yazi" -e yazi
 
 # google translate
 bindsym --to-code $mod+t exec alacritty -t "Translate" --class "FLOAT" -e trans -shell

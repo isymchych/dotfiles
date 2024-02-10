@@ -1,5 +1,5 @@
 # CLI tools
-* `nnn` - file manager
+* `yazi` - file manager
 * `ripgrep` - search in files
 * `fd` - find files
 * `tokei` - count lines of code

@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=nnn
+Name=yazi
 Comment=Terminal file manager
-Exec=alacritty -e nnn
-Icon=nnn
+Exec=alacritty -e yazi
+Icon=yazi
 MimeType=inode/directory
 Categories=System;FileTools;FileManager;ConsoleOnly
 Keywords=File;Manager;Management;Explorer;Launcher

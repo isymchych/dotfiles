@@ -117,7 +117,7 @@ $ chmod 600 ~/.ssh/key
 * slurp - select the part of the screen
 * wf-recorder - record the screen
 * swappy - simple drawing on top of images
-* nnn - file manager, stow nnn
+* yazi - file manager
 * translate-shell - Google Translate
 * mate-calc - calculator
 * easyeffects - enable "auto gain" plugin, for volume normalisation
