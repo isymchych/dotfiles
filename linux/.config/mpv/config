@@ -18,3 +18,7 @@ audio-file-auto=fuzzy
 
 # use wayland
 gpu-context=wayland
+
+
+# open UI window even from terminal
+force-window=yes

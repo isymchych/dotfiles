@@ -1,0 +1,40 @@
+import = [
+    "~/.config/alacritty/solarized_light.toml"
+]
+
+[env]
+TERM = "xterm-direct"
+
+[font]
+size = 20
+
+[font.bold]
+family = "Iosevka Term Medium"
+style = "Bold"
+
+[font.bold_italic]
+family = "Iosevka Term Medium"
+style = "Bold Italic"
+
+[font.italic]
+family = "Iosevka Term Medium"
+style = "Oblique"
+
+[font.normal]
+family = "Iosevka Term Medium"
+style = "Regular"
+
+[window.padding]
+x = 5
+y = 3
+
+# spawn new instance in the same dir on Alt-Enter
+[[keyboard.bindings]]
+action = "SpawnNewInstance"
+key = "Return"
+mods = "Alt"
+
+[colors]
+# need this so that solarized ls looks good
+draw_bold_text_with_bright_colors = false
+

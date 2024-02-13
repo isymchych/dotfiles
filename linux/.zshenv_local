@@ -1,1 +1,4 @@
-export NNN_BMS="m:/run/media/$USER;s:/mnt/shares"
+alias cdmedia="cd /run/media/$USER"
+alias y=yazi
+
+export ARHIV_ROOT=~/arhiv

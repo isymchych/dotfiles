@@ -87,7 +87,7 @@ $ chmod 600 ~/.ssh/key
 * kanshi - automatically switch display configurations
 * wl-clipboard - cli tools for interacting with clipboard
 * cliphist - clipboard manager
-* mako - notification daemon
+* mako - notification daemon; enable and start mako service
 * darkman - enable dark mode on sunset
 * wev - monitor keypresses, like xev
 * wtype - xdotool type for wayland
@@ -117,7 +117,7 @@ $ chmod 600 ~/.ssh/key
 * slurp - select the part of the screen
 * wf-recorder - record the screen
 * swappy - simple drawing on top of images
-* nnn - file manager, stow nnn
+* yazi - file manager
 * translate-shell - Google Translate
 * mate-calc - calculator
 * easyeffects - enable "auto gain" plugin, for volume normalisation
