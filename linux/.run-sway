@@ -45,8 +45,8 @@ export PATH=$PATH:$NPM_BIN:$YARN_BIN:$RUST_BIN
 export TERMINAL=alacritty
 export BROWSER=firefox
 
-# for gnome keyring git/ssh integration
-export SSH_AUTH_SOCK="/run/user/$(id -u)/keyring/ssh"
+# for gcr-ssh-agent
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
 
 # export WLR_NO_HARDWARE_CURSORS=1
 # export WLR_DRM_NO_MODIFIERS=1
