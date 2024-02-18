@@ -40,3 +40,8 @@
 * Map caps lock to escape https://vim.fandom.com/wiki/Map_caps_lock_to_escape_in_macOS
 * Make ctrl-c etc work https://apple.stackexchange.com/a/170671
 * Exclude projects folder from the Spotlight index to prevent high CPU usage
+
+
+# Dev tools
+* brew install yaml-language-server
+* brew install typescript-language-server

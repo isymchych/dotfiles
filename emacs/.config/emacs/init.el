@@ -1110,8 +1110,11 @@ narrowed."
               (evil-collection-define-key 'normal 'view-mode-map
                 " " 'nil)))
 
-  (evil-collection-define-key 'normal 'image-mode-map
-    " " 'nil)
+  (add-hook 'image-mode-hook
+            (lambda ()
+              (evil-collection-define-key 'normal 'image-mode-map
+                " " 'nil)))
+
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'mb/dired-up-directory
     "l" 'dired-find-alternate-file
@@ -1268,7 +1271,8 @@ narrowed."
    consult-async-min-input 3
    consult-async-refresh-delay  0.15
    consult-async-input-throttle 0.2
-   consult-async-input-debounce 0.1)
+   consult-async-input-debounce 0.1
+   consult-narrow-key "C-+")
 
   ;; use consult instead of the standard *Completions* buffer
   (setq completion-in-region-function #'consult-completion-in-region)
@@ -1840,6 +1844,7 @@ targets."
 
 ;; Magit-delta: use delta for displaying diffs in magit
 (use-package magit-delta
+  :disabled t ;; slows down emacs
   :ensure t
   :hook (magit-mode . magit-delta-mode))
 
