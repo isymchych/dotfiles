@@ -1,0 +1,13 @@
+[manager]
+sort_by = "natural"
+sort_dir_first = true
+
+[opener]
+imv = [
+	{ run = 'imv -n "$1" .', desc = "Open image in imv", orphan = true, for = "linux" },
+]
+
+[open]
+rules = [
+	{ mime = "image/*", use = ["imv", "image"] },
+]
