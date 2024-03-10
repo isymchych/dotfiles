@@ -4,7 +4,7 @@ sort_dir_first = true
 
 [opener]
 imv = [
-	{ run = 'imv -n "$1" .', desc = "Open image in imv", orphan = true, for = "linux" },
+	{ run = 'imv-dir "$@"', desc = "Open image in imv-dir", orphan = true, for = "linux" },
 ]
 
 [open]
