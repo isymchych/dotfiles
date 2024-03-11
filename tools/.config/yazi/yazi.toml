@@ -8,6 +8,6 @@ imv = [
 ]
 
 [open]
-rules = [
+prepend_rules = [
 	{ mime = "image/*", use = ["imv", "image"] },
 ]
