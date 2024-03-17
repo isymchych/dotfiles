@@ -143,6 +143,7 @@ $ chmod 600 ~/.ssh/key
 * libsecret
 * xdg-utils
 * imagemagick
+* xdg-desktop-portal-gtk
 * xdg-desktop-portal-wlr - for screensharing
   * enable pipewire user service
   * enable chrome://flags/#enable-webrtc-pipewire-capturer
