@@ -4,6 +4,7 @@
 ;; * Doom Emacs https://github.com/doomemacs/doomemacs
 ;; * Evil guide https://github.com/noctuid/evil-guide
 ;;; Code:
+;; -*- lexical-binding: t; -*-
 
 
 
@@ -47,6 +48,7 @@
              '("melpa" . "https://melpa.org/packages/") t)
 
 (setq package-enable-at-startup nil)
+(setq package-install-upgrade-built-in t)
 
 (package-initialize)
 
@@ -760,7 +762,6 @@ narrowed."
     (kbd "M-e l") 'flymake-show-project-diagnostics
     (kbd "M-e M-k") 'flymake-goto-prev-error
     (kbd "M-e b") 'flymake-start))
-
 
 
 ;; ---------------------------------------- 3rd PARTY PACKAGES
@@ -1760,14 +1761,23 @@ targets."
 
 ;; Highlight-indentation: highlight indentation columns
 (use-package highlight-indentation
+  :disabled t
   :ensure t
   :defer t
   :init
-  (add-hook 'ruby-mode-hook 'highlight-indentation-current-column-mode)
-  (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
+  (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode)
   :config
   (set-face-background 'highlight-indentation-face (face-background 'highlight))
   (set-face-background 'highlight-indentation-current-column-face (face-background 'highlight)))
+
+
+
+;; Indent-guide: highlight indentation
+(use-package indent-guide
+  :diminish indent-guide-mode
+  :ensure t
+  :init
+  (indent-guide-global-mode))
 
 
 
