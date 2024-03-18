@@ -1,10 +1,9 @@
-;;; init.el --- main emacs config file
+;;; init.el --- main emacs config file -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; * Spacemacs https://github.com/syl20bnr/spacemacs
 ;; * Doom Emacs https://github.com/doomemacs/doomemacs
 ;; * Evil guide https://github.com/noctuid/evil-guide
 ;;; Code:
-;; -*- lexical-binding: t; -*-
 
 
 
@@ -1761,23 +1760,15 @@ targets."
 
 ;; Highlight-indentation: highlight indentation columns
 (use-package highlight-indentation
-  :disabled t
   :ensure t
   :defer t
   :init
   (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode)
+  (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
   :config
-  (set-face-background 'highlight-indentation-face (face-background 'highlight))
-  (set-face-background 'highlight-indentation-current-column-face (face-background 'highlight)))
-
-
-
-;; Indent-guide: highlight indentation
-(use-package indent-guide
-  :diminish indent-guide-mode
-  :ensure t
-  :init
-  (indent-guide-global-mode))
+  ;; (set-face-background 'highlight-indentation-face (face-background 'highlight))
+  ;; (set-face-background 'highlight-indentation-current-column-face (face-background 'highlight))
+  )
 
 
 
