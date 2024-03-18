@@ -1762,6 +1762,7 @@ targets."
 (use-package highlight-indentation
   :ensure t
   :defer t
+  :diminish highlight-indentation-current-column-mode
   :init
   (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode)
   (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
