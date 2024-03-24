@@ -1,210 +1,105 @@
 {
-    "workbench.colorTheme": "Monokai",
-    "editor.fontFamily": "'iosevka term medium', 'Droid Sans Mono', 'monospace', monospace",
-    "editor.cursorSurroundingLines": 8,
-    "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
-    "editor.inlayHints.enabled": "offUnlessPressed",
-    "editor.formatOnSave": true,
-    "editor.minimap.enabled": false,
-    "editor.lineNumbers": "off",
-    "codeium.enableSearch": true,
-    "keyboard.dispatch": "keyCode",
-    "vim.leader": " ",
-    "vim.hlsearch": true,
-    "vim.useSystemClipboard": true,
-    "vim.highlightedyank.enable": true,
-    "vim.highlightedyank.color": "#a9dc7660",
-    "vim.highlightedyank.duration": 250,
-    "vim.normalModeKeyBindings": [
-        {
-            "before": [
-                "<leader>",
-                "s"
-            ],
-            "commands": [
-                "workbench.action.files.save",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "r"
-            ],
-            "commands": [
-                "workbench.action.openRecent",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "k"
-            ],
-            "commands": [
-                "workbench.action.closeActiveEditor",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "p",
-                "f"
-            ],
-            "commands": [
-                "workbench.action.quickOpen",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "b",
-                "l"
-            ],
-            "commands": [
-                "workbench.action.files.formatDocument",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "b",
-                "n"
-            ],
-            "commands": [
-                "workbench.action.nextEditor",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "b",
-                "p"
-            ],
-            "commands": [
-                "workbench.action.previousEditor",
-            ],
-            "silent": true
-        },
-        {
-            "before": [
-                "<leader>",
-                "g",
-                "s"
-            ],
-            "commands": [
-                "magit.status"
-            ]
-        },
-        {
-            "before": [
-                "<leader>",
-                "g",
-                "j"
-            ],
-            "commands": [
-                "workbench.action.editor.nextChange"
-            ]
-        },
-        {
-            "before": [
-                "<leader>",
-                "g",
-                "k"
-            ],
-            "commands": [
-                "workbench.action.editor.previousChange"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "p",
-                "d"
-            ],
-            "commands": [
-                "editor.action.peekDefinition"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "h"
-            ],
-            "commands": [
-                "editor.action.showDefinitionPreviewHover"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "i"
-            ],
-            "commands": [
-                "editor.action.goToImplementation"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "p",
-                "i"
-            ],
-            "commands": [
-                "editor.action.peekImplementation"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "q"
-            ],
-            "commands": [
-                "editor.action.quickFix"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "r"
-            ],
-            "commands": [
-                "editor.action.referenceSearch.trigger"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "t"
-            ],
-            "commands": [
-                "editor.action.goToTypeDefinition"
-            ]
-        },
-        {
-            "before": [
-                "g",
-                "p",
-                "t"
-            ],
-            "commands": [
-                "editor.action.peekTypeDefinition"
-            ]
-        },
-        {
-            "before": [
-                "<leader>",
-                "e"
-            ],
-            "commands": [
-                "workbench.view.explorer"
-            ]
-        },
-    ],
-    "problems.showCurrentInStatus": true,
-    "editor.fontSize": 17,
+  "editor.fontFamily": "'iosevka term medium', 'Droid Sans Mono', 'monospace', monospace",
+  "editor.cursorSurroundingLines": 4,
+  "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "editor.formatOnSave": true,
+  "editor.minimap.enabled": false,
+  "editor.lineNumbers": "off",
+  "codeium.enableSearch": true,
+  "keyboard.dispatch": "keyCode",
+  "window.autoDetectColorScheme": true,
+  "vim.leader": " ",
+  "vim.hlsearch": true,
+  "vim.useSystemClipboard": true,
+  "vim.highlightedyank.enable": true,
+  "vim.highlightedyank.color": "#a9dc7660",
+  "vim.highlightedyank.duration": 250,
+  "vim.normalModeKeyBindings": [
+    {
+      "before": ["<leader>", "s"],
+      "commands": ["workbench.action.files.save"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "r"],
+      "commands": ["workbench.action.openRecent"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "k"],
+      "commands": ["workbench.action.closeActiveEditor"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "p", "f"],
+      "commands": ["workbench.action.quickOpen"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "b", "l"],
+      "commands": ["workbench.action.files.formatDocument"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "b", "n"],
+      "commands": ["workbench.action.nextEditor"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "b", "p"],
+      "commands": ["workbench.action.previousEditor"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "g", "s"],
+      "commands": ["magit.status"]
+    },
+    {
+      "before": ["<leader>", "g", "j"],
+      "commands": ["workbench.action.editor.nextChange"]
+    },
+    {
+      "before": ["<leader>", "g", "k"],
+      "commands": ["workbench.action.editor.previousChange"]
+    },
+    {
+      "before": ["g", "p", "d"],
+      "commands": ["editor.action.peekDefinition"]
+    },
+    {
+      "before": ["g", "h"],
+      "commands": ["editor.action.showDefinitionPreviewHover"]
+    },
+    {
+      "before": ["g", "i"],
+      "commands": ["editor.action.goToImplementation"]
+    },
+    {
+      "before": ["g", "p", "i"],
+      "commands": ["editor.action.peekImplementation"]
+    },
+    {
+      "before": ["g", "q"],
+      "commands": ["editor.action.quickFix"]
+    },
+    {
+      "before": ["g", "r"],
+      "commands": ["editor.action.referenceSearch.trigger"]
+    },
+    {
+      "before": ["g", "t"],
+      "commands": ["editor.action.goToTypeDefinition"]
+    },
+    {
+      "before": ["g", "p", "t"],
+      "commands": ["editor.action.peekTypeDefinition"]
+    },
+    {
+      "before": ["<leader>", "e"],
+      "commands": ["workbench.view.explorer"]
+    }
+  ],
+  "problems.showCurrentInStatus": true,
+  "editor.fontSize": 17
 }
