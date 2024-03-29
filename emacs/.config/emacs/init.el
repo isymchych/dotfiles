@@ -1292,14 +1292,6 @@ narrowed."
   ;;  consult-outline support for eshell prompts
   (add-hook 'eshell-mode-hook (lambda () (setq outline-regexp eshell-prompt-regexp)))
 
-  (defun consult-ripgrep-symbol-at-point (&optional dir)
-    (interactive)
-    (consult-ripgrep dir (thing-at-point 'symbol)))
-
-  (defun consult-ripgrep-in-current-dir ()
-    (interactive)
-    (consult-ripgrep default-directory))
-
   (global-set-key (kbd "M-X") 'consult-mode-command)
 
   ;; remap existing commands
@@ -1321,6 +1313,22 @@ narrowed."
 
   (advice-add #'multi-occur :override #'consult-multi-occur)
 
+  (defun consult-ripgrep-symbol-at-point (&optional dir)
+    (interactive)
+    (consult-ripgrep dir (thing-at-point 'symbol)))
+
+  (defun consult-ripgrep-in-current-dir ()
+    (interactive)
+    (consult-ripgrep default-directory))
+
+  (defun consult-fd-thing-at-point (&optional dir)
+    (interactive)
+    (consult-fd dir (thing-at-point 'filename)))
+
+  (defun consult-fd-in-current-dir ()
+    (interactive)
+    (consult-fd default-directory))
+
   (evil-define-key 'normal 'global
     (kbd "<leader>r") 'consult-recent-file
     (kbd "<leader>y") 'consult-yank-from-kill-ring
@@ -1332,48 +1340,12 @@ narrowed."
     (kbd "<leader>SPC") 'consult-buffer
 
     (kbd "<leader>Ds") 'consult-ripgrep-in-current-dir
+    (kbd "<leader>Df") 'consult-fd-in-current-dir
 
     ;; project
     (kbd "<leader>pb") 'consult-project-buffer
     (kbd "<leader>ps") 'consult-ripgrep
-    (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point))
-
-
-
-;; https://github.com/minad/consult/wiki#find-files-using-fd
-(use-package consult-fd
-  :no-require t
-  :after consult
-  :config
-  (defvar consult--fd-command nil)
-  (defun consult--fd-builder (input)
-    (unless consult--fd-command
-      (setq consult--fd-command
-            (if (eq 0 (call-process-shell-command "fdfind"))
-                "fdfind"
-              "fd")))
-    (pcase-let* ((`(,arg . ,opts) (consult--command-split input))
-                 (`(,re . ,hl) (funcall consult--regexp-compiler
-                                        arg 'extended t)))
-      (when re
-        (cons (append
-               (list consult--fd-command
-                     "--color=never" "--full-path"
-                     (consult--join-regexps re 'extended))
-               opts)
-              hl))))
-
-  (defun consult-fd (&optional dir initial)
-    (interactive "P")
-    (pcase-let* ((`(,prompt ,paths ,dir) (consult--directory-prompt "Find" dir))
-                 (default-directory dir))
-      (find-file (consult--find prompt #'consult--fd-builder initial))))
-
-  (defun consult-fd-thing-at-point (&optional dir)
-    (interactive)
-    (consult-fd dir (thing-at-point 'filename)))
-
-  (evil-define-key 'normal 'global
+    (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
     (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>pF") 'consult-fd-thing-at-point))
 
@@ -2227,6 +2199,10 @@ targets."
   :ensure t
   :defer t
   :mode ("\\.scss\\'" . scss-mode)
+  :init
+  ;; fix mode breaking due to missing flymake variables
+  (setq flymake-allowed-file-name-masks nil
+        flymake-err-line-patterns nil)
   :config
   (setq scss-compile-at-save nil)
   (message "mb: SCSS MODE"))
