@@ -24,7 +24,6 @@
 (defvar mb-font "iosevka term medium-15")
 
 (defvar mb-tab-size        4)
-(defvar mb-web-indent-size 2)
 
 ;; load customizations file if it exists
 (load mb-customizations-file t)
@@ -33,7 +32,7 @@
 (load (expand-file-name "local.el" mb-dotfiles-dir) t)
 
 ;; keep packages in emacs-version-specific directories
-(setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
+;; (setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
 
 
 ;; ---------------------------------------- INIT
@@ -51,11 +50,6 @@
 
 (package-initialize)
 
-;; Bootstrap `use-package'
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
 (eval-when-compile
   (require 'use-package))
 
@@ -71,21 +65,11 @@
 
 ;; ---------------------------------------- CONFIG
 
-;; in GUI change default frame background to dark color
-;; to avoid momentary white bg flashes in dark mode
-(when window-system
-  (set-background-color "#2e3440")
-  (set-foreground-color "white"))
-
-;; Turn off mouse interface early in startup to avoid momentary display
-(if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
-(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-
 ;; keep menu bar enabled only on mac since it doesn't take vertical space
 (if (and
      (fboundp 'menu-bar-mode)
-     (not mb-is-mac-os))
-    (menu-bar-mode   -1))
+     mb-is-mac-os)
+    (menu-bar-mode t))
 
 ;; Terminal mouse support
 (unless window-system
@@ -191,21 +175,9 @@
 (put 'narrow-to-region          'disabled nil)
 
 (setq-default
- ;; disable startup screen
- inhibit-startup-screen t
- ;; remove message from scratch
- initial-scratch-message nil
  ;; start scratch in text mode (usefull to get a faster Emacs load time
  ;; because it avoids autoloads of elisp modes)
  initial-major-mode 'text-mode
-
- ;; reduce the frequency of garbage collection by making it happen on
- ;; each 100MB of allocated data (the default is on every 0.76MB)
- gc-cons-threshold 100000000
-
- ;; Increase the amount of data which Emacs reads from the process.
- ;; default is too low 4k considering that the some of the language server responses are in 800k - 3M range.
- read-process-output-max (* 1024 1024) ;; 1mb
 
  ;; prevent creating backup files
  make-backup-files nil
@@ -341,8 +313,7 @@
   "Remove file connected to current buffer and kill buffer."
   (interactive)
   (let ((filename (buffer-file-name))
-        (buffer (current-buffer))
-        (name (buffer-name)))
+        (buffer (current-buffer)))
     (if (not (and filename (file-exists-p filename)))
         (ido-kill-buffer)
       (when (yes-or-no-p "Are you sure you want to remove this file? ")
@@ -1887,6 +1858,28 @@ targets."
 
 
 
+;; Download tree-sitter grammars
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (setq treesit-font-lock-level 4)
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode)
+
+  (add-hook 'tsx-ts-mode-hook #'lsp-deferred)
+  (add-hook 'typescript-ts-mode-hook #'lsp-deferred)
+  (add-hook 'rust-ts-mode-hook #'lsp-deferred)
+  (add-hook 'yaml-ts-mode-hook #'lsp-deferred) ;; https://github.com/redhat-developer/yaml-language-server
+
+  (add-hook 'tsx-ts-mode-hook #'mb/flymake-eslint-enable)
+  (add-hook 'typescript-ts-mode-hook #'mb/flymake-eslint-enable)
+  (add-hook 'json-ts-mode-hook #'mb/flymake-eslint-enable)
+  )
+
+
+
 ;; Language server protocol
 (use-package lsp-mode
   :ensure t
@@ -2036,30 +2029,6 @@ targets."
 
 
 
-;; Javascript
-(use-package js
-  :defines javascript-indent-level js-indent-level js-switch-indent-offset
-  :mode
-  ("\\.cjs\\'" . js-mode)
-  ("\\.js\\'"  . js-mode)
-  ("\\.mjs\\'" . js-mode)
-  ("\\.jsx\\'" . js-mode)
-  :config
-  (setq javascript-indent-level mb-web-indent-size
-        js-switch-indent-offset mb-web-indent-size
-        js-indent-level         mb-web-indent-size)
-
-  (add-hook 'js-mode-hook (lambda ()
-                            (when (not (eq major-mode 'json-mode))
-                              (lsp)
-                              (mb/flymake-eslint-enable))
-                            ))
-
-
-  (message "mb: JS MODE"))
-
-
-
 ;; XML
 (use-package nxml-mode
   :mode ("\\.xml\\'" . nxml-mode)
@@ -2069,16 +2038,6 @@ targets."
   (setq nxml-child-indent  mb-tab-size)
 
   (message "mb: nXML MODE"))
-
-
-
-;; Css
-(use-package css-mode
-  :mode ("\\.css\\'" . css-mode)
-  :config
-  (setq css-indent-offset mb-web-indent-size)
-
-  (message "mb: CSS MODE"))
 
 
 
@@ -2119,68 +2078,6 @@ targets."
 ;; ---------------------------------------- 3rd PARTY LANGUAGES
 
 
-(use-package json-mode
-  :ensure t
-  :defer t
-  :after flymake-eslint
-  :config
-  (add-hook 'json-mode-hook #'mb/flymake-eslint-enable)
-  (message "mb: JSON MODE"))
-
-
-
-;; WebMode
-(use-package web-mode
-  :ensure t
-  :mode
-  ("\\.phtml\\'"      . web-mode)
-  ("\\.tpl\\.php\\'"  . web-mode)
-  ("\\.twig\\'"       . web-mode)
-  ("\\.html\\'"       . web-mode)
-  ("\\.htm\\'"        . web-mode)
-  ("\\.[gj]sp\\'"     . web-mode)
-  ("\\.as[cp]x?\\'"   . web-mode)
-  ("\\.eex\\'"        . web-mode)
-  ("\\.erb\\'"        . web-mode)
-  ("\\.mustache\\'"   . web-mode)
-  ("\\.handlebars\\'" . web-mode)
-  ("\\.hbs\\'"        . web-mode)
-  ("\\.tera\\'"       . web-mode)
-  ("\\.eco\\'"        . web-mode)
-  ("\\.ejs\\'"        . web-mode)
-  ("\\.djhtml\\'"     . web-mode)
-  ("\\.vue\\'"        . web-mode)
-  ("\\.ts\\'"         . web-mode)
-  ("\\.tsx\\'"        . web-mode)
-  ("\\.cts\\'"        . web-mode)
-  ("\\.svelte\\'"     . web-mode)
-  :init
-  (setq web-mode-enable-auto-pairing  nil
-        web-mode-enable-auto-quoting nil
-        web-mode-markup-indent-offset mb-web-indent-size ; html tag in html file
-        web-mode-css-indent-offset    mb-web-indent-size ; css in html file
-        web-mode-code-indent-offset   mb-web-indent-size ; js code in html file
-        )
-
-  :config
-  (add-hook 'web-mode-hook (lambda ()
-                             (when (or
-                                    (string-equal "ts" (file-name-extension buffer-file-name))
-                                    (string-equal "tsx" (file-name-extension buffer-file-name))
-                                    (string-equal "cts" (file-name-extension buffer-file-name))
-                                    (string-equal "js" (file-name-extension buffer-file-name))
-                                    (string-equal "jsx" (file-name-extension buffer-file-name))
-                                    (string-equal "svelte" (file-name-extension buffer-file-name)))
-
-
-                               (lsp)
-                               (mb/flymake-eslint-enable)
-                               )))
-
-  (message "mb: WEB MODE"))
-
-
-
 ;; Run code formatters like Prettier
 (use-package apheleia
   :ensure t
@@ -2206,36 +2103,6 @@ targets."
   :config
   (setq scss-compile-at-save nil)
   (message "mb: SCSS MODE"))
-
-
-
-;; Yaml
-(use-package yaml-mode
-  :ensure t
-  :defer t
-  :hook (yaml-mode . lsp) ;; https://github.com/redhat-developer/yaml-language-server
-  :config (message "mb: YAML MODE"))
-
-
-
-;; Rust
-(use-package rust-mode
-  :ensure t
-  :defer t
-  :mode ("\\.rs$" . rust-mode)
-  :hook (rust-mode . lsp)
-  :config
-  (setq rust-format-on-save t)
-
-  (message "mb: RUST MODE"))
-
-
-
-;; Toml
-(use-package toml-mode
-  :ensure t
-  :defer t
-  :config (message "mb: TOML MODE"))
 
 
 
