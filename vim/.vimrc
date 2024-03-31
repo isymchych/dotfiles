@@ -143,6 +143,7 @@ nnoremap <Leader>b :CtrlPBuffer<CR>
 nnoremap <Leader>d :NERDTreeToggle<CR>
 
 nnoremap <Leader>w :w<CR>
+nnoremap <Leader>q :q<CR>
 nnoremap <Leader>rtw :%s/\s\+$//e<CR> " remove trailing whitespace
 
 nnoremap <Leader>gt :!tig<CR>

@@ -5,10 +5,10 @@ ratio = [2, 4, 2]
 
 [opener]
 imv = [
-	{ run = 'imv-dir "$@"', desc = "Open image in imv-dir", orphan = true, for = "linux" },
+  { run = 'imv-dir "$@"', desc = "Open image in imv-dir", orphan = true, for = "linux" },
 ]
 
 [open]
 prepend_rules = [
-	{ mime = "image/*", use = ["imv", "image"] },
+  { mime = "image/*", use = ["imv", "image"] },
 ]
