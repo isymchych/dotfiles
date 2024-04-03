@@ -37,6 +37,9 @@
 
 ;; ---------------------------------------- INIT
 
+(if (native-comp-available-p)
+    (message "Native compilation enabled!")
+  (warn "Native compilation not enabled!"))
 
 
 (require 'package)
@@ -344,16 +347,6 @@ It wouldn't be associated with the buffer."
     (apply 'mb/launch-application (getenv "TERMINAL") args)))
 
 
-(defun mb/project-base-term (&rest args)
-  "Launches terminal in project root with ARGS."
-  (interactive)
-
-  (if-let ((fboundp 'project-root)
-           (proj (project-current))
-           (default-directory (project-root proj)))
-      (apply 'mb/terminal args)
-    (error "MB: buffer is not in the project")))
-
 (defun mb/eval-and-replace ()
   "Replace the preceding sexp with its value."
   (interactive)
@@ -397,13 +390,6 @@ narrowed."
         (setq beg (region-beginning) end (region-end))
       (setq beg (line-beginning-position) end (line-end-position)))
     (shell-command-on-region beg end column-command (current-buffer) t nil)))
-
-(defun mb/run-command (command)
-  "Save and run COMMAND in current project if defined."
-  (interactive)
-  (when command
-    (save-buffer)
-    (mb/project-base-term "-e" command "--hold")))
 
 (defun mb/display-ansi-colors ()
   "Replace ANSI escape chars with real colors in current buffer."
@@ -488,7 +474,6 @@ narrowed."
 
 (global-set-key [f3]    'mb/toggle-verbose-mode)
 (global-set-key [f4]    'mb/terminal)
-(global-set-key [M-f4]  'mb/project-base-term)
 (global-set-key [f5]    'make-frame)
 (global-set-key [f6]    'mb/revert-buffer)
 (global-set-key [f12]   'menu-bar-mode)
@@ -523,7 +508,48 @@ narrowed."
   :init
   (setq project-list-file (expand-file-name "projects" mb-save-path))
   :config
-  (push '(project-dired "Root directory") project-switch-commands))
+  (push '(project-dired "Root directory") project-switch-commands)
+
+  ;; Improve detection of project root https://andreyor.st/posts/2022-07-16-project-el-enhancements/
+  (defcustom project-root-markers
+    '("Cargo.toml" ".git" "package.json")
+    "Files or directories that indicate the root of a project."
+    :type '(repeat string)
+    :group 'project)
+
+  (defun project-root-p (path)
+    "Check if the current PATH has any of the project root markers."
+    (catch 'found
+      (dolist (marker project-root-markers)
+        (when (file-exists-p (concat path marker))
+          (throw 'found marker)))))
+
+  (defun project-find-root (path)
+    "Search up the PATH for `project-root-markers'."
+    (when-let ((root (locate-dominating-file path #'project-root-p)))
+      (cons 'transient (expand-file-name root))))
+
+  (add-to-list 'project-find-functions #'project-find-root)
+
+  (defun mb/project-base-term (&rest args)
+    "Launches terminal in project root with ARGS."
+    (interactive)
+
+    (if-let ((fboundp 'project-root)
+             (proj (project-current))
+             (default-directory (project-root proj)))
+        (apply 'mb/terminal args)
+      (error "MB: buffer is not in the project")))
+
+
+  (defun mb/run-command (command)
+    "Save and run COMMAND in current project if defined."
+    (interactive)
+    (when command
+      (save-buffer)
+      (mb/project-base-term "-e" command "--hold")))
+
+  (global-set-key [M-f4]  'mb/project-base-term))
 
 
 
@@ -1873,9 +1899,9 @@ targets."
   (add-hook 'rust-ts-mode-hook #'lsp-deferred)
   (add-hook 'yaml-ts-mode-hook #'lsp-deferred) ;; https://github.com/redhat-developer/yaml-language-server
 
-  (add-hook 'tsx-ts-mode-hook #'mb/flymake-eslint-enable)
-  (add-hook 'typescript-ts-mode-hook #'mb/flymake-eslint-enable)
-  (add-hook 'json-ts-mode-hook #'mb/flymake-eslint-enable)
+  (add-hook 'tsx-ts-mode-hook #'flymake-eslint-enable)
+  (add-hook 'typescript-ts-mode-hook #'flymake-eslint-enable)
+  (add-hook 'json-ts-mode-hook #'flymake-eslint-enable)
   )
 
 
@@ -1962,18 +1988,8 @@ targets."
 ;; Flymake eslint integration
 (use-package flymake-eslint
   :ensure t
-  :config
-  (defun mb/flymake-eslint-enable ()
-    "Enable flymake-eslint in current buffer."
-    (interactive)
-    (push
-     (file-name-concat
-      (locate-dominating-file
-       (buffer-file-name)
-       "package.json")
-      "node_modules" ".bin")
-     exec-path)
-    (flymake-eslint-enable)))
+  :custom
+  (flymake-eslint-executable-name "npx"))
 
 
 
@@ -2152,7 +2168,7 @@ targets."
   :ensure t
   :defer t
   :config
-  (add-hook 'graphql-mode-hook #'mb/flymake-eslint-enable)
+  (add-hook 'graphql-mode-hook #'flymake-eslint-enable)
   (message "mb: GRAPHQL MODE"))
 
 
