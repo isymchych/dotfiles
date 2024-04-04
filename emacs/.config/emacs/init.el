@@ -21,6 +21,9 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
+;; dir for local 3rd party packages
+(defvar mb-local-packages-path (expand-file-name "local-packages/" mb-dotfiles-dir))
+
 (defvar mb-font "iosevka term medium-15")
 
 (defvar mb-tab-size        4)
@@ -436,6 +439,12 @@ narrowed."
     (global-visual-line-mode arg)
     ))
 
+
+(defun mb/get-selected-text ()
+  "Return the currently selected text in the current buffer."
+  (if (region-active-p)
+      (buffer-substring (region-beginning) (region-end))
+    ""))
 
 
 ;; ---------------------------------------- GLOBAL KEYBINDINGS
@@ -1312,7 +1321,9 @@ narrowed."
 
   (defun consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
-    (consult-ripgrep dir (thing-at-point 'symbol)))
+    (consult-ripgrep dir (if (region-active-p)
+                             (mb/get-selected-text)
+                           (thing-at-point 'symbol))))
 
   (defun consult-ripgrep-in-current-dir ()
     (interactive)
@@ -1320,7 +1331,9 @@ narrowed."
 
   (defun consult-fd-thing-at-point (&optional dir)
     (interactive)
-    (consult-fd dir (thing-at-point 'filename)))
+    (consult-fd dir (if (region-active-p)
+                        (mb/get-selected-text)
+                      (thing-at-point 'filename))))
 
   (defun consult-fd-in-current-dir ()
     (interactive)
@@ -1345,6 +1358,15 @@ narrowed."
     (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
     (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>pF") 'consult-fd-thing-at-point))
+
+
+;; jump to project
+(use-package consult-jump-project
+  :load-path mb-local-packages-path
+  :after consult
+  :config
+  (evil-define-key 'normal 'global
+    (kbd "<leader>pp") 'consult-jump-project))
 
 
 
