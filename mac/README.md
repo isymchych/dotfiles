@@ -45,3 +45,4 @@
 # Dev tools
 * brew install yaml-language-server
 * brew install typescript-language-server
+* brew install vscode-langservers-extracted

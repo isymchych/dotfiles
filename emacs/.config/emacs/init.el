@@ -1880,8 +1880,8 @@ targets."
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
 
   (evil-define-key 'normal 'global
-    (kbd "<leader>gj") 'diff-hl-next-hunk
-    (kbd "<leader>gk") 'diff-hl-previous-hunk
+    (kbd "]c") 'diff-hl-next-hunk
+    (kbd "[c") 'diff-hl-previous-hunk
     (kbd "<leader>gr") 'diff-hl-revert-hunk
     (kbd "<leader>gd") 'diff-hl-diff-goto-hunk)
 
@@ -1916,14 +1916,13 @@ targets."
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode)
 
+  (add-hook 'hack-local-variables-hook
+            (lambda () (when (derived-mode-p 'ts-mode) (lsp))))
+
   (add-hook 'tsx-ts-mode-hook #'lsp-deferred)
   (add-hook 'typescript-ts-mode-hook #'lsp-deferred)
   (add-hook 'rust-ts-mode-hook #'lsp-deferred)
   (add-hook 'yaml-ts-mode-hook #'lsp-deferred) ;; https://github.com/redhat-developer/yaml-language-server
-
-  (add-hook 'tsx-ts-mode-hook #'flymake-eslint-enable)
-  (add-hook 'typescript-ts-mode-hook #'flymake-eslint-enable)
-  (add-hook 'json-ts-mode-hook #'flymake-eslint-enable)
   )
 
 
@@ -1979,7 +1978,9 @@ targets."
         lsp-modeline-code-actions-segments '(count name)
 
         lsp-headerline-breadcrumb-enable t
-        lsp-headerline-breadcrumb-segments '(symbols))
+        lsp-headerline-breadcrumb-segments '(symbols)
+
+        lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
   :config
   ;; https://github.com/emacs-lsp/lsp-mode/issues/2681
   (advice-add 'json-parse-string :around
@@ -2004,14 +2005,6 @@ targets."
     (kbd "<leader>la") 'lsp-execute-code-action
     (kbd "<leader>lf") 'lsp-find-references
     (kbd "<leader>lr") 'lsp-rename))
-
-
-
-;; Flymake eslint integration
-(use-package flymake-eslint
-  :ensure t
-  :custom
-  (flymake-eslint-executable-name "npx"))
 
 
 
@@ -2190,7 +2183,6 @@ targets."
   :ensure t
   :defer t
   :config
-  (add-hook 'graphql-mode-hook #'flymake-eslint-enable)
   (message "mb: GRAPHQL MODE"))
 
 
