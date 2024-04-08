@@ -521,7 +521,7 @@ narrowed."
 
   ;; Improve detection of project root https://andreyor.st/posts/2022-07-16-project-el-enhancements/
   (defcustom project-root-markers
-    '("Cargo.toml" ".git" "package.json")
+    '("Cargo.lock" ".git" ".emacs-project")
     "Files or directories that indicate the root of a project."
     :type '(repeat string)
     :group 'project)

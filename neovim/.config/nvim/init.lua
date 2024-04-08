@@ -76,8 +76,8 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>em", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror [M]essages" })
+vim.keymap.set("n", "<leader>el", vim.diagnostic.setloclist, { desc = "Open diagnostic quickfix [E]rror [L]ist" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -162,10 +162,10 @@ require("lazy").setup({
 				map({ "n", "v" }, "[c", gs.prev_hunk, { desc = "Jump to previous git [c]hange" })
 				-- Actions
 				map("n", "<leader>hs", gs.stage_hunk, { desc = "git [s]tage hunk" })
-				map("n", "<leader>hr", gs.reset_hunk, { desc = "git [r]eset hunk" })
+				map("n", "<leader>gr", gs.reset_hunk, { desc = "git [r]eset hunk" })
 				map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "git [u]ndo stage hunk" })
 				map("n", "<leader>hp", gs.preview_hunk, { desc = "git [p]review hunk" })
-				map("n", "<leader>hb", gs.blame_line, { desc = "git [b]lame line" })
+				map("n", "<leader>gb", gs.blame_line, { desc = "git [b]lame line" })
 				map("n", "<leader>hd", gs.diffthis, { desc = "git [d]iff against index" })
 				-- Visual mode
 				map("v", "<leader>hs", function()
@@ -189,7 +189,7 @@ require("lazy").setup({
 		config = function()
 			require("neogit").setup({})
 
-			vim.keymap.set("n", "<leader>Gs", require("neogit").open, { desc = "[G]it [S]tatus" })
+			vim.keymap.set("n", "<leader>gs", require("neogit").open, { desc = "[G]it [S]tatus" })
 		end,
 	},
 
@@ -363,7 +363,7 @@ require("lazy").setup({
 					-- Jump to the type of the word under your cursor.
 					--  Useful when you're not sure what type a variable is and you want to see
 					--  the definition of its *type*, not where it was *defined*.
-					map("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
+					map("<leader>lt", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
 
 					-- Fuzzy find all the symbols in your current document.
 					--  Symbols are things like variables, functions, types, etc.
@@ -379,11 +379,11 @@ require("lazy").setup({
 
 					-- Rename the variable under your cursor.
 					--  Most Language Servers support renaming across files, etc.
-					map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+					map("<leader>br", vim.lsp.buf.rename, "[Buffer] [R]ename")
 
 					-- Execute a code action, usually your cursor needs to be on top of an error
 					-- or a suggestion from your LSP for this to activate.
-					map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+					map("<leader>la", vim.lsp.buf.code_action, "[C]ode [A]ction")
 
 					-- Opens a popup that displays documentation about the word under your cursor
 					--  See `:help K` for why this keymap.
@@ -394,9 +394,9 @@ require("lazy").setup({
 					map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
 
 					-- Formats the current buffer
-					map("<leader>f", function()
+					map("<leader>bf", function()
 						vim.lsp.buf.format({ async = true })
-					end, "[F]ormat code")
+					end, "[B]uffer [F]ormat code")
 
 					-- The following two autocommands are used to highlight references of the
 					-- word under your cursor when your cursor rests there for a little while.
@@ -693,7 +693,7 @@ require("lazy").setup({
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
 		opts = {
-			ensure_installed = { "bash", "c", "html", "lua", "luadoc", "markdown", "vim", "vimdoc" },
+			ensure_installed = { "bash", "html", "lua", "luadoc", "markdown", "vim", "vimdoc" },
 			-- Autoinstall languages that are not installed
 			auto_install = true,
 			highlight = {
@@ -767,6 +767,17 @@ end)
 vim.keymap.set("n", "<C-+>", function()
 	vim.g.neovide_scale_factor = 1.0
 end)
+
+vim.keymap.set("n", "<leader>q", ":q<CR>", { desc = "[Q]uit" })
+
+-- navigate windows using prefix Alt-w
+vim.keymap.set({ "n", "v", "i" }, "<A-w>", "<C-w>", { noremap = true })
+
+-- scroll buffer forward using Alt-f
+vim.keymap.set({ "n", "v", "i" }, "<A-f>", "<C-f>", { noremap = true })
+
+-- scroll buffer backward using Alt-b
+vim.keymap.set({ "n", "v", "i" }, "<A-b>", "<C-b>", { noremap = true })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
