@@ -2139,17 +2139,27 @@ targets."
 
 ;; Markdown
 (use-package markdown-mode
+  :disabled t
   :ensure t
   :defer t
   :config
   (add-hook 'markdown-mode-hook 'flyspell-mode)
   (message "mb: MARKDOWN MODE"))
 
+;; Markdown treesit mode
+(use-package markdown-ts-mode
+  :ensure t
+  :mode ("\\.md\\'" . markdown-ts-mode)
+  :defer t
+  ;; :config
+  ;; (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/ikatyang/tree-sitter-markdown" "master" "src"))
+  :config
+  (message "mb: MARKDOWN-TS MODE"))
+
 
 
 ;; Lua mode
 (use-package lua-mode
-  :disabled t
   :ensure t
   :defer t
   :config
