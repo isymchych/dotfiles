@@ -1033,7 +1033,7 @@ narrowed."
   (define-key evil-insert-state-map [escape] 'evil-normal-state)
 
   ;; disable man look up
-  (define-key evil-motion-state-map "K" nil)
+  (define-key evil-motion-state-map "K" 'eldoc)
   (define-key evil-motion-state-map (kbd " ") nil)
 
   ;; Replace Emacs kill-ring-save with window management commands

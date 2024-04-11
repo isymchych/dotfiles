@@ -210,6 +210,7 @@ assign [app_id="thunderbird"] 8
 assign [app_id="transmission-gtk"]  9
 assign [app_id="com.transmissionbt.transmission.*"]  9
 assign [class="Quodlibet"]  9
+assign [title="^Spotify.*"] 9
 
 
 # browser pop-ups
@@ -277,6 +278,8 @@ for_window [class="^File-roller"]      floating enable border pixel $border
 
 for_window [class="^Chrome" title="^Developer Tools.*"] floating disable, move to workspace 5
 for_window [window_role="^bubble$"] floating enable
+
+for_window [title="^Spotify.*"] border pixel $border
 
 # enable floating for apps with custom app_id FLOAT
 for_window [app_id="FLOAT"] floating enable
