@@ -278,10 +278,19 @@
 
 
 
-(defun mb/prev-buffer ()
-  "Switch to previous buffer."
+;; https://github.com/syl20bnr/spacemacs/blob/a58a7d79b3713bcf693bb61d9ba83d650a6aba86/core/core-funcs.el#L331
+(defun mb/alternate-buffer (&optional window)
+  "Switch back and forth between current and last buffer in the
+current window."
   (interactive)
-  (mode-line-other-buffer))
+  (cl-destructuring-bind (buf start pos)
+      (or (cl-find (window-buffer window) (window-prev-buffers)
+                   :key #'car :test-not #'eq)
+          (list (other-buffer) nil nil))
+    (if (not buf)
+        (message "Last buffer not found.")
+      (set-window-buffer-start-and-point window buf start pos))))
+
 
 (defun mb/untabify-buffer ()
   "Replace tabs with spaces in buffer."
@@ -477,7 +486,7 @@ narrowed."
 
 (global-set-key (kbd "C-x e")   'mb/eval-and-replace)
 (global-set-key (kbd "C-x C-f") 'find-file)
-(global-set-key [M-tab]         'mb/prev-buffer)
+(global-set-key [M-tab]         'mb/alternate-buffer)
 (global-set-key (kbd "M-/")     'hippie-expand)
 (global-set-key (kbd "M-u")     'universal-argument)
 
@@ -734,7 +743,7 @@ narrowed."
 
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
   (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
-  (define-key dired-mode-map [remap dired-find-file]    'dired-find-alternate-file))
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 
 
 
@@ -1123,7 +1132,8 @@ narrowed."
 
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'mb/dired-up-directory
-    "l" 'dired-find-alternate-file
+    "l" 'dired-find-file
+    (kbd "RET") 'dired-find-alternate-file
     " " 'nil))
 
 
@@ -1274,7 +1284,7 @@ narrowed."
   :config
   (setq
    consult-line-numbers-widen t
-   consult-async-min-input 3
+   consult-async-min-input 2
    consult-async-refresh-delay  0.15
    consult-async-input-throttle 0.2
    consult-async-input-debounce 0.1
@@ -1651,21 +1661,6 @@ targets."
   :ensure t
   :diminish anzu-mode
   :init
-  (setq anzu-cons-mode-line-p nil)
-
-  ;; from spacemacs
-  (defun mb/anzu-update-mode-line (here total)
-    "Custom update function which does not propertize the status.
-                HERE is current position, TOTAL is total matches count."
-    (when anzu--state
-      (let ((status (cl-case anzu--state
-                      (search (format "(%s/%d%s)"
-                                      (anzu--format-here-position here total)
-                                      total (if anzu--overflow-p "+" "")))
-                      (replace-query (format "(%d replace)" total))
-                      (replace (format "(%d/%d)" here total)))))
-        status)))
-  (setq anzu-mode-line-update-function 'mb/anzu-update-mode-line)
   (global-anzu-mode t))
 
 (use-package evil-anzu
@@ -1775,23 +1770,7 @@ targets."
 ;; Magit: UI for git
 (use-package magit
   :ensure t
-  :defer t
-  :defines
-  magit-last-seen-setup-instructions
-  magit-status-buffer-switch-function
-  magit-rewrite-inclusive
-  magit-save-some-buffers
-  magit-auto-revert-mode-lighter
-  magit-push-always-verify
-  magit-set-upstream-on-push
-
   :init
-  (evil-define-key 'normal 'global
-    (kbd "<leader>gs") 'magit-status
-    (kbd "<leader>gl") 'magit-log-all
-    (kbd "<leader>gL") 'magit-log-buffer-file
-    (kbd "<leader>gb") 'magit-blame)
-
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
   (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
         transient-values-file  (expand-file-name "transient/values" mb-save-path)
@@ -1817,7 +1796,6 @@ targets."
 
         ;; ask me if I want a tracking upstream
         magit-set-upstream-on-push 'askifnotset
-
         transient-default-level 5
 
         magit-diff-refine-hunk t ; show granular diffs in selected hunk
@@ -1827,11 +1805,20 @@ targets."
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
 
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gs") 'magit-status
+    (kbd "<leader>gl") 'magit-log-all
+    (kbd "<leader>gL") 'magit-log-buffer-file
+    (kbd "<leader>gb") 'magit-blame)
+
   ;; Close transient with ESC
   (define-key transient-map [escape] #'transient-quit-one)
 
   ;; make <leader> work in magit
   (define-key magit-mode-map (kbd "SPC") nil)
+
+  ;; make M-tab work in magit status
+  (evil-define-key 'normal 'magit-mode-map [M-tab] 'mb/alternate-buffer)
 
   (message "mb: initialized MAGIT"))
 

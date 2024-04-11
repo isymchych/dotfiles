@@ -1,5 +1,6 @@
 .projectile
 .tern-project
 .dir-locals.el
+.emacs-project
 .log/
 FLYCHECK_XXY*
