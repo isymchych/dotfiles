@@ -21,9 +21,6 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-;; dir for local 3rd party packages
-(defvar mb-local-packages-path (expand-file-name "local-packages/" mb-dotfiles-dir))
-
 (defvar mb-font "iosevka term medium-15")
 
 (defvar mb-tab-size        4)
@@ -1392,8 +1389,10 @@ narrowed."
 
 ;; jump to project
 (use-package consult-jump-project
-  :load-path mb-local-packages-path
   :after consult
+  :init
+  (if (not (package-installed-p 'consult-jump-project))
+      (package-vc-install "https://github.com/jdtsmith/consult-jump-project"))
   :config
   (evil-define-key 'normal 'global
     (kbd "<leader>pp") 'consult-jump-project))
