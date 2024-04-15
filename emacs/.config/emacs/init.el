@@ -741,11 +741,18 @@ narrowed."
       (dired-up-directory)
       (kill-buffer old)))
 
-  ;; FIXME alternate file if NOT DIR
-  ;; (define-key dired-mode-map [remap dired-find-file] 'dired-find-alternate-file)
+  (defun mb/dired-find-file-or-alternate ()
+    "In Dired, open directories with `dired-find-alternate-file' and files with `dired-find-file'."
+    (interactive)
+    (let ((file (dired-get-file-for-visit)))
+      (if (file-directory-p file)
+          (dired-find-alternate-file)
+        (dired-find-file))))
 
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
   (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
+
+  (define-key dired-mode-map [remap dired-find-file] 'mb/dired-find-file-or-alternate)
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 
 
