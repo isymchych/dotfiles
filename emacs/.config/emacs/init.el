@@ -25,6 +25,9 @@
 
 (defvar mb-tab-size        4)
 
+;; see https://platform.openai.com/api-keys
+(defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
+
 ;; load customizations file if it exists
 (load mb-customizations-file t)
 
@@ -218,6 +221,8 @@
 
 ;; dir to save info about interrupted sessions
 (setq auto-save-list-file-prefix mb-save-path)
+
+(setq backup-directory-alist '(("." . mb-save-path)))
 
 ;; Transparently open compressed files
 (auto-compression-mode t)
@@ -1097,16 +1102,25 @@ narrowed."
 
   (define-key evil-normal-state-map "gc" 'comment-dwim-2)
 
+  (which-key-add-key-based-replacements "SPC a" "AI actions")
+  (which-key-add-key-based-replacements "SPC b" "Buffer actions")
+  (which-key-add-key-based-replacements "SPC l" "List")
+  (which-key-add-key-based-replacements "SPC p" "Project actions")
+  (which-key-add-key-based-replacements "SPC g" "Go to")
+  (which-key-add-key-based-replacements "SPC j" "Jump to")
+  (which-key-add-key-based-replacements "SPC D" "current Dir")
+
   ;; NOTE: m is reserved for mode-local bindings
   (evil-define-key 'normal 'global
     (kbd "<leader>2")   'call-last-kbd-macro
     (kbd "<leader>q")   'evil-quit
     (kbd "<leader>n")   'mb/narrow-or-widen-dwim
-    (kbd "<leader>ff")  'find-file
     (kbd "<leader>k")   'mb/kill-this-buffer
     (kbd "<leader>s")   'save-buffer
     (kbd "<leader>e")   'eshell
     (kbd "<leader>d")   'dired-jump
+
+    (kbd "<leader>gf")  'find-file
 
     (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>li")  'imenu
@@ -1715,6 +1729,7 @@ targets."
   (push '(("RET" . nil) . ("⏎" . nil)) which-key-replacement-alist)
 
   (global-set-key (kbd "C-h w") 'which-key-show-major-mode)
+  (global-set-key (kbd "C-h W") 'which-key-show-top-level)
 
   (evil-define-key nil 'global (kbd "<leader><escape>") 'which-key-abort))
 
@@ -2085,6 +2100,24 @@ targets."
     (kbd "M-e M-k") 'flycheck-previous-error
     ;; (kbd "M-e l") 'mb/toggle-flyckeck-errors-list
     (kbd "M-e b") 'flycheck-buffer))
+
+
+
+;; Robby mode: interact with OpenAI
+(use-package robby-mode
+  :if mb-openai-api-key
+  :init
+  (if (not (package-installed-p 'robby))
+      (package-vc-install "https://github.com/stevemolitor/robby"))
+
+  :config
+  (setq robby-openai-api-key mb-openai-api-key)
+  (robby-mode)
+
+  (evil-set-initial-state 'robby-chat-mode 'emacs)
+
+  (evil-define-key 'normal 'global (kbd "<leader>ar") 'robby-commands))
+
 
 
 ;; ---------------------------------------- BUILT-IN LANGUAGES
