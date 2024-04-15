@@ -767,6 +767,7 @@ narrowed."
 
 ;; Flymake
 (use-package flymake
+  :disabled t
   :defer t
   :after (evil)
   :init
@@ -1398,6 +1399,16 @@ narrowed."
     (kbd "<leader>pp") 'consult-jump-project))
 
 
+;; Jump to Flycheck error
+(use-package consult-flycheck
+  :ensure t
+  :after (consult flycheck)
+  :config
+  (evil-define-key 'normal 'global
+    (kbd "<leader>le") #'consult-flycheck
+    (kbd "M-e l") #'consult-flycheck))
+
+
 
 ;; Context commands for things at a point
 (use-package embark
@@ -1489,6 +1500,7 @@ targets."
      "\\*Apropos\\*"
      "Output\\*$"
      "\\*Async Shell Command\\*"
+     "\\*Flycheck"
      "\\*rustfmt\\*"
      "\\magit: "
      help-mode
@@ -1846,6 +1858,9 @@ targets."
 
   ;; make <leader> work in magit
   (define-key magit-mode-map (kbd "SPC") nil)
+  (define-key magit-diff-mode-map (kbd "SPC") nil)
+
+  (define-key magit-mode-map (kbd "M-w") nil)
 
   ;; make M-tab work in magit status
   (evil-define-key 'normal 'magit-mode-map [M-tab] 'mb/alternate-buffer)
@@ -1959,7 +1974,7 @@ targets."
         lsp-enable-file-watchers nil
         lsp-auto-execute-action nil
 
-        lsp-diagnostics-provider :flymake
+        lsp-diagnostics-provider :flycheck
         lsp-diagnostic-clean-after-change t
 
         lsp-inlay-hint-enable t
@@ -2030,6 +2045,47 @@ targets."
     (kbd "<leader>lf") 'lsp-find-references
     (kbd "<leader>lr") 'lsp-rename))
 
+
+
+;; Flycheck: lint files
+(use-package flycheck
+  :ensure t
+  :diminish flycheck-mode
+  :init (global-flycheck-mode)
+  :config
+  (setq
+   flycheck-check-syntax-automatically '(mode-enabled save)
+
+   ;; Display errors a little quicker (default is 0.9s)
+   flycheck-display-errors-delay 0.25
+
+   flycheck-temp-prefix "FLYCHECK_XXY")
+
+  (if (display-graphic-p)
+      (setq flycheck-indication-mode 'right-fringe)
+    (progn
+      (setq flycheck-indication-mode 'right-margin)))
+
+  (evil-add-command-properties #'flycheck-first-error :jump t)
+  (evil-add-command-properties #'flycheck-next-error :jump t)
+  (evil-add-command-properties #'flycheck-previous-error :jump t)
+
+  ;; from Spacemacs
+  (defun mb/toggle-flyckeck-errors-list ()
+    "Toggle flycheck's error list window."
+    (interactive)
+    (-if-let (window (flycheck-get-error-list-window))
+        (quit-window nil window)
+      (flycheck-list-errors)))
+
+  (evil-define-key 'normal 'global
+    (kbd "M-e 1") 'flycheck-first-error
+    (kbd "M-e j") 'flycheck-next-error
+    (kbd "M-e M-j") 'flycheck-next-error
+    (kbd "M-e k") 'flycheck-previous-error
+    (kbd "M-e M-k") 'flycheck-previous-error
+    ;; (kbd "M-e l") 'mb/toggle-flyckeck-errors-list
+    (kbd "M-e b") 'flycheck-buffer))
 
 
 ;; ---------------------------------------- BUILT-IN LANGUAGES
@@ -2139,6 +2195,8 @@ targets."
   :diminish apheleia-mode
   :init (apheleia-global-mode +1)
   :config
+  (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
+
   (setf (alist-get 'prettier apheleia-formatters)
         '("npx" "prettier" "--stdin-filepath" filepath))
   (setf (alist-get 'prettier-json apheleia-formatters)
@@ -2153,8 +2211,8 @@ targets."
   :mode ("\\.scss\\'" . scss-mode)
   :init
   ;; fix mode breaking due to missing flymake variables
-  (setq flymake-allowed-file-name-masks nil
-        flymake-err-line-patterns nil)
+  ;; (setq flymake-allowed-file-name-masks nil
+  ;;       flymake-err-line-patterns nil)
   :config
   (setq scss-compile-at-save nil)
   (message "mb: SCSS MODE"))
