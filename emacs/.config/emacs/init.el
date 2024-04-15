@@ -778,6 +778,15 @@ narrowed."
     (kbd "M-e b") 'flymake-start))
 
 
+
+;; Ediff: resolve merge conflicts
+(use-package ediff
+  :config
+  (setq ediff-diff-options "-w" ; turn off whitespace checking
+        ediff-split-window-function #'split-window-horizontally
+        ediff-window-setup-function #'ediff-setup-windows-plain))
+
+
 ;; ---------------------------------------- 3rd PARTY PACKAGES
 
 
@@ -1930,15 +1939,18 @@ targets."
         lsp-auto-execute-action nil
 
         lsp-diagnostics-provider :flymake
-        lsp-diagnostic-clean-after-change nil
+        lsp-diagnostic-clean-after-change t
 
-        lsp-rust-analyzer-server-display-inlay-hints nil
-        ;; lsp-rust-analyzer-cargo-watch-command "clippy"
-        lsp-rust-server 'rust-analyzer
+        lsp-inlay-hint-enable t
+
         lsp-rust-analyzer-proc-macro-enable t
         lsp-rust-analyzer-cargo-load-out-dirs-from-check t
         lsp-rust-analyzer-call-info-full t
         lsp-rust-build-on-save t
+
+        lsp-javascript-display-return-type-hints t
+        lsp-javascript-display-variable-type-hints t
+        lsp-javascript-display-parameter-type-hints t
 
         lsp-eldoc-enable-hover t
         lsp-eldoc-render-all nil
@@ -1953,8 +1965,12 @@ targets."
         lsp-enable-symbol-highlighting nil
         lsp-enable-text-document-color t
         lsp-enable-xref t
+
         lsp-enable-snippet nil
+
         lsp-lens-enable nil
+
+        lsp-semantic-tokens-enable t
 
         lsp-completion-default-behaviour :insert
         lsp-completion-provider :capf
