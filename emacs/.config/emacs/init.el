@@ -741,6 +741,9 @@ narrowed."
       (dired-up-directory)
       (kill-buffer old)))
 
+  ;; FIXME alternate file if NOT DIR
+  ;; (define-key dired-mode-map [remap dired-find-file] 'dired-find-alternate-file)
+
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
   (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
@@ -1683,7 +1686,18 @@ targets."
   :ensure t
   :diminish which-key-mode
   :init
+  (setq
+   which-key-compute-remaps t
+   which-key-allow-multiple-replacements t)
+
   (which-key-mode)
+
+  (push '((nil . "\\`evil-") . (nil . "😈-")) which-key-replacement-alist)
+  (push '((nil . "\\`evil-collection-unimpaired-\\(.*\\)") . (nil . "😈-cu-\\1")) which-key-replacement-alist)
+  (push '(("RET" . nil) . ("⏎" . nil)) which-key-replacement-alist)
+
+  (global-set-key (kbd "C-h w") 'which-key-show-top-level)
+
   (evil-define-key nil 'global (kbd "<leader><escape>") 'which-key-abort))
 
 
