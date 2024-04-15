@@ -1715,7 +1715,7 @@ targets."
   (push '((nil . "\\`evil-collection-unimpaired-\\(.*\\)") . (nil . "😈-cu-\\1")) which-key-replacement-alist)
   (push '(("RET" . nil) . ("⏎" . nil)) which-key-replacement-alist)
 
-  (global-set-key (kbd "C-h w") 'which-key-show-top-level)
+  (global-set-key (kbd "C-h w") 'which-key-show-major-mode)
 
   (evil-define-key nil 'global (kbd "<leader><escape>") 'which-key-abort))
 
