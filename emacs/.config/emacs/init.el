@@ -23,6 +23,9 @@
 
 (defvar mb-font "iosevka term medium-15")
 
+(defvar mb-light-theme 'modus-operandi-tinted)
+(defvar mb-dark-theme 'modus-vivendi-tinted)
+
 (defvar mb-tab-size        4)
 
 ;; see https://platform.openai.com/api-keys
@@ -814,6 +817,57 @@ narrowed."
 
 ;; ---------------------------------------- 3rd PARTY PACKAGES
 
+;; Nord theme https://github.com/arcticicestudio/nord-emacs
+;; Solarized theme https://github.com/bbatsov/solarized-emacs
+;; Doom emacs themes https://github.com/doomemacs/themes
+
+;; Modus themes https://protesilaos.com/emacs/modus-themes
+(use-package modus-themes
+  :ensure t
+  :config
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs nil
+        modus-themes-common-palette-overrides modus-themes-preset-overrides-faint)
+
+  (setq modus-themes-common-palette-overrides
+        (append
+         ;; Keep the border but make it the same color as the background of the
+         ;; mode line (thus appearing borderless).  The difference with the
+         ;; above is that this version is a bit thicker because the border are
+         ;; still there.
+         '((border-mode-line-active bg-mode-line-active)
+           (border-mode-line-inactive bg-mode-line-inactive))
+
+         modus-themes-preset-overrides-faint)))
+
+
+;; Auto dark mode on Linux https://darkman.grtcdr.tn/
+(use-package darkman
+  :if mb-is-linux
+  :ensure t
+
+  :config
+  (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
+  (darkman-mode))
+
+
+;; Auto dark mode on macOS
+(use-package auto-dark
+  :if mb-is-mac-os
+  :ensure t
+  :diminish auto-dark-mode
+  :init
+  ;; HACK: remove the applescript support so that this package doesn't break in CLI mode
+  (unless window-system
+    (fmakunbound 'ns-do-applescript))
+  :config
+  (setq
+   auto-dark-allow-osascript t
+   auto-dark-dark-theme mb-dark-theme
+   auto-dark-light-theme mb-light-theme)
+
+  (auto-dark-mode t))
+
 
 ;; Diminish: cleanup mode line
 (use-package diminish
@@ -821,99 +875,6 @@ narrowed."
   :config
   (eval-after-load 'hi-lock
     '(diminish 'hi-lock-mode)))
-
-
-
-;; Fix PATH on Mac
-;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
-;; (use-package exec-path-from-shell
-;;   :ensure t
-;;   :if mb-is-mac-os
-;;   :config
-;;   (exec-path-from-shell-initialize))
-
-
-
-;; writable grep, complementary package for other packages
-(use-package wgrep
-  :ensure t
-  :defer t
-  :config
-  (setq wgrep-auto-save-buffer t))
-
-
-
-(use-package mb-theme
-  :no-require t
-
-  :config
-
-  ;; Nord theme https://github.com/arcticicestudio/nord-emacs
-  ;; Solarized theme https://github.com/bbatsov/solarized-emacs
-
-  ;; Doom emacs themes https://github.com/doomemacs/themes
-  (use-package doom-themes
-    :disabled
-    :ensure t
-    :config
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-
-    ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config))
-
-  ;; Modus themes https://protesilaos.com/emacs/modus-themes
-  (use-package modus-themes
-    :ensure t
-    :config
-    (setq modus-themes-italic-constructs t
-          modus-themes-bold-constructs nil
-          modus-themes-common-palette-overrides modus-themes-preset-overrides-faint)
-
-    (setq modus-themes-common-palette-overrides
-          (append
-           ;; Keep the border but make it the same color as the background of the
-           ;; mode line (thus appearing borderless).  The difference with the
-           ;; above is that this version is a bit thicker because the border are
-           ;; still there.
-           '((border-mode-line-active bg-mode-line-active)
-             (border-mode-line-inactive bg-mode-line-inactive))
-
-           modus-themes-preset-overrides-faint)))
-
-  (defvar mb-light-theme 'modus-operandi-tinted)
-  (defvar mb-dark-theme 'modus-vivendi-tinted)
-
-  ;; Auto dark mode on Linux  https://darkman.grtcdr.tn/
-  (use-package darkman
-    :ensure t
-
-    :if mb-is-linux
-
-    :config
-    (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
-    (darkman-mode))
-
-
-  ;; Auto dark mode on macOS
-  (use-package auto-dark
-    :ensure t
-    :diminish auto-dark-mode
-
-    :if mb-is-mac-os
-
-    :init
-    ;; HACK: remove the applescript support so that this package doesn't break in CLI mode
-    (unless window-system
-      (fmakunbound 'ns-do-applescript))
-
-    :config
-    (setq
-     auto-dark-allow-osascript t
-     auto-dark-dark-theme mb-dark-theme
-     auto-dark-light-theme mb-light-theme)
-
-    (auto-dark-mode t)))
 
 
 
@@ -928,6 +889,26 @@ narrowed."
   (dimmer-configure-which-key)
 
   (dimmer-mode 1))
+
+
+
+;; Fix PATH on Mac
+(use-package exec-path-from-shell
+  ;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
+  :disabled
+  :if mb-is-mac-os
+  :ensure t
+  :config
+  (exec-path-from-shell-initialize))
+
+
+
+;; writable grep, complementary package for other packages
+(use-package wgrep
+  :ensure t
+  :defer t
+  :config
+  (setq wgrep-auto-save-buffer t))
 
 
 
