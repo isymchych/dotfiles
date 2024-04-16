@@ -2057,6 +2057,7 @@ targets."
     (kbd "gd") 'lsp-find-definition
     (kbd "<leader>la") 'lsp-execute-code-action
     (kbd "<leader>lf") 'lsp-find-references
+    (kbd "<leader>lt") 'lsp-goto-type-definition
     (kbd "<leader>lr") 'lsp-rename))
 
 
