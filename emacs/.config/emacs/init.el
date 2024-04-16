@@ -957,14 +957,6 @@ narrowed."
   (global-undo-fu-session-mode))
 
 
-;; manage comments
-(use-package comment-dwim-2
-  :after evil
-  :ensure t
-  :config
-  (global-set-key [remap comment-line] 'comment-dwim-2))
-
-
 ;; Evil: vim mode
 (use-package evil
   :ensure t
@@ -1197,12 +1189,14 @@ narrowed."
 
 ;; align text into columns - gl<space> or gL<space>
 (use-package evil-lion
+  :after evil
   :ensure t
   :config
   (evil-lion-mode))
 
 ;; better jump list
 (use-package better-jumper
+  :after evil
   :ensure t
   :diminish better-jumper-local-mode
   :init
@@ -1227,15 +1221,23 @@ narrowed."
   (advice-add #'imenu :around #'evil-better-jumper/set-jump-a))
 
 
+;; manage comments
+(use-package comment-dwim-2
+  :after evil
+  :ensure t
+  :config
+  (global-set-key [remap comment-line] 'comment-dwim-2))
+
 
 ;; Visualise the undo history
 (use-package vundo
   :ensure t
   :config
-  (setq vundo-glyph-alist vundo-unicode-symbols
-        vundo-compact-display t)
+  (setq vundo-glyph-alist vundo-unicode-symbols)
 
-  (evil-define-key 'normal 'vundo-mode-map (kbd "<leader>u") 'vundo))
+  (evil-define-key 'normal 'vundo-mode-map
+    (kbd "<leader>u") 'vundo
+    (kbd "<escape>") 'vundo-quit))
 
 
 
