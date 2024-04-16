@@ -884,31 +884,15 @@ narrowed."
   (defvar mb-light-theme 'modus-operandi-tinted)
   (defvar mb-dark-theme 'modus-vivendi-tinted)
 
-  ;; Auto dark mode on Linux
-  (use-package mb-darkman
-    :no-require t
+  ;; Auto dark mode on Linux  https://darkman.grtcdr.tn/
+  (use-package darkman
+    :ensure t
 
     :if mb-is-linux
 
     :config
-    (load "dbus")
-
-    (defun activate-mode (mode)
-      (message "MB: activate %s mode" mode)
-      (if (equal mode "dark")
-          (load-theme mb-dark-theme t)
-        (load-theme mb-light-theme t)))
-
-    (defun set-darkman-theme (mode)
-      (message "MB: darkman mode changed to %s" mode)
-      (activate-mode mode))
-
-    (dbus-register-signal :session nil "/nl/whynothugo/darkman" "nl.whynothugo.darkman" "ModeChanged" #'set-darkman-theme)
-
-    (activate-mode
-     (if (member "nl.whynothugo.darkman" (dbus-list-names :session))
-         (dbus-get-property :session "nl.whynothugo.darkman" "/nl/whynothugo/darkman" "nl.whynothugo.darkman" "Mode")
-       "light")))
+    (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
+    (darkman-mode))
 
 
   ;; Auto dark mode on macOS
