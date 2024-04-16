@@ -276,6 +276,18 @@
 
 
 
+;; Use GNU ls as `gls' from `coreutils' if available.  Add `(setq
+;; dired-use-ls-dired nil)' to your config to suppress the Dired warning when
+;; not using GNU ls.  We must look for `gls' after `exec-path-from-shell' was
+;; initialized to make sure that `gls' is in `exec-path'
+(when mb-is-mac-os
+  (let ((gls (executable-find "gls")))
+    (when gls
+      (setq insert-directory-program gls
+            dired-listing-switches "-aBhl --group-directories-first"))))
+
+
+
 ;; ---------------------------------------- UTILS
 
 
@@ -816,19 +828,9 @@ narrowed."
 ;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
 ;; (use-package exec-path-from-shell
 ;;   :ensure t
-
 ;;   :if mb-is-mac-os
-
 ;;   :config
-;;   (exec-path-from-shell-initialize)
-;;   ;; Use GNU ls as `gls' from `coreutils' if available.  Add `(setq
-;;   ;; dired-use-ls-dired nil)' to your config to suppress the Dired warning when
-;;   ;; not using GNU ls.  We must look for `gls' after `exec-path-from-shell' was
-;;   ;; initialized to make sure that `gls' is in `exec-path'
-;;   (let ((gls (executable-find "gls")))
-;;     (when gls
-;;       (setq insert-directory-program gls
-;;             dired-listing-switches "-aBhl --group-directories-first"))))
+;;   (exec-path-from-shell-initialize))
 
 
 
@@ -847,24 +849,11 @@ narrowed."
   :config
 
   ;; Nord theme https://github.com/arcticicestudio/nord-emacs
-  (use-package nord-theme
-    :disabled
-    :ensure t)
-
-
   ;; Solarized theme https://github.com/bbatsov/solarized-emacs
-  (use-package solarized-theme
-    :disabled
-    :ensure t)
-
-  ;; Different background for "unreal" buffers (that aren't files), supported by some themes
-  (use-package solaire-mode
-    :ensure t
-    :init
-    (solaire-global-mode +1))
 
   ;; Doom emacs themes https://github.com/doomemacs/themes
   (use-package doom-themes
+    :disabled
     :ensure t
     :config
     ;; Enable flashing mode-line on errors
@@ -873,8 +862,26 @@ narrowed."
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 
-  (defvar mb-light-theme 'doom-one-light)
-  (defvar mb-dark-theme 'doom-one)
+  ;; Modus themes https://protesilaos.com/emacs/modus-themes
+  (use-package modus-themes
+    :config
+    (setq modus-themes-italic-constructs t
+          modus-themes-bold-constructs nil
+          modus-themes-common-palette-overrides modus-themes-preset-overrides-faint)
+
+    (setq modus-themes-common-palette-overrides
+          (append
+           ;; Keep the border but make it the same color as the background of the
+           ;; mode line (thus appearing borderless).  The difference with the
+           ;; above is that this version is a bit thicker because the border are
+           ;; still there.
+           '((border-mode-line-active bg-mode-line-active)
+             (border-mode-line-inactive bg-mode-line-inactive))
+
+           modus-themes-preset-overrides-faint)))
+
+  (defvar mb-light-theme 'modus-operandi-tinted)
+  (defvar mb-dark-theme 'modus-vivendi-tinted)
 
   ;; Auto dark mode on Linux
   (use-package mb-darkman
@@ -922,6 +929,20 @@ narrowed."
      auto-dark-light-theme mb-light-theme)
 
     (auto-dark-mode t)))
+
+
+
+;; Dimmer: make inactive tabs dim
+(use-package dimmer
+  :ensure t
+  :config
+  (setq dimmer-fraction 0.3)
+  (setq dimmer-adjustment-mode :foreground)
+  (setq dimmer-use-colorspace :rgb)
+  (dimmer-configure-magit)
+  (dimmer-configure-which-key)
+
+  (dimmer-mode 1))
 
 
 
@@ -1809,9 +1830,8 @@ targets."
   (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode)
   (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
   :config
-  ;; (set-face-background 'highlight-indentation-face (face-background 'highlight))
-  ;; (set-face-background 'highlight-indentation-current-column-face (face-background 'highlight))
-  )
+  (set-face-background 'highlight-indentation-face (face-background 'highlight))
+  (set-face-background 'highlight-indentation-current-column-face (face-background 'highlight)))
 
 
 
