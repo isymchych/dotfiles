@@ -864,6 +864,7 @@ narrowed."
 
   ;; Modus themes https://protesilaos.com/emacs/modus-themes
   (use-package modus-themes
+    :ensure t
     :config
     (setq modus-themes-italic-constructs t
           modus-themes-bold-constructs nil
@@ -1128,6 +1129,7 @@ narrowed."
   (which-key-add-key-based-replacements "SPC l" "List")
   (which-key-add-key-based-replacements "SPC p" "Project actions")
   (which-key-add-key-based-replacements "SPC g" "Go to")
+  (which-key-add-key-based-replacements "SPC i" "Insert")
   (which-key-add-key-based-replacements "SPC j" "Jump to")
   (which-key-add-key-based-replacements "SPC D" "current Dir")
 
@@ -1146,6 +1148,9 @@ narrowed."
     (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>li")  'imenu
     (kbd "<leader> l <SPC>") 'just-one-space
+
+    (kbd "<leader>ie") 'emoji-search
+    (kbd "<leader>is") 'yas-insert-snippet
 
     (kbd "<leader>bb") 'switch-to-buffer
     (kbd "<leader>bl") 'mb/cleanup-buffer
@@ -2134,6 +2139,8 @@ targets."
   :config
   (setq robby-openai-api-key mb-openai-api-key)
   (robby-mode)
+
+  (diminish 'robby-mode "🤖")
 
   (evil-set-initial-state 'robby-chat-mode 'emacs)
 
