@@ -3,6 +3,7 @@ alias remove_final_newline="perl -pi -e 'chomp if eof'"
 alias ydl='noglob yt-dlp -o "%(playlist_index|)s%(playlist_index& - |)s%(title)s.%(ext)s" --format "bestvideo[height<=1080]+bestaudio"'
 alias ydl-min='noglob yt-dlp -o "%(title)s.%(ext)s" --format "bv*[height<=480]+ba/b[height<=480] / wv*+ba/w"'
 alias ydl-mp3='noglob yt-dlp -x --audio-format mp3 -o "%(title)s.%(ext)s"'
+alias ydl-sub-en='noglob yt-dlp --write-subs --sub-langs en --skip-download'
 alias zip-package='7z a -mx=0'
 
 alias outputs='swaymsg -t get_outputs'
