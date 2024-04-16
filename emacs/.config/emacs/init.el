@@ -841,6 +841,7 @@ narrowed."
          modus-themes-preset-overrides-faint)))
 
 
+
 ;; Auto dark mode on Linux https://darkman.grtcdr.tn/
 (use-package darkman
   :if mb-is-linux
@@ -849,6 +850,7 @@ narrowed."
   :config
   (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
   (darkman-mode))
+
 
 
 ;; Auto dark mode on macOS
@@ -869,14 +871,6 @@ narrowed."
   (auto-dark-mode t))
 
 
-;; Diminish: cleanup mode line
-(use-package diminish
-  :ensure t
-  :config
-  (eval-after-load 'hi-lock
-    '(diminish 'hi-lock-mode)))
-
-
 
 ;; Dimmer: make inactive tabs dim
 (use-package dimmer
@@ -889,6 +883,29 @@ narrowed."
   (dimmer-configure-which-key)
 
   (dimmer-mode 1))
+
+
+
+;; Mode line
+(use-package doom-modeline
+  :ensure t
+  :config
+  (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
+        doom-modeline-icon nil
+        doom-modeline-unicode-fallback nil
+        doom-modeline-buffer-encoding nil
+        doom-modeline-minor-modes t
+        doom-modeline-env-version nil)
+  (doom-modeline-mode 1))
+
+
+
+;; Diminish: cleanup mode line
+(use-package diminish
+  :ensure t
+  :config
+  (eval-after-load 'hi-lock
+    '(diminish 'hi-lock-mode)))
 
 
 
@@ -1741,20 +1758,6 @@ targets."
   ;; Don't highlight the thing at point itself
   (setq highlight-thing-exclude-thing-under-point t)
   (setq highlight-thing-delay-seconds 1.5))
-
-
-
-;; Mode line
-(use-package doom-modeline
-  :ensure t
-  :config
-  (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
-        doom-modeline-icon nil
-        doom-modeline-unicode-fallback nil
-        doom-modeline-buffer-encoding nil
-        doom-modeline-minor-modes t
-        doom-modeline-env-version nil)
-  (doom-modeline-mode 1))
 
 
 
