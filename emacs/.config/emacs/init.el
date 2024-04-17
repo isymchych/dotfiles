@@ -1971,6 +1971,7 @@ targets."
             (lambda () (when (derived-mode-p 'ts-mode) (lsp))))
 
   (add-hook 'tsx-ts-mode-hook #'lsp-deferred)
+  (add-hook 'js-ts-mode-hook #'lsp-deferred)
   (add-hook 'typescript-ts-mode-hook #'lsp-deferred)
   (add-hook 'rust-ts-mode-hook #'lsp-deferred)
   (add-hook 'yaml-ts-mode-hook #'lsp-deferred) ;; https://github.com/redhat-developer/yaml-language-server
@@ -2040,19 +2041,6 @@ targets."
 
         lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
   :config
-  ;; https://github.com/emacs-lsp/lsp-mode/issues/2681
-  (advice-add 'json-parse-string :around
-              (lambda (orig string &rest rest)
-                (apply orig (s-replace "\\u0000" "" string)
-                       rest)))
-  ;; minor changes: saves excursion and uses search-forward instead of re-search-forward
-  (advice-add 'json-parse-buffer :around
-              (lambda (oldfn &rest args)
-                (save-excursion
-                  (while (search-forward "\\u0000" nil t)
-                    (replace-match "" nil t)))
-                (apply oldfn args)))
-
   (defun mb/lsp-mode-setup-completion ()
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless)))
@@ -2284,6 +2272,7 @@ targets."
   ;; :config
   ;; (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/ikatyang/tree-sitter-markdown" "master" "src"))
   :config
+  (add-hook 'markdown-ts-mode-hook 'flyspell-mode)
   (message "mb: MARKDOWN-TS MODE"))
 
 
