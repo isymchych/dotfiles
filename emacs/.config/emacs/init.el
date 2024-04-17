@@ -224,7 +224,8 @@
 
 ;; dir to save info about interrupted sessions
 (setq auto-save-list-file-prefix mb-save-path)
-
+(setq multisession-directory mb-save-path)
+;; dir to store some temporary files
 (setq backup-directory-alist '(("." . mb-save-path)))
 
 ;; Transparently open compressed files
@@ -352,29 +353,6 @@ current window."
         (delete-file filename)
         (kill-buffer buffer)
         (message "mb: File '%s' successfully removed" filename)))))
-
-(defun mb/launch-application (application-name &rest args)
-  "Asynchronously start application APPLICATION-NAME with ARGS.
-It wouldn't be associated with the buffer."
-  (interactive)
-  (apply 'start-process application-name nil application-name args)
-  (message "mb: started %s %S" application-name args))
-
-(defun mb/terminal (&rest args)
-  "Launches terminal emulator with ARGS."
-  (interactive)
-  (if mb-is-mac-os
-      (start-process "terminal" nil "osascript" "-e" (format "
-   tell application \"iTerm2\"
-        set newWindow to (create window with default profile)
-        tell current session of newWindow
-            write text \"cd %s;\"
-        end tell
-      end tell
-" default-directory)) ;; TODO handle args
-
-    (apply 'mb/launch-application (getenv "TERMINAL") args)))
-
 
 (defun mb/eval-and-replace ()
   "Replace the preceding sexp with its value."
@@ -508,8 +486,6 @@ narrowed."
 (global-set-key (kbd "M-u")     'universal-argument)
 
 (global-set-key [f3]    'mb/toggle-verbose-mode)
-(global-set-key [f4]    'mb/terminal)
-(global-set-key [f5]    'make-frame)
 (global-set-key [f6]    'mb/revert-buffer)
 (global-set-key [f12]   'menu-bar-mode)
 
@@ -564,27 +540,7 @@ narrowed."
     (when-let ((root (locate-dominating-file path #'project-root-p)))
       (cons 'transient (expand-file-name root))))
 
-  (add-to-list 'project-find-functions #'project-find-root)
-
-  (defun mb/project-base-term (&rest args)
-    "Launches terminal in project root with ARGS."
-    (interactive)
-
-    (if-let ((fboundp 'project-root)
-             (proj (project-current))
-             (default-directory (project-root proj)))
-        (apply 'mb/terminal args)
-      (error "MB: buffer is not in the project")))
-
-
-  (defun mb/run-command (command)
-    "Save and run COMMAND in current project if defined."
-    (interactive)
-    (when command
-      (save-buffer)
-      (mb/project-base-term "-e" command "--hold")))
-
-  (global-set-key [M-f4]  'mb/project-base-term))
+  (add-to-list 'project-find-functions #'project-find-root))
 
 
 
@@ -648,6 +604,7 @@ narrowed."
   (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
   (add-to-list 'recentf-exclude "/elpa/")
   (add-to-list 'recentf-exclude ".recentf")
+  (add-to-list 'recentf-exclude "/save-files/")
 
   (add-hook 'server-done-hook 'recentf-save-list)
   (add-hook 'server-visit-hook 'recentf-save-list)
@@ -1027,7 +984,6 @@ narrowed."
   (evil-set-initial-state 'bc-menu-mode              'emacs)
   (evil-set-initial-state 'rdictcc-buffer-mode       'emacs)
   (evil-set-initial-state 'comint-mode               'normal)
-  (evil-set-initial-state 'recentf-mode              'normal)
   (evil-set-initial-state 'wdired-mode               'normal)
   (evil-set-initial-state 'shell-mode                'insert)
 
@@ -1096,13 +1052,12 @@ narrowed."
   (define-key evil-visual-state-map (kbd ">") 'mb/evil-shift-right-visual)
   (define-key evil-visual-state-map (kbd "<") 'mb/evil-shift-left-visual)
 
-  (define-key evil-normal-state-map "gc" 'comment-dwim-2)
-
   (which-key-add-key-based-replacements "SPC a" "AI actions")
   (which-key-add-key-based-replacements "SPC b" "Buffer actions")
   (which-key-add-key-based-replacements "SPC l" "List")
+  (which-key-add-key-based-replacements "SPC m" "Mode actions")
   (which-key-add-key-based-replacements "SPC p" "Project actions")
-  (which-key-add-key-based-replacements "SPC g" "Go to")
+  (which-key-add-key-based-replacements "SPC g" "Git")
   (which-key-add-key-based-replacements "SPC i" "Insert")
   (which-key-add-key-based-replacements "SPC j" "Jump to")
   (which-key-add-key-based-replacements "SPC D" "current Dir")
@@ -1116,8 +1071,6 @@ narrowed."
     (kbd "<leader>s")   'save-buffer
     (kbd "<leader>e")   'eshell
     (kbd "<leader>d")   'dired-jump
-
-    (kbd "<leader>gf")  'find-file
 
     (kbd "<leader>lm") 'evil-show-marks
     (kbd "<leader>li")  'imenu
@@ -1241,9 +1194,11 @@ narrowed."
 ;; manage comments
 (use-package comment-dwim-2
   :after evil
+  :defer 1
   :ensure t
   :config
-  (global-set-key [remap comment-line] 'comment-dwim-2))
+  (global-set-key [remap comment-line] 'comment-dwim-2)
+  (define-key evil-normal-state-map "gc" 'comment-dwim-2))
 
 
 ;; Visualise the undo history
@@ -1365,7 +1320,6 @@ narrowed."
   (global-set-key [remap recentf-open-files]            #'consult-recent-file)
   (global-set-key [remap switch-to-buffer]              #'consult-buffer)
   (global-set-key [remap switch-to-buffer-other-window] #'consult-buffer-other-window)
-  (global-set-key [remap switch-to-buffer-other-frame]  #'consult-buffer-other-frame)
   (global-set-key [remap yank-pop]                      #'consult-yank-pop)
 
   (advice-add #'multi-occur :override #'consult-multi-occur)
@@ -1510,6 +1464,7 @@ targets."
 
 ;; Better control for "virtual" (temporary) windows
 (use-package popper
+  :disabled
   :ensure t
   :bind (("M-`"   . popper-toggle-latest)
          ("C-`"   . popper-cycle)
@@ -1745,6 +1700,23 @@ targets."
 
 
 
+;; Helpful: a better *help* buffer
+(use-package helpful
+  :ensure t
+  :commands helpful--read-symbol
+  :hook (helpful-mode . visual-line-mode)
+  :init
+  ;; Make `apropos' et co search more extensively. They're more useful this way.
+  (setq apropos-do-all t)
+
+  (global-set-key [remap describe-function] #'helpful-callable)
+  (global-set-key [remap describe-command]  #'helpful-command)
+  (global-set-key [remap describe-variable] #'helpful-variable)
+  (global-set-key [remap describe-key]      #'helpful-key)
+  (global-set-key [remap describe-symbol]   #'helpful-symbol))
+
+
+
 ;; Highlight all matches of the word under the cursor
 (use-package highlight-thing
   :ensure t
@@ -1821,6 +1793,7 @@ targets."
 ;; Magit: UI for git
 (use-package magit
   :ensure t
+  :defer 1
   :init
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
   (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
@@ -1875,12 +1848,6 @@ targets."
   (evil-define-key 'normal 'magit-mode-map [M-tab] 'mb/alternate-buffer)
 
   (message "mb: initialized MAGIT"))
-
-;; Magit-delta: use delta for displaying diffs in magit
-(use-package magit-delta
-  :disabled t ;; slows down emacs
-  :ensure t
-  :hook (magit-mode . magit-delta-mode))
 
 
 
@@ -1944,6 +1911,49 @@ targets."
     (diff-hl-margin-mode))
 
   (global-diff-hl-mode))
+
+
+
+;; Treemacs: file tree sidebar
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (setq treemacs-follow-after-init t
+        treemacs-is-never-other-window nil
+        treemacs-sorting 'alphabetic-case-insensitive-asc
+        treemacs-persist-file (expand-file-name "treemacs-persist" mb-save-path)
+        treemacs-last-error-persist-file (expand-file-name "treemacs-last-error-persist" mb-save-path))
+
+  (global-set-key [f4]    'treemacs)
+
+  (global-set-key (kbd "M-t") 'treemacs-select-window)
+
+  (which-key-add-key-based-replacements "SPC t" "Treemacs")
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>tt") 'treemacs
+    (kbd "<leader>tf") 'treemacs-find-file)
+
+  :config
+  ;; Don't follow the cursor (it's more disruptive/jarring than helpful as a default)
+  (treemacs-follow-mode -1)
+  (treemacs-project-follow-mode t))
+
+;; Treemacs integration with evil
+(use-package treemacs-evil
+  :ensure t
+  :after (treemacs evil))
+
+;; Treemacs integration with magit
+(use-package treemacs-magit
+  :ensure t
+  :after (treemacs magit))
+
+;; Treemacs integration with lsp
+(use-package lsp-treemacs
+  :ensure t
+  :after (treemacs lsp))
 
 
 
@@ -2094,8 +2104,16 @@ targets."
     (kbd "M-e M-j") 'flycheck-next-error
     (kbd "M-e k") 'flycheck-previous-error
     (kbd "M-e M-k") 'flycheck-previous-error
-    ;; (kbd "M-e l") 'mb/toggle-flyckeck-errors-list
+    (kbd "M-e e") 'flycheck-explain-error-at-point
+    (kbd "M-e v") 'flycheck-verify-setup
+    (kbd "M-e L") 'mb/toggle-flyckeck-errors-list
     (kbd "M-e b") 'flycheck-buffer))
+
+;; Flycheck-pos-tip: display flycheck error in a tooltip
+(use-package flycheck-pos-tip
+  :ensure t
+  :config
+  (flycheck-pos-tip-mode))
 
 
 
