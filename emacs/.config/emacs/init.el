@@ -857,6 +857,15 @@ narrowed."
 
 
 
+;; Nyan mode: use nyan cat in mode line to indicate scroll position
+(use-package nyan-mode
+  :ensure t
+  :config
+  (setq nyan-minimum-window-width 128)
+  (nyan-mode))
+
+
+
 ;; Diminish: cleanup mode line
 (use-package diminish
   :ensure t
@@ -1194,7 +1203,7 @@ narrowed."
 ;; manage comments
 (use-package comment-dwim-2
   :after evil
-  :defer 1
+  :defer 0.5
   :ensure t
   :config
   (global-set-key [remap comment-line] 'comment-dwim-2)
@@ -1323,6 +1332,8 @@ narrowed."
   (global-set-key [remap yank-pop]                      #'consult-yank-pop)
 
   (advice-add #'multi-occur :override #'consult-multi-occur)
+
+  (setq consult-fd-args "fd --color=never")
 
   (defun consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
@@ -1778,7 +1789,7 @@ targets."
 ;; Magit: UI for git
 (use-package magit
   :ensure t
-  :defer 1
+  :defer 0.5
   :init
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
   (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
