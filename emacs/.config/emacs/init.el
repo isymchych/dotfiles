@@ -1360,7 +1360,7 @@ narrowed."
     ;; project
     (kbd "<leader>pb") 'consult-project-buffer
     (kbd "<leader>ps") 'consult-ripgrep
-    (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
+    ;; (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
     (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>pF") 'consult-fd-thing-at-point))
 
@@ -1462,30 +1462,15 @@ targets."
               :around #'embark-hide-which-key-indicator))
 
 
-;; Better control for "virtual" (temporary) windows
-(use-package popper
-  :disabled
+;; Rg: search using ripgrep
+(use-package rg
   :ensure t
-  :bind (("M-`"   . popper-toggle-latest)
-         ("C-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
-  :init
-  (setq
-   popper-display-control nil
-   popper-reference-buffers
-   '("\\*Messages\\*"
-     "\\*Warnings\\*"
-     "\\*Apropos\\*"
-     "Output\\*$"
-     "\\*Async Shell Command\\*"
-     "\\*Flycheck"
-     "\\*rustfmt\\*"
-     "\\magit: "
-     help-mode
-     compilation-mode))
+  :config
+  (evil-define-key 'normal 'global
+    (kbd "M-s R") 'rg-isearch-menu
+    (kbd "M-s r") 'rg-menu
 
-  (popper-mode +1)
-  (popper-echo-mode +1))
+    (kbd "<leader>pS") 'rg-project))
 
 
 
@@ -1820,7 +1805,9 @@ targets."
 
         ;; ask me if I want a tracking upstream
         magit-set-upstream-on-push 'askifnotset
+
         transient-default-level 5
+        transient-display-buffer-action '(display-buffer-below-selected)
 
         magit-diff-refine-hunk t ; show granular diffs in selected hunk
         ;; Don't display parent/related refs in commit buffers; they are rarely
