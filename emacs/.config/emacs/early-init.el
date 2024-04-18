@@ -44,6 +44,9 @@
                             (vertical-scroll-bars . nil)
                             (horizontal-scroll-bars . nil)
 
+                            ;; Setting the face in here prevents flashes of
+                            ;; color as the theme gets activated
+                            (background-color . "#2e3440")
 
                             (ns-appearance . dark)
                             (ns-transparent-titlebar . t)))
@@ -52,8 +55,8 @@
 (setq initial-frame-alist '(
                             ;; Setting the face in here prevents flashes of
                             ;; color as the theme gets activated
-                            (background-color . "#2e3440")
-                            (foreground-color . "white")))
+                            (foreground-color . "#cccccc")
+                            ))
 
 ;; Font
 (setq font-use-system-font nil)

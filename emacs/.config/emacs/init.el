@@ -1593,7 +1593,7 @@ targets."
 
 
 (use-package company-shell
-  :disabled
+  :if mb-use-company
   :after (company sh-script)
   :ensure t
   :config
@@ -1870,13 +1870,11 @@ targets."
 (use-package magit
   :ensure t
   :defer t
-  :commands (magit-status magit-log-all magit-log-buffer-file magit-blame)
-  :init
-  (evil-define-key 'normal 'global
-    (kbd "<leader>gs") 'magit-status
-    (kbd "<leader>gl") 'magit-log-all
-    (kbd "<leader>gL") 'magit-log-buffer-file
-    (kbd "<leader>gb") 'magit-blame)
+  :bind
+  (("<leader>gs" . 'magit-status)
+   ("<leader>gl" . 'magit-log-all)
+   ("<leader>gL" . 'magit-log-buffer-file)
+   ("<leader>gb" . 'magit-blame))
 
   :config
   (setq vc-follow-symlinks nil
@@ -2187,16 +2185,36 @@ targets."
   :init
   (if (not (package-installed-p 'robby))
       (package-vc-install "https://github.com/stevemolitor/robby"))
-
+  :bind ("<leader>ar" . 'robby-commands)
+  :custom
+  ((robby-openai-api-key mb-openai-api-key))
   :config
-  (setq robby-openai-api-key mb-openai-api-key)
   (robby-mode)
-
   (diminish 'robby-mode "🤖")
+  (evil-set-initial-state 'robby-chat-mode 'emacs))
 
-  (evil-set-initial-state 'robby-chat-mode 'emacs)
 
-  (evil-define-key 'normal 'global (kbd "<leader>ar") 'robby-commands))
+
+;; Chatgpt-shell: talk with ChatGPT
+(use-package chatgpt-shell
+  :if mb-openai-api-key
+  :ensure t
+  :bind ("<leader>ac" . 'chatgpt-shell)
+  :custom
+  ((chatgpt-shell-welcome-function nil)
+   (chatgpt-shell-root-path mb-save-path)
+   (chatgpt-shell-openai-key mb-openai-api-key)))
+
+
+
+;; Dall-E-shell: talk with dall-e
+(use-package dall-e-shell
+  :if mb-openai-api-key
+  :ensure t
+  :bind ("<leader>ad" . 'dall-e-shell)
+  :custom
+  ((dall-e-shell-welcome-function nil)
+   (dall-e-shell-openai-key mb-openai-api-key)))
 
 
 
