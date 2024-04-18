@@ -16,8 +16,8 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-(defvar mb-light-theme 'modus-operandi-tinted)
-(defvar mb-dark-theme 'modus-vivendi-tinted)
+(defvar mb-light-theme 'doom-one-light)
+(defvar mb-dark-theme 'doom-one)
 
 (defvar mb-tab-size        4)
 
@@ -213,7 +213,7 @@
 
 ;; dir to save info about interrupted sessions
 (setq auto-save-list-file-prefix mb-save-path)
-(setq multisession-directory mb-save-path)
+(setq tramp-persistency-file-name (expand-file-name "tramp" mb-save-path))
 ;; dir to store some temporary files
 (setq backup-directory-alist '(("." . mb-save-path)))
 
@@ -771,10 +771,24 @@ narrowed."
 
 ;; Nord theme https://github.com/arcticicestudio/nord-emacs
 ;; Solarized theme https://github.com/bbatsov/solarized-emacs
+
 ;; Doom emacs themes https://github.com/doomemacs/themes
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+
+  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  ;; (doom-themes-treemacs-config)
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
 
 ;; Modus themes https://protesilaos.com/emacs/modus-themes
 (use-package modus-themes
+  :disabled
   :ensure t
   :config
   (setq modus-themes-italic-constructs t
@@ -823,9 +837,18 @@ narrowed."
 
 
 
+;; Different background for "unreal" buffers (that aren't files), supported by some themes
+(use-package solaire-mode
+  :ensure t
+  :init
+  (solaire-global-mode +1))
+
+
+
 ;; Dimmer: make inactive tabs dim
 (use-package dimmer
   :if window-system
+  :disabled t
   :ensure t
   :defer 0.5
   :init
