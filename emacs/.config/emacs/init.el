@@ -1855,17 +1855,23 @@ targets."
 
 
 
+;; Transient: menus, used by magit and other packages
+(use-package transient
+  :ensure t
+  :init
+  ;; Must be set early to prevent ~/.emacs.d/transient from being created
+  (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
+        transient-values-file  (expand-file-name "transient/values" mb-save-path)
+        transient-history-file (expand-file-name "transient/history" mb-save-path)))
+
+
+
 ;; Magit: UI for git
 (use-package magit
   :ensure t
   :defer t
   :commands (magit-status magit-log-all magit-log-buffer-file magit-blame)
   :init
-  ;; Must be set early to prevent ~/.emacs.d/transient from being created
-  (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
-        transient-values-file  (expand-file-name "transient/values" mb-save-path)
-        transient-history-file (expand-file-name "transient/history" mb-save-path))
-
   (evil-define-key 'normal 'global
     (kbd "<leader>gs") 'magit-status
     (kbd "<leader>gl") 'magit-log-all
