@@ -166,6 +166,12 @@
 ;; disable only critical messages
 (setq warning-minimum-level :emergency)
 
+;; Emacs 30 and newer: Disable Ispell completion function.
+(setq text-mode-ispell-word-completion nil)
+
+;; Emacs 28 and newer: Hide commands in M-x which do not apply to the current mode.
+(setq read-extended-command-predicate #'command-completion-default-include-p)
+
 ;; make urls in comments/strings clickable
 (add-hook 'find-file-hook 'goto-address-prog-mode)
 
@@ -496,7 +502,11 @@ narrowed."
 (use-package dabbrev
   :config
   ;; do not split words on _ and -
-  (setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]"))
+  (setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]")
+
+  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 
 
 
@@ -741,7 +751,7 @@ narrowed."
 
 ;; Flymake
 (use-package flymake
-  :disabled t
+  :disabled
   :defer t
   :after (evil)
   :init
@@ -783,8 +793,7 @@ narrowed."
   :ensure t
   :config
   (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-common-palette-overrides modus-themes-preset-overrides-faint)
+        modus-themes-bold-constructs nil)
 
   (setq modus-themes-common-palette-overrides
         (append
@@ -831,13 +840,38 @@ narrowed."
 
 ;; Dimmer: make inactive tabs dim
 (use-package dimmer
+  :if window-system
   :ensure t
+  :init
+  ;; https://github.com/gonewest818/dimmer.el/issues/62#issuecomment-1820362245
+  (defun advise-dimmer-config-change-handler ()
+    "Advise to only force process if no predicate is truthy."
+    (let ((ignore (cl-some (lambda (f) (and (fboundp f) (funcall f)))
+                           dimmer-prevent-dimming-predicates)))
+      (unless ignore
+        (when (fboundp 'dimmer-process-all)
+          (dimmer-process-all t)))))
+
+  (defun corfu-frame-p ()
+    "Check if the buffer is a corfu frame buffer."
+    (string-match-p "\\` \\*corfu" (buffer-name)))
+
+  (defun dimmer-configure-corfu ()
+    "Convenience settings for corfu users."
+    (add-to-list
+     'dimmer-prevent-dimming-predicates
+     #'corfu-frame-p))
   :config
   (setq dimmer-fraction 0.3)
   (setq dimmer-adjustment-mode :foreground)
   (setq dimmer-use-colorspace :rgb)
   (dimmer-configure-magit)
   (dimmer-configure-which-key)
+
+  (advice-add
+   'dimmer-config-change-handler
+   :override 'advise-dimmer-config-change-handler)
+  (dimmer-configure-corfu)
 
   (dimmer-mode 1))
 
@@ -1216,9 +1250,8 @@ narrowed."
   :config
   (setq vundo-glyph-alist vundo-unicode-symbols)
 
-  (evil-define-key 'normal 'vundo-mode-map
-    (kbd "<leader>u") 'vundo
-    (kbd "<escape>") 'vundo-quit))
+  (evil-define-key 'normal vundo-mode-map (kbd "<escape>") 'vundo-quit)
+  (evil-define-key 'normal 'global (kbd "<leader>u") 'vundo))
 
 
 
@@ -1546,7 +1579,7 @@ targets."
 
 
 (use-package company-shell
-  :disabled t
+  :disabled
   :after (company sh-script)
   :ensure t
   :config
@@ -1555,14 +1588,17 @@ targets."
 
 
 ;; Completion-at-point (CAPF)
+;; M-SPC during completion allows to filter candidates
+;; M-g during completion shows candidate source
+;; M-h during completion shows candidate documentation
 (use-package corfu
-  :disabled t
   :ensure t
   :init
   (setq corfu-cycle t
         corfu-auto t
         corfu-auto-delay 0.1
         corfu-auto-prefix 1
+        corfu-scroll-margin 5
         corfu-indexed-start 1)
   (global-corfu-mode)
   (corfu-indexed-mode)
@@ -1596,7 +1632,9 @@ targets."
   (mapc #'evil-declare-change-repeat
         '(corfu-insert
           corfu-insert-exact
-          corfu-complete)))
+          corfu-complete))
+
+  (global-set-key (kbd "M-p") 'completion-at-point))
 
 
 
@@ -2147,7 +2185,7 @@ targets."
 
 ;; Python mode
 (use-package python
-  :disabled t
+  :disabled
   :interpreter ("python" . python-mode)
   :config
   (setq python-indent-offset mb-tab-size)
@@ -2255,7 +2293,7 @@ targets."
 
 ;; Markdown
 (use-package markdown-mode
-  :disabled t
+  :disabled
   :ensure t
   :defer t
   :config
@@ -2286,7 +2324,7 @@ targets."
 
 ;; Groovy mode (for Jenkinsfile)
 (use-package groovy-mode
-  :disabled t
+  :disabled
   :ensure t
   :defer t
   :config
@@ -2296,7 +2334,7 @@ targets."
 
 ;; Dockerfile mode
 (use-package dockerfile-mode
-  :disabled t
+  :disabled
   :ensure t
   :defer t
   :config
@@ -2306,7 +2344,7 @@ targets."
 
 ;; Graphql mode
 (use-package graphql-mode
-  :disabled t
+  :disabled
   :ensure t
   :defer t
   :config
