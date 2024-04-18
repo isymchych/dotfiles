@@ -2,6 +2,16 @@
 ;;; Commentary:
 ;;; Code:
 
+;; base configs dir
+(defvar mb-dotfiles-dir (file-name-directory (or (buffer-file-name) load-file-name)))
+
+(defvar mb-customizations-file (expand-file-name "custom.el" mb-dotfiles-dir))
+
+(defvar mb-font "iosevka term medium-15")
+
+;; load customizations file if it exists
+(load mb-customizations-file t)
+
 ;; reduce the frequency of garbage collection by making it happen on
 ;; each 100MB of allocated data (the default is on every 0.76MB)
 (setq gc-cons-threshold 100000000)
@@ -46,7 +56,6 @@
                             (foreground-color . "white")))
 
 ;; Font
-(defvar mb-font "iosevka term medium-15")
 (setq font-use-system-font nil)
 (setq-default default-font mb-font)
 

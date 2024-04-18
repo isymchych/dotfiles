@@ -13,11 +13,6 @@
 (defvar mb-is-mac-os (eq system-type 'darwin))
 (defvar mb-is-linux (eq system-type 'gnu/linux))
 
-;; base configs dir
-(defvar mb-dotfiles-dir (file-name-directory (or (buffer-file-name) load-file-name)))
-
-(defvar mb-customizations-file (expand-file-name "custom.el" mb-dotfiles-dir))
-
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
@@ -30,9 +25,6 @@
 
 ;; see https://platform.openai.com/api-keys
 (defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
-
-;; load customizations file if it exists
-(load mb-customizations-file t)
 
 ;; keep packages in emacs-version-specific directories
 ;; (setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
