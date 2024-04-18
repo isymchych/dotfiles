@@ -29,18 +29,29 @@
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
 
-
+;; default styles for *ALL* windows
 (setq default-frame-alist '((fullscreen . maximized)
-                            ;; You can turn off scroll bars by uncommenting these lines:
                             (vertical-scroll-bars . nil)
                             (horizontal-scroll-bars . nil)
 
+
+                            (ns-appearance . dark)
+                            (ns-transparent-titlebar . t)))
+
+;; default styles for *THE FIRST* window
+(setq initial-frame-alist '(
                             ;; Setting the face in here prevents flashes of
                             ;; color as the theme gets activated
                             (background-color . "#2e3440")
-                            (foreground-color . "white")
-                            (ns-appearance . dark)
-                            (ns-transparent-titlebar . t)))
+                            (foreground-color . "white")))
+
+;; Font
+(defvar mb-font "iosevka term medium-15")
+(setq font-use-system-font nil)
+(setq-default default-font mb-font)
+
+;; set font for all windows
+(add-to-list 'default-frame-alist `(font . ,mb-font))
 
 ;; Improve lsp-mode performance https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
 (setenv "LSP_USE_PLISTS" "true")

@@ -21,21 +21,18 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
-(defvar mb-font "iosevka term medium-15")
-
 (defvar mb-light-theme 'modus-operandi-tinted)
 (defvar mb-dark-theme 'modus-vivendi-tinted)
 
 (defvar mb-tab-size        4)
+
+(defvar mb-use-company  nil)
 
 ;; see https://platform.openai.com/api-keys
 (defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
 
 ;; load customizations file if it exists
 (load mb-customizations-file t)
-
-;; load local settings if file exists
-(load (expand-file-name "local.el" mb-dotfiles-dir) t)
 
 ;; keep packages in emacs-version-specific directories
 ;; (setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
@@ -174,12 +171,6 @@
 
 ;; make urls in comments/strings clickable
 (add-hook 'find-file-hook 'goto-address-prog-mode)
-
-;; Font
-(setq font-use-system-font nil)
-(setq-default default-font mb-font)
-;; set font for all windows
-(add-to-list 'default-frame-alist `(font . ,mb-font))
 
 ;; highlight current line
 (global-hl-line-mode t)
@@ -556,9 +547,9 @@ narrowed."
 
 ;; Flyspell-mode: spell-checking on the fly as you type
 (use-package flyspell
+  :defer 1
   :diminish flyspell-mode
   :init
-
   (when (executable-find "aspell")
     (setq ispell-program-name "aspell") ; use aspell instead of ispell
     (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-save-path))
@@ -589,6 +580,7 @@ narrowed."
 
 ;; IBuffer (local)
 (use-package ibuffer
+  :disabled
   :bind ([f2] . ibuffer)
   :init
   ;; use ibuffer on C-x C-b
@@ -776,7 +768,8 @@ narrowed."
 
 ;; Ediff: resolve merge conflicts
 (use-package ediff
-  :config
+  :defer t
+  :init
   (setq ediff-diff-options "-w" ; turn off whitespace checking
         ediff-split-window-function #'split-window-horizontally
         ediff-window-setup-function #'ediff-setup-windows-plain))
@@ -842,6 +835,7 @@ narrowed."
 (use-package dimmer
   :if window-system
   :ensure t
+  :defer 0.5
   :init
   ;; https://github.com/gonewest818/dimmer.el/issues/62#issuecomment-1820362245
   (defun advise-dimmer-config-change-handler ()
@@ -1120,7 +1114,6 @@ narrowed."
     (kbd "<leader> l <SPC>") 'just-one-space
 
     (kbd "<leader>ie") 'emoji-search
-    (kbd "<leader>is") 'yas-insert-snippet
 
     (kbd "<leader>bb") 'switch-to-buffer
     (kbd "<leader>bl") 'mb/cleanup-buffer
@@ -1412,10 +1405,11 @@ narrowed."
 ;; jump to project
 (use-package consult-jump-project
   :after consult
+  :defer t
+  :commands (consult-jump-project)
   :init
   (if (not (package-installed-p 'consult-jump-project))
       (package-vc-install "https://github.com/jdtsmith/consult-jump-project"))
-  :config
   (evil-define-key 'normal 'global
     (kbd "<leader>pp") 'consult-jump-project))
 
@@ -1423,8 +1417,10 @@ narrowed."
 ;; Jump to Flycheck error
 (use-package consult-flycheck
   :ensure t
+  :defer t
   :after (consult flycheck)
-  :config
+  :commands (consult-flycheck)
+  :init
   (evil-define-key 'normal 'global
     (kbd "<leader>le") #'consult-flycheck
     (kbd "M-e l") #'consult-flycheck))
@@ -1508,8 +1504,10 @@ targets."
 
 ;; Rg: search using ripgrep
 (use-package rg
+  :defer t
   :ensure t
-  :config
+  :commands (rg-menu rg-isearch-menu rg-project)
+  :init
   (evil-define-key 'normal 'global
     (kbd "M-s R") 'rg-isearch-menu
     (kbd "M-s r") 'rg-menu
@@ -1531,6 +1529,7 @@ targets."
 
 ;; Company-mode: autocomplete
 (use-package company
+  :if mb-use-company
   :ensure t
   :diminish company-mode
   :config
@@ -1587,19 +1586,24 @@ targets."
   (add-to-list 'company-backends 'company-shell))
 
 
+
 ;; Completion-at-point (CAPF)
 ;; M-SPC during completion allows to filter candidates
 ;; M-g during completion shows candidate source
 ;; M-h during completion shows candidate documentation
 (use-package corfu
+  :if (not mb-use-company)
   :ensure t
-  :init
+  :config
   (setq corfu-cycle t
         corfu-auto t
         corfu-auto-delay 0.1
         corfu-auto-prefix 1
         corfu-scroll-margin 5
-        corfu-indexed-start 1)
+        corfu-indexed-start 1
+        corfu-count 16
+        corfu-max-width 120
+        corfu-on-exact-match nil)
   (global-corfu-mode)
   (corfu-indexed-mode)
   (corfu-popupinfo-mode)
@@ -1641,36 +1645,46 @@ targets."
 ;; YASnippet: snippets
 (use-package yasnippet
   :ensure t
+  :defer t
+  :commands (yas-hippie-try-expand yas-insert-snippet yas-visit-snippet-file yas-new-snippet)
   :diminish yas-minor-mode
+  :init
+  ;; expand snippets with hippie expand
+  (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
+
+  ;; free up the binding for a prefix
+  (global-set-key (kbd "M-y") nil)
+  (global-set-key (kbd "M-y i") 'yas-insert-snippet)
+  (global-set-key (kbd "M-y e") 'yas-visit-snippet-file)
+  (global-set-key (kbd "M-y n") 'yas-new-snippet)
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>is") 'yas-insert-snippet)
+
   :config
   (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" mb-dotfiles-dir) t)
   (setq
    yas-verbosity          2
    yas-wrap-around-region t)
 
-  ;; expand snippets with hippie expand
-  (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
-
   ;; Remove GUI dropdown prompt (prefer ivy/helm)
   (delq 'yas-dropdown-prompt yas-prompt-functions)
 
   ;; disable `yas-expand` on TAB
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  (define-key yas-minor-mode-map (kbd "TAB") nil)
-
-  ;; free up the binding for a prefix
-  (global-set-key (kbd "M-y") nil)
-
-  (global-set-key (kbd "M-y i") 'yas-insert-snippet)
-  (global-set-key (kbd "M-y e") 'yas-visit-snippet-file)
-  (global-set-key (kbd "M-y n") 'yas-new-snippet))
+  (define-key yas-minor-mode-map (kbd "TAB") nil))
 
 (use-package consult-yasnippet
   :after (yasnippet)
   :ensure t
-  :config
+  :defer t
+  :commands (consult-yasnippet consult-yasnippet-visit-snippet-file)
+  :init
   (global-set-key (kbd "M-y i") 'consult-yasnippet)
-  (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file))
+  (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file)
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>is") 'consult-yasnippet))
 
 (use-package yasnippet-snippets
   :after (yasnippet)
@@ -1684,7 +1698,9 @@ targets."
 ;; Correct word at point
 (use-package flyspell-correct
   :ensure t
-  :config
+  :defer t
+  :commands (flyspell-correct-at-point)
+  :init
   (global-set-key [f8]    'flyspell-correct-at-point))
 
 
@@ -1827,12 +1843,19 @@ targets."
 ;; Magit: UI for git
 (use-package magit
   :ensure t
-  :defer 0.5
+  :defer t
+  :commands (magit-status magit-log-all magit-log-buffer-file magit-blame)
   :init
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
   (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
         transient-values-file  (expand-file-name "transient/values" mb-save-path)
         transient-history-file (expand-file-name "transient/history" mb-save-path))
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>gs") 'magit-status
+    (kbd "<leader>gl") 'magit-log-all
+    (kbd "<leader>gL") 'magit-log-buffer-file
+    (kbd "<leader>gb") 'magit-blame)
 
   :config
   (setq vc-follow-symlinks nil
@@ -1864,12 +1887,6 @@ targets."
         magit-revision-insert-related-refs nil)
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>gs") 'magit-status
-    (kbd "<leader>gl") 'magit-log-all
-    (kbd "<leader>gL") 'magit-log-buffer-file
-    (kbd "<leader>gb") 'magit-blame)
 
   ;; Close transient with ESC
   (define-key transient-map [escape] #'transient-quit-one)
@@ -1919,6 +1936,7 @@ targets."
 ;; Diff-hl: highlight changes in gutter
 (use-package diff-hl
   :ensure t
+  :defer 0.5
   :config
   (setq diff-hl-draw-borders nil)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
@@ -2065,8 +2083,7 @@ targets."
         lsp-semantic-tokens-enable t
 
         lsp-completion-default-behaviour :insert
-        lsp-completion-provider :capf
-        ;; lsp-completion-provider :none ;; use Corfu
+        lsp-completion-provider (if mb-use-company :capf :none)
         lsp-completion-show-detail t
         lsp-completion-show-kind t
 
@@ -2077,10 +2094,11 @@ targets."
 
         lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
   :config
-  (defun mb/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless)))
-  (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion)
+  (when mb-use-company
+    (defun mb/lsp-mode-setup-completion ()
+      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+            '(orderless)))
+    (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion))
 
   (evil-define-key 'normal 'lsp-mode-map
     (kbd "gd") 'lsp-find-definition
@@ -2136,6 +2154,7 @@ targets."
 ;; Flycheck-pos-tip: display flycheck error in a tooltip
 (use-package flycheck-pos-tip
   :ensure t
+  :after (flycheck)
   :config
   (flycheck-pos-tip-mode))
 
@@ -2263,6 +2282,7 @@ targets."
 
 ;; Run code formatters like Prettier
 (use-package apheleia
+  :defer 0.5
   :ensure t
   :diminish apheleia-mode
   :init (apheleia-global-mode +1)
