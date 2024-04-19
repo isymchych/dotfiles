@@ -1092,7 +1092,6 @@ narrowed."
 
     (kbd "<leader>ie") 'emoji-search
 
-    (kbd "<leader>bb") 'switch-to-buffer
     (kbd "<leader>bl") 'mb/cleanup-buffer
     (kbd "<leader>bd") 'mb/delete-current-buffer-file
     (kbd "<leader>br") 'mb/rename-file-and-buffer
@@ -2297,24 +2296,8 @@ targets."
 
 
 
-;; SCSS-mode
-(use-package scss-mode
-  :ensure t
-  :defer t
-  :mode ("\\.scss\\'" . scss-mode)
-  :init
-  ;; fix mode breaking due to missing flymake variables
-  ;; (setq flymake-allowed-file-name-masks nil
-  ;;       flymake-err-line-patterns nil)
-  :config
-  (setq scss-compile-at-save nil)
-  (message "mb: SCSS MODE"))
-
-
-
 ;; Markdown
 (use-package markdown-mode
-  :disabled
   :ensure t
   :defer t
   :config
