@@ -21,7 +21,7 @@
 
 (defvar mb-tab-size        4)
 
-(defvar mb-use-company  nil)
+(defvar mb-use-company  t)
 
 ;; see https://platform.openai.com/api-keys
 (defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
@@ -1561,6 +1561,7 @@ targets."
   (global-set-key (kbd "M-p") 'company-manual-begin))
 
 
+;; Company-shell: better autocomplete in shell
 (use-package company-shell
   :if mb-use-company
   :after (company sh-script)
@@ -1568,6 +1569,17 @@ targets."
   :config
   (setq company-shell-dont-fetch-meta mb-is-mac-os) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
   (add-to-list 'company-backends 'company-shell))
+
+
+;; Company-quickhelp: show docs for a candidate in a tooltip
+;; NOTE: change tooltip font size on Mac: defaults write org.gnu.Emacs NSToolTipsFontSize -int 14
+(use-package company-quickhelp
+  :if mb-use-company
+  :after company
+  :ensure t
+  :bind (:map company-active-map ("M-h" . #'company-quickhelp-manual-begin))
+  :config
+  (company-quickhelp-mode))
 
 
 

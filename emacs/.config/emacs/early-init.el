@@ -65,6 +65,8 @@
 ;; set font for all windows
 (add-to-list 'default-frame-alist `(font . ,mb-font))
 
+(message "Using font %s" mb-font)
+
 ;; Improve lsp-mode performance https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
 (setenv "LSP_USE_PLISTS" "true")
 
