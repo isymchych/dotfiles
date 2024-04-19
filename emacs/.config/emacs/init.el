@@ -1827,7 +1827,11 @@ targets."
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
   (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
         transient-values-file  (expand-file-name "transient/values" mb-save-path)
-        transient-history-file (expand-file-name "transient/history" mb-save-path)))
+        transient-history-file (expand-file-name "transient/history" mb-save-path))
+
+  :config
+  ;; Close transient with ESC
+  (define-key transient-map [escape] #'transient-quit-one))
 
 
 
@@ -1871,9 +1875,6 @@ targets."
         magit-revision-insert-related-refs nil)
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
-
-  ;; Close transient with ESC
-  (define-key transient-map [escape] #'transient-quit-one)
 
   ;; make <leader> work in magit
   (define-key magit-mode-map (kbd "SPC") nil)
@@ -2137,6 +2138,23 @@ targets."
 
 
 
+;; Run code formatters like Prettier
+(use-package apheleia
+  :defer 0.5
+  :ensure t
+  :diminish apheleia-mode
+  :init (apheleia-global-mode +1)
+  :bind (("<leader>ta" . 'apheleia-mode))
+  :config
+  (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
+
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("npx" "prettier" "--stdin-filepath" filepath))
+  (setf (alist-get 'prettier-json apheleia-formatters)
+        '("npx" "prettier" "--stdin-filepath" filepath "--parser=json")))
+
+
+
 ;; Robby mode: interact with OpenAI
 (use-package robby-mode
   :if mb-openai-api-key
@@ -2192,13 +2210,6 @@ targets."
 
   (add-hook 'makefile-mode-hook 'mb/use-tabs)
   (add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs))
-
-
-
-;; Justfile mode
-(use-package just-mode
-  :ensure t
-  :defer t)
 
 
 ;; Python mode
@@ -2279,21 +2290,23 @@ targets."
 ;; ---------------------------------------- 3rd PARTY LANGUAGES
 
 
-;; Run code formatters like Prettier
-(use-package apheleia
-  :defer 0.5
+;; Justfile mode syntax
+(use-package just-mode
   :ensure t
-  :diminish apheleia-mode
-  :init (apheleia-global-mode +1)
-  :bind (("<leader>ta" . 'apheleia-mode))
+  :defer t)
+
+;; Run justfile recipes
+(use-package justl
+  :ensure t
+  :defer t
+  :bind (("<leader>pj" . 'justl))
   :config
-  (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
-
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath))
-  (setf (alist-get 'prettier-json apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath "--parser=json")))
-
+  (evil-define-key 'normal justl-mode-map
+    (kbd "<RET>") 'justl-exec-recipe
+    (kbd "e")     'justl-exec-recipe
+    (kbd "E")     'justl-exec-eshell
+    (kbd "?")     'justl-help-popup
+    (kbd "w")     'justl-no-exec-eshell))
 
 
 ;; Markdown
