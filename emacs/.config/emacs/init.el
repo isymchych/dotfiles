@@ -1935,7 +1935,7 @@ targets."
   (define-key magit-mode-map (kbd "M-w") nil)
 
   ;; make M-tab work in magit status
-  (evil-define-key 'normal 'magit-mode-map [M-tab] 'mb/alternate-buffer)
+  (evil-define-key 'normal magit-mode-map [M-tab] 'mb/alternate-buffer)
 
   (message "mb: initialized MAGIT"))
 
@@ -2130,7 +2130,7 @@ targets."
             '(orderless)))
     (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion))
 
-  (evil-define-key 'normal 'lsp-mode-map
+  (evil-define-key 'normal lsp-mode-map
     (kbd "gd") 'lsp-find-definition
     (kbd "<leader>la") 'lsp-execute-code-action
     (kbd "<leader>lf") 'lsp-find-references
@@ -2226,7 +2226,12 @@ targets."
   :config
   (robby-mode)
   (diminish 'robby-mode "🤖")
-  (evil-set-initial-state 'robby-chat-mode 'emacs))
+
+  (define-key robby-chat-mode-map (kbd "v") nil t)
+
+  (evil-define-key 'normal robby-chat-mode-map
+    (kbd "a") 'robby-chat
+    (kbd "q") 'kill-this-buffer))
 
 
 
@@ -2315,7 +2320,7 @@ targets."
 ;; Emacs Lisp
 (use-package elisp-mode
   :init
-  (evil-define-key 'normal 'emacs-lisp-mode
+  (evil-define-key 'normal emacs-lisp-mode-map
     (kbd "<leader>meb") 'eval-buffer
     (kbd "<leader>mer") 'eval-region
     (kbd "<leader>mes") 'eval-last-sexp)
