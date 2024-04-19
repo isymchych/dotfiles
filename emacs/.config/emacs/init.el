@@ -441,6 +441,9 @@ narrowed."
 (define-key input-decode-map [?\C-\M-i] [M-tab])
 (global-set-key [M-tab]         'mb/alternate-buffer)
 
+;; free up keybinding to be used as a prefix
+(global-set-key (kbd "M-e")     'nil)
+
 (global-set-key (kbd "M-/")     'hippie-expand)
 (global-set-key (kbd "M-u")     'universal-argument)
 
@@ -1515,21 +1518,24 @@ targets."
 (use-package company
   :if mb-use-company
   :ensure t
+  :defer 0.5
   :diminish company-mode
   :config
   (setq
-   company-idle-delay                0.1
+   company-idle-delay                0.15
    company-tooltip-limit             20
    company-tooltip-align-annotations t
-   company-minimum-prefix-length     2
+   company-minimum-prefix-length     1
    company-echo-delay                0
    company-selection-wrap-around     t
+
+   company-insertion-triggers        nil
 
    company-dabbrev-ignore-case       nil
    company-dabbrev-downcase          nil
 
    company-require-match             nil
-   company-show-numbers             'left
+   company-show-quick-access         t
    company-transformers             '(delete-dups)
 
    company-backends '((company-files
@@ -1555,8 +1561,37 @@ targets."
 
   (global-company-mode 1)
 
+  ;; Remap the standard Emacs keybindings for invoking completion to instead use Company.
+  (global-set-key [remap completion-at-point] #'company-manual-begin)
+  (global-set-key [remap complete-symbol] #'company-manual-begin)
+
+  ;; Make TAB always complete the current selection, instead of
+  ;; only completing a common prefix.
+  (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
+  (define-key company-active-map (kbd "TAB") #'company-complete-selection)
+
+  ;; https://emacs.stackexchange.com/a/24800
+  ;; <return> is for windowed Emacs; RET is for terminal Emacs
+  (dolist (key '("<return>" "RET"))
+    ;; Here we are using an advanced feature of define-key that lets
+    ;; us pass an "extended menu item" instead of an interactive
+    ;; function. Doing this allows RET to regain its usual
+    ;; functionality when the user has not explicitly interacted with
+    ;; Company.
+    (define-key company-active-map (kbd key)
+                `(menu-item nil company-complete
+                            :filter ,(lambda (cmd)
+                                       (when (company-explicit-action-p)
+                                         cmd)))))
+
+  (define-key company-active-map (kbd "<f1>") nil)
+
   (define-key company-active-map (kbd "C-w") nil)
   (define-key company-active-map (kbd "C-j") nil)
+  (define-key company-active-map (kbd "C-s")  nil)
+  (define-key company-active-map (kbd "M-l")  'company-show-location)
+  (define-key company-active-map [remap scroll-down-command]  nil)
+  (define-key company-active-map [remap scroll-up-command]  nil)
 
   (global-set-key (kbd "M-p") 'company-manual-begin))
 
@@ -1579,6 +1614,7 @@ targets."
   :ensure t
   :bind (:map company-active-map ("M-h" . #'company-quickhelp-manual-begin))
   :config
+  (setq company-quickhelp-delay nil)
   (company-quickhelp-mode))
 
 
@@ -2151,6 +2187,13 @@ targets."
   :after (flycheck)
   :config
   (flycheck-pos-tip-mode))
+
+
+
+;; Eat: terminal emulator
+(use-package eat
+  :ensure t
+  :hook (eshell-load . eat-eshell-mode))
 
 
 
