@@ -954,6 +954,7 @@ narrowed."
   (defvar evil-want-C-i-jump t)
   (defvar evil-want-keybinding nil)
   (defvar evil-undo-system 'undo-fu)
+  (defvar evil-lookup-func #'helpful-at-point)
 
   ;; enable subword mode CamelCase movement in evil
   (define-category ?U "Uppercase")
@@ -1104,6 +1105,7 @@ narrowed."
 
     (kbd "<leader>tn") 'display-line-numbers-mode
     (kbd "<leader>tw") 'visual-line-mode
+    (kbd "<leader>tf") 'auto-fill-mode
     (kbd "<leader>tm") 'menu-bar-mode)
 
   (evil-define-key 'visual 'global
@@ -1573,6 +1575,8 @@ targets."
 ;; M-SPC during completion allows to filter candidates
 ;; M-g during completion shows candidate source
 ;; M-h during completion shows candidate documentation
+;; NOTE: Feels "slow" comparing to company; has visual glitches
+;; TODO: configure multiple completion sources
 (use-package corfu
   :if (not mb-use-company)
   :ensure t
