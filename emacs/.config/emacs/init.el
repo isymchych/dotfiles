@@ -287,8 +287,7 @@
 
 ;; https://github.com/syl20bnr/spacemacs/blob/a58a7d79b3713bcf693bb61d9ba83d650a6aba86/core/core-funcs.el#L331
 (defun mb/alternate-buffer (&optional window)
-  "Switch back and forth between current and last buffer in the
-current window."
+  "Switch back and forth between current and last buffer in the WINDOW."
   (interactive)
   (cl-destructuring-bind (buf start pos)
       (or (cl-find (window-buffer window) (window-prev-buffers)
@@ -342,18 +341,6 @@ current window."
         (delete-file filename)
         (kill-buffer buffer)
         (message "mb: File '%s' successfully removed" filename)))))
-
-(defun mb/eval-and-replace ()
-  "Replace the preceding sexp with its value."
-  (interactive)
-  (right-char)
-  (backward-kill-sexp)
-  (condition-case nil
-      (prin1 (eval (read (current-kill 0)))
-             (current-buffer))
-    (error (message "Invalid expression")
-           (insert (current-kill 0)))))
-
 
 (defun mb/revert-buffer ()
   "Revert active buffer without asking."
@@ -418,21 +405,6 @@ narrowed."
   (save-excursion
     (shell-command-on-region (mark) (point) "node-transform 'x => JSON.stringify(eval(`(${x})`), null, 2)'" (buffer-name) t "*MB ERROR BUFFER*" t)))
 
-
-(defvar mb-verbose-mode nil)
-(defun mb/toggle-verbose-mode ()
-  "Toggle line numbers and visual line wrapping."
-  (interactive)
-
-  (setq mb-verbose-mode (not mb-verbose-mode))
-  (message "mb/toggle-verbose-mode: %s" mb-verbose-mode)
-
-  (let ((arg (if mb-verbose-mode 1 0)))
-    (global-display-line-numbers-mode arg)
-    (global-visual-line-mode arg)
-    ))
-
-
 (defun mb/get-selected-text ()
   "Return the currently selected text in the current buffer."
   (if (region-active-p)
@@ -459,24 +431,20 @@ narrowed."
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
 
 
-;; make M-tab work in terminal
-(define-key input-decode-map [?\C-\M-i] [M-tab])
-
 ;; disable input methods
 (global-unset-key (kbd "C-\\"))
 
 ;; prevent accidentally closed frames
 (global-unset-key (kbd "C-x C-z"))
 
-(global-set-key (kbd "C-x e")   'mb/eval-and-replace)
-(global-set-key (kbd "C-x C-f") 'find-file)
+;; make M-tab work in terminal
+(define-key input-decode-map [?\C-\M-i] [M-tab])
 (global-set-key [M-tab]         'mb/alternate-buffer)
+
 (global-set-key (kbd "M-/")     'hippie-expand)
 (global-set-key (kbd "M-u")     'universal-argument)
 
-(global-set-key [f3]    'mb/toggle-verbose-mode)
 (global-set-key [f6]    'mb/revert-buffer)
-(global-set-key [f12]   'menu-bar-mode)
 
 
 ;; ---------------------------------------- BUILT-IN PACKAGES
@@ -837,14 +805,6 @@ narrowed."
 
 
 
-;; Different background for "unreal" buffers (that aren't files), supported by some themes
-(use-package solaire-mode
-  :ensure t
-  :init
-  (solaire-global-mode +1))
-
-
-
 ;; Dimmer: make inactive tabs dim
 (use-package dimmer
   :if window-system
@@ -1108,11 +1068,13 @@ narrowed."
   (which-key-add-key-based-replacements "SPC b" "Buffer actions")
   (which-key-add-key-based-replacements "SPC l" "List")
   (which-key-add-key-based-replacements "SPC m" "Mode actions")
+  (which-key-add-key-based-replacements "SPC h" "Help")
   (which-key-add-key-based-replacements "SPC p" "Project actions")
   (which-key-add-key-based-replacements "SPC g" "Git")
   (which-key-add-key-based-replacements "SPC i" "Insert")
   (which-key-add-key-based-replacements "SPC j" "Jump to")
   (which-key-add-key-based-replacements "SPC D" "current Dir")
+  (which-key-add-key-based-replacements "SPC t" "Toggle")
 
   ;; NOTE: m is reserved for mode-local bindings
   (evil-define-key 'normal 'global
@@ -1134,11 +1096,16 @@ narrowed."
     (kbd "<leader>bl") 'mb/cleanup-buffer
     (kbd "<leader>bd") 'mb/delete-current-buffer-file
     (kbd "<leader>br") 'mb/rename-file-and-buffer
+    (kbd "<leader>bR") 'mb/revert-buffer
 
     (kbd "<leader>pp") 'project-switch-project
     (kbd "<leader>pD") 'project-dired
     (kbd "<leader>pe") 'project-eshell
-    (kbd "<leader>pk") 'project-kill-buffers)
+    (kbd "<leader>pk") 'project-kill-buffers
+
+    (kbd "<leader>tn") 'display-line-numbers-mode
+    (kbd "<leader>tw") 'visual-line-mode
+    (kbd "<leader>tm") 'menu-bar-mode)
 
   (evil-define-key 'visual 'global
     (kbd "<leader>n")  'mb/narrow-or-widen-dwim
@@ -1245,11 +1212,12 @@ narrowed."
 ;; manage comments
 (use-package comment-dwim-2
   :after evil
-  :defer 0.5
   :ensure t
-  :config
-  (global-set-key [remap comment-line] 'comment-dwim-2)
-  (define-key evil-normal-state-map "gc" 'comment-dwim-2))
+  :defer t
+  :bind (([remap comment-line] . 'comment-dwim-2)
+         ([remap comment-dwim] . 'comment-dwim-2)
+         :map evil-normal-state-map
+         ("gc"   . 'comment-dwim-2)))
 
 
 ;; Visualise the undo history
@@ -1403,7 +1371,7 @@ narrowed."
     (kbd "<leader>le") 'consult-flymake
     (kbd "<leader>ll") 'consult-line
     (kbd "<leader>lo") 'consult-outline
-    (kbd "<leader>bb") 'consult-buffer
+    (kbd "gb")         'consult-buffer
     (kbd "<leader>SPC") 'consult-buffer
 
     (kbd "<leader>Ds") 'consult-ripgrep-in-current-dir
@@ -1431,28 +1399,29 @@ narrowed."
 
 ;; Jump to Flycheck error
 (use-package consult-flycheck
+  :after (consult flycheck)
   :ensure t
   :defer t
-  :after (consult flycheck)
-  :commands (consult-flycheck)
-  :init
-  (evil-define-key 'normal 'global
-    (kbd "<leader>le") #'consult-flycheck
-    (kbd "M-e l") #'consult-flycheck))
+  :bind
+  (("<leader>le" . 'consult-flycheck)
+   ("M-e l"      . 'consult-flycheck)))
 
 
 
 ;; Context commands for things at a point
 (use-package embark
   :ensure t
+  :bind
+  (("C-h B" . 'embark-bindings-at-point)
+   ("M-." .  'embark-act)
+   :map evil-normal-state-map
+   ("M-."        . 'embark-act)
+   ("<leader>hb" . 'embark-bindings-in-keymap)
+   ("<leader>hB" . 'embark-bindings))
 
   :config
   ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
-
-  (global-set-key (kbd "C-h B") 'embark-bindings-at-point)
-  (global-set-key (kbd "M-.") 'embark-act)
-  (define-key evil-normal-state-map (kbd "M-.") 'embark-act)
 
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
@@ -1465,7 +1434,6 @@ narrowed."
 (use-package embark-consult
   :ensure t
   :after (embark consult)
-  :demand t ; only necessary if you have the hook below
   ;; if you want to have consult previews as you move around an
   ;; auto-updating embark collect buffer
   :hook
@@ -1747,21 +1715,19 @@ targets."
 (use-package which-key
   :ensure t
   :diminish which-key-mode
+  :bind (("C-h w"            . 'which-key-show-major-mode)
+         ("C-h W"            . 'which-key-show-top-level))
   :init
   (setq
    which-key-compute-remaps t
-   which-key-allow-multiple-replacements t)
+   which-key-allow-multiple-replacements t
+   which-key-sort-order 'which-key-key-order-alpha)
 
   (which-key-mode)
 
   (push '((nil . "\\`evil-") . (nil . "😈-")) which-key-replacement-alist)
   (push '((nil . "\\`evil-collection-unimpaired-\\(.*\\)") . (nil . "😈-cu-\\1")) which-key-replacement-alist)
-  (push '(("RET" . nil) . ("⏎" . nil)) which-key-replacement-alist)
-
-  (global-set-key (kbd "C-h w") 'which-key-show-major-mode)
-  (global-set-key (kbd "C-h W") 'which-key-show-top-level)
-
-  (evil-define-key nil 'global (kbd "<leader><escape>") 'which-key-abort))
+  (push '(("RET" . nil) . ("⏎" . nil)) which-key-replacement-alist))
 
 
 
@@ -1991,22 +1957,15 @@ targets."
 (use-package treemacs
   :ensure t
   :defer t
+  :bind (("<leader>tt" . 'treemacs)
+         ("M-t" . 'treemacs-select-window)
+         ("<f4>" . 'treemacs))
   :init
   (setq treemacs-follow-after-init t
         treemacs-is-never-other-window nil
         treemacs-sorting 'alphabetic-case-insensitive-asc
         treemacs-persist-file (expand-file-name "treemacs-persist" mb-save-path)
         treemacs-last-error-persist-file (expand-file-name "treemacs-last-error-persist" mb-save-path))
-
-  (global-set-key [f4]    'treemacs)
-
-  (global-set-key (kbd "M-t") 'treemacs-select-window)
-
-  (which-key-add-key-based-replacements "SPC t" "Treemacs")
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>tt") 'treemacs
-    (kbd "<leader>tf") 'treemacs-find-file)
 
   :config
   ;; Don't follow the cursor (it's more disruptive/jarring than helpful as a default)
@@ -2200,21 +2159,23 @@ targets."
   :if mb-openai-api-key
   :ensure t
   :bind ("<leader>ac" . 'chatgpt-shell)
-  :custom
-  ((chatgpt-shell-welcome-function nil)
-   (chatgpt-shell-root-path mb-save-path)
-   (chatgpt-shell-openai-key mb-openai-api-key)))
+  :config
+  (setq chatgpt-shell-welcome-function nil
+        chatgpt-shell-root-path mb-save-path
+        chatgpt-shell-streaming nil
+        chatgpt-shell-openai-key mb-openai-api-key))
 
 
 
 ;; Dall-E-shell: talk with dall-e
 (use-package dall-e-shell
   :if mb-openai-api-key
+  :after chatgpt-shell
   :ensure t
   :bind ("<leader>ad" . 'dall-e-shell)
   :custom
   ((dall-e-shell-welcome-function nil)
-   (dall-e-shell-openai-key mb-openai-api-key)))
+   (dall-e-shell-openai-key       mb-openai-api-key)))
 
 
 
@@ -2325,6 +2286,7 @@ targets."
   :ensure t
   :diminish apheleia-mode
   :init (apheleia-global-mode +1)
+  :bind (("<leader>ta" . 'apheleia-mode))
   :config
   (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
 
