@@ -194,11 +194,6 @@
  ;; set default mode for unknown files
  major-mode 'text-mode
 
- ;; compilation mode
- compilation-scroll-output t
- compilation-ask-about-save nil
- compilation-save-buffers-predicate (lambda () nil)
-
  ;; move files to trash when deleting
  delete-by-moving-to-trash t)
 
@@ -216,6 +211,7 @@
 (setq tramp-persistency-file-name (expand-file-name "tramp" mb-save-path))
 ;; dir to store some temporary files
 (setq backup-directory-alist '(("." . mb-save-path)))
+(setq url-configuration-directory (expand-file-name "url" mb-save-path))
 
 ;; Transparently open compressed files
 (auto-compression-mode t)
@@ -256,7 +252,14 @@
 (setq split-width-threshold 160)
 
 
+;; Allow for minibuffer-ception. Sometimes we need another minibuffer command
+;; while we're in the minibuffer.
 (setq enable-recursive-minibuffers t)
+
+
+;; Expand the minibuffer to fit multi-line text displayed in the echo-area
+(setq resize-mini-windows 'grow-only)
+
 
 ;; Try to keep the cursor out of the read-only portions of the minibuffer.
 (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
@@ -651,7 +654,11 @@ narrowed."
         ;; it's higher than selection
         show-paren-priority 10
         ;; highlight everything inside parens
-        show-paren-style 'expression)
+        show-paren-style 'expression
+
+        show-paren-highlight-openparen t
+        show-paren-when-point-inside-paren t
+        show-paren-when-point-in-periphery t)
   (show-paren-mode 1))
 
 
@@ -666,7 +673,7 @@ narrowed."
 
 
 
-;; Dired
+;; Dired extensions
 (use-package dired-x
   :config
   (put 'dired-find-alternate-file 'disabled nil)
@@ -726,6 +733,35 @@ narrowed."
     (kbd "M-e l") 'flymake-show-project-diagnostics
     (kbd "M-e M-k") 'flymake-goto-prev-error
     (kbd "M-e b") 'flymake-start))
+
+
+
+;; Comint-mode: interact with REPLs
+(use-package comint
+  :no-require
+  :init
+  (setq ansi-color-for-comint-mode t
+        comint-prompt-read-only t
+        comint-buffer-maximum-size 2048))
+
+
+
+;; Compilation mode
+(use-package compile
+  :no-require
+  :init
+  (setq compilation-always-kill t       ; kill compilation process before starting another
+        compilation-ask-about-save nil  ; save all buffers on `compile'
+        compilation-save-buffers-predicate (lambda () nil)
+        compilation-scroll-output 'first-error)
+
+  (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
+
+  ;; Automatically truncate compilation buffers so they don't accumulate too
+  ;; much data and bog down the rest of Emacs.
+  (autoload 'comint-truncate-buffer "comint" nil t)
+  (add-hook 'compilation-filter-hook #'comint-truncate-buffer))
+
 
 
 
@@ -859,6 +895,20 @@ narrowed."
         doom-modeline-buffer-encoding nil
         doom-modeline-minor-modes t
         doom-modeline-env-version nil)
+
+  ;; minibuffer colors for evil states https://emacs.stackexchange.com/a/76861
+  (defun color-minibuffer (color)
+    `(lambda ()
+       (when (minibufferp)
+         (face-remap-add-relative 'minibuffer-prompt :foreground ,color))))
+  (add-hook 'evil-normal-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-normal-state nil t)))
+  (add-hook 'evil-operator-state-entry-hook (color-minibuffer (face-foreground 'doom-modeline-evil-operator-state nil t)))
+  (add-hook 'evil-insert-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-insert-state nil t)))
+  (add-hook 'evil-replace-state-entry-hook  (color-minibuffer (face-foreground 'doom-modeline-evil-replace-state nil t)))
+  (add-hook 'evil-visual-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-visual-state nil t)))
+  (add-hook 'evil-motion-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-motion-state nil t)))
+  (add-hook 'evil-emacs-state-entry-hook    (color-minibuffer (face-foreground 'doom-modeline-evil-emacs-state nil t)))
+
   (doom-modeline-mode 1))
 
 
@@ -956,6 +1006,7 @@ narrowed."
   (defvar evil-want-Y-yank-to-eol t)
   (defvar evil-want-C-i-jump t)
   (defvar evil-want-keybinding nil)
+  (defvar evil-want-minibuffer t)
   (defvar evil-undo-system 'undo-fu)
   (defvar evil-lookup-func #'helpful-at-point)
 
@@ -992,6 +1043,7 @@ narrowed."
   ;; Exit to normal state after save
   (add-hook 'after-save-hook 'evil-normal-state)
 
+  (evil-set-initial-state 'minibuffer-mode           'emacs)
   (evil-set-initial-state 'inferior-emacs-lisp-mode  'emacs)
   (evil-set-initial-state 'pylookup-mode             'emacs)
   (evil-set-initial-state 'term-mode                 'emacs)
@@ -1052,6 +1104,16 @@ narrowed."
   (global-set-key (kbd "M-l") 'right-char)
 
   (evil-ex-define-cmd "Q[uit]" 'evil-quit)
+
+  (evil-define-key 'emacs minibuffer-mode-map
+    ;; insert newline with Alt-Enter
+    (kbd "M-<return>") 'newline
+    (kbd "M-RET") 'newline
+
+    ;; make Enter work as expected in minibuffer default (emacs) state
+    (kbd "<return>") 'exit-minibuffer
+    (kbd "RET") 'exit-minibuffer)
+
 
   ;; Overload shifts so that they don't lose the selection
   ;; @see http://superuser.com/a/789156
@@ -1119,9 +1181,10 @@ narrowed."
 (use-package evil-collection
   :after evil
   :ensure t
-  :diminish evil-collection-unimpaired-mode
   :init
-  (setq evil-collection-setup-minibuffer nil)
+  (setq
+   evil-collection-setup-minibuffer t
+   evil-collection-want-unimpaired-p nil)
 
   :config
   (evil-collection-init)
@@ -1227,11 +1290,13 @@ narrowed."
 ;; Visualise the undo history
 (use-package vundo
   :ensure t
+  :defer t
+  :bind
+  ("<leader>u" . 'vundo)
   :config
   (setq vundo-glyph-alist vundo-unicode-symbols)
 
-  (evil-define-key 'normal vundo-mode-map (kbd "<escape>") 'vundo-quit)
-  (evil-define-key 'normal 'global (kbd "<leader>u") 'vundo))
+  (evil-define-key 'normal vundo-mode-map (kbd "<escape>") 'vundo-quit))
 
 
 
@@ -1561,10 +1626,6 @@ targets."
 
   (global-company-mode 1)
 
-  ;; Remap the standard Emacs keybindings for invoking completion to instead use Company.
-  (global-set-key [remap completion-at-point] #'company-manual-begin)
-  (global-set-key [remap complete-symbol] #'company-manual-begin)
-
   ;; Make TAB always complete the current selection, instead of
   ;; only completing a common prefix.
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
@@ -1581,7 +1642,9 @@ targets."
     (define-key company-active-map (kbd key)
                 `(menu-item nil company-complete
                             :filter ,(lambda (cmd)
-                                       (when (company-explicit-action-p)
+                                       (when (or (company-explicit-action-p)
+                                                 ;; or if previewing just one completion candidate
+                                                 (eq company-candidates-length 1))
                                          cmd)))))
 
   (define-key company-active-map (kbd "<f1>") nil)
@@ -2141,8 +2204,9 @@ targets."
 
 ;; Flycheck: lint files
 (use-package flycheck
-  :ensure t
   :diminish flycheck-mode
+  :ensure t
+  :defer 1
   :init (global-flycheck-mode)
   :config
   (setq
@@ -2220,12 +2284,15 @@ targets."
   :init
   (if (not (package-installed-p 'robby))
       (package-vc-install "https://github.com/stevemolitor/robby"))
-  :bind ("<leader>ar" . 'robby-commands)
+  :bind (("<leader>ar" . 'robby-commands)
+         ("<leader>aa" . 'robby-chat))
   :custom
   ((robby-openai-api-key mb-openai-api-key))
   :config
   (robby-mode)
   (diminish 'robby-mode "🤖")
+
+  (add-hook 'robby-chat-mode-hook (lambda () (setq-local markdown-hide-markup-in-view-modes nil)))
 
   (define-key robby-chat-mode-map (kbd "v") nil t)
 
@@ -2239,6 +2306,7 @@ targets."
 (use-package chatgpt-shell
   :if mb-openai-api-key
   :ensure t
+  :defer 0.5
   :bind ("<leader>ac" . 'chatgpt-shell)
   :config
   (setq chatgpt-shell-welcome-function nil
@@ -2253,6 +2321,7 @@ targets."
   :if mb-openai-api-key
   :after chatgpt-shell
   :ensure t
+  :defer
   :bind ("<leader>ad" . 'dall-e-shell)
   :custom
   ((dall-e-shell-welcome-function nil)
@@ -2383,11 +2452,10 @@ targets."
 
 ;; Markdown treesit mode
 (use-package markdown-ts-mode
+  :disabled
   :ensure t
   :mode ("\\.md\\'" . markdown-ts-mode)
   :defer t
-  ;; :config
-  ;; (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/ikatyang/tree-sitter-markdown" "master" "src"))
   :config
   (add-hook 'markdown-ts-mode-hook 'flyspell-mode)
   (message "mb: MARKDOWN-TS MODE"))
