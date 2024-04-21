@@ -415,6 +415,20 @@ narrowed."
     ""))
 
 
+(defvar mb-auto-fill-mode nil)
+(defun mb/toggle-auto-fill-mode ()
+  "Toggle auto-fill mode and fill indicator."
+  (interactive)
+
+  (setq mb-auto-fill-mode (not mb-auto-fill-mode))
+  (message "mb/toggle-auto-fill-mode: %s" mb-auto-fill-mode)
+
+  (let ((arg (if mb-auto-fill-mode 1 0)))
+    (auto-fill-mode arg)
+    (display-fill-column-indicator-mode arg)
+    ))
+
+
 ;; ---------------------------------------- GLOBAL KEYBINDINGS
 
 
@@ -1187,8 +1201,7 @@ narrowed."
     (kbd "<leader>pk") 'project-kill-buffers
 
     (kbd "<leader>tn") 'display-line-numbers-mode
-    (kbd "<leader>tw") 'visual-line-mode
-    (kbd "<leader>tf") 'auto-fill-mode
+    (kbd "<leader>tf") 'mb/toggle-auto-fill-mode
     (kbd "<leader>tm") 'menu-bar-mode)
 
   (evil-define-key 'visual 'global
@@ -1954,6 +1967,17 @@ targets."
 
 
 
+;; Visual-fill-column: visually wrap lines at fill-column instead of window margin
+(use-package visual-fill-column
+  :ensure t
+  :commands (visual-fill-column-mode)
+  :init
+  (setq-default visual-fill-column-center-text t)
+  (evil-define-key 'normal 'global
+    (kbd "<leader>tv") 'visual-fill-column-mode))
+
+
+
 ;; highlight todos
 (use-package hl-todo
   :ensure t
@@ -2385,7 +2409,13 @@ targets."
   :disabled
   :init
   (if (not (package-installed-p 'codeium))
-      (package-vc-install "https://github.com/Exafunction/codeium.el")))
+      (package-vc-install "https://github.com/Exafunction/codeium.el"))
+  :config
+  ;; get codeium status in the modeline
+  (setq codeium-mode-line-enable
+        (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
+  (add-to-list 'mode-line-misc-info '(:eval (car-safe codeium-mode-line)) t)
+  )
 
 
 ;; ---------------------------------------- BUILT-IN LANGUAGES
