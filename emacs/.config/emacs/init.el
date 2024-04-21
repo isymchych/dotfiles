@@ -885,16 +885,34 @@ narrowed."
 
 
 
+;; Nerd icons. Used by other packages. must use nerd font!
+(use-package nerd-icons
+  :ensure t
+  :config)
+
+
+
+;; Nerd icons for dired
+(use-package nerd-icons-dired
+  :ensure t
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+
+
 ;; Mode line
 (use-package doom-modeline
   :ensure t
   :config
   (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
-        doom-modeline-icon nil
+        doom-modeline-minor-modes t
+        doom-modeline-hud t
         doom-modeline-unicode-fallback nil
         doom-modeline-buffer-encoding nil
-        doom-modeline-minor-modes t
-        doom-modeline-env-version nil)
+        doom-modeline-env-version nil
+
+        ;; show evil register macro while recording it
+        doom-modeline-always-show-macro-register t)
 
   ;; minibuffer colors for evil states https://emacs.stackexchange.com/a/76861
   (defun color-minibuffer (color)
@@ -1474,6 +1492,15 @@ narrowed."
   :bind
   (("<leader>le" . 'consult-flycheck)
    ("M-e l"      . 'consult-flycheck)))
+
+
+;; Nerd icons for consult / completion
+(use-package nerd-icons-completion
+  :ensure t
+  :after marginalia
+  :config
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 
 
@@ -2086,6 +2113,13 @@ targets."
   ;; Don't follow the cursor (it's more disruptive/jarring than helpful as a default)
   (treemacs-follow-mode -1)
   (treemacs-project-follow-mode t))
+
+;; Treemacs nerd icons
+(use-package treemacs-nerd-icons
+  :ensure t
+  :after treemacs
+  :config
+  (treemacs-load-theme "nerd-icons"))
 
 ;; Treemacs integration with evil
 (use-package treemacs-evil
