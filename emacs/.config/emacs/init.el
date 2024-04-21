@@ -1940,9 +1940,9 @@ targets."
   :ensure t
   :init
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
-  (setq transient-levels-file  (expand-file-name "transient/levels" mb-save-path)
-        transient-values-file  (expand-file-name "transient/values" mb-save-path)
-        transient-history-file (expand-file-name "transient/history" mb-save-path))
+  (setq transient-levels-file  (expand-file-name "transient/levels.el" mb-save-path)
+        transient-values-file  (expand-file-name "transient/values.el" mb-save-path)
+        transient-history-file (expand-file-name "transient/history.el" mb-save-path))
 
   :config
   ;; Close transient with ESC
@@ -2284,6 +2284,7 @@ targets."
   :init
   (if (not (package-installed-p 'robby))
       (package-vc-install "https://github.com/stevemolitor/robby"))
+  :defer t
   :bind (("<leader>ar" . 'robby-commands)
          ("<leader>aa" . 'robby-chat))
   :custom
@@ -2292,27 +2293,17 @@ targets."
   (robby-mode)
   (diminish 'robby-mode "🤖")
 
+  ;; load robby-transient so that robby-api-options command becomes available
+  (require 'robby-transients)
+
   (add-hook 'robby-chat-mode-hook (lambda () (setq-local markdown-hide-markup-in-view-modes nil)))
 
   (define-key robby-chat-mode-map (kbd "v") nil t)
 
   (evil-define-key 'normal robby-chat-mode-map
     (kbd "a") 'robby-chat
-    (kbd "q") 'kill-this-buffer))
-
-
-
-;; Chatgpt-shell: talk with ChatGPT
-(use-package chatgpt-shell
-  :if mb-openai-api-key
-  :ensure t
-  :defer 0.5
-  :bind ("<leader>ac" . 'chatgpt-shell)
-  :config
-  (setq chatgpt-shell-welcome-function nil
-        chatgpt-shell-root-path mb-save-path
-        chatgpt-shell-streaming nil
-        chatgpt-shell-openai-key mb-openai-api-key))
+    (kbd "q") 'kill-this-buffer
+    (kbd "<leader>mm") 'robby-commands))
 
 
 
@@ -2327,6 +2318,40 @@ targets."
   ((dall-e-shell-welcome-function nil)
    (dall-e-shell-openai-key       mb-openai-api-key)))
 
+
+
+;; Gptel: interact with chatgpt and other LLMs
+(use-package gptel
+  :after transient
+  :if mb-openai-api-key
+  :ensure t
+  :custom
+  ((gptel-api-key mb-openai-api-key)
+   (gptel-max-tokens 2500)
+   (gptel-model "gpt-4-turbo")
+   (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
+  :bind ("C-x C-a" . 'gptel-send)
+  :config
+  (add-hook 'gptel-pre-response-hook 'evil-normal-state)
+  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+
+  (evil-define-key 'normal 'global
+    (kbd "<leader>ae") 'gptel-send
+    (kbd "<leader>ag") 'gptel)
+
+  (define-key gptel-mode-map (kbd "<leader>mm") 'gptel-menu)
+  (define-key gptel-mode-map (kbd "M-RET") 'gptel-send)
+  (define-key gptel-mode-map (kbd "M-<return>") 'gptel-send))
+
+
+
+;; Codeium: AI autocomplete
+(use-package codeium
+  :disabled
+  :init
+  (if (not (package-installed-p 'codeium))
+      (package-vc-install "https://github.com/Exafunction/codeium.el")))
 
 
 ;; ---------------------------------------- BUILT-IN LANGUAGES

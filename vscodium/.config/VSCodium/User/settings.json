@@ -8,7 +8,6 @@
   "editor.lineNumbers": "off",
   "editor.fontSize": 17,
   "problems.showCurrentInStatus": true,
-  "workbench.colorTheme": "Default Light Modern",
   "codeium.enableSearch": true,
   "keyboard.dispatch": "keyCode",
   "window.autoDetectColorScheme": true,
@@ -102,5 +101,6 @@
       "before": ["<leader>", "e"],
       "commands": ["workbench.view.explorer"]
     }
-  ]
+  ],
+  "workbench.colorTheme": "Default Light Modern"
 }

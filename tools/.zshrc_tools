@@ -1,2 +1,4 @@
 alias y=yazi
 alias j=just
+
+eval "$(zoxide init --cmd cd zsh)"
