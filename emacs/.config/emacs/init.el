@@ -403,7 +403,7 @@ narrowed."
     ""))
 
 
-(defvar mb-auto-fill-mode nil)
+(defvar-local mb-auto-fill-mode nil)
 (defun mb/toggle-auto-fill-mode ()
   "Toggle auto-fill mode and fill indicator."
   (interactive)
@@ -1970,9 +1970,28 @@ targets."
   :ensure t
   :commands (visual-fill-column-mode)
   :init
-  (setq-default visual-fill-column-center-text t)
+  (setq-default
+   visual-fill-column-center-text t
+   visual-fill-column-enable-sensible-window-split t)
+
+  (defvar-local mb-visual-fill-mode nil)
+  (defun mb/toggle-visual-fill-mode ()
+    "Toggle visual-fill mode."
+    (interactive)
+
+    (setq mb-visual-fill-mode (not mb-visual-fill-mode))
+    (message "mb/toggle-visual-fill-mode: %s" mb-visual-fill-mode)
+
+    (let ((arg (if mb-visual-fill-mode 1 0)))
+      (visual-fill-column-mode arg)
+      (visual-line-mode arg)))
+
+  ;; visual line mode
   (evil-define-key 'normal 'global
-    (kbd "<leader>tv") 'visual-fill-column-mode))
+    (kbd "<leader>tv") 'mb/toggle-visual-fill-mode)
+
+  :config
+  (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
 
 
 
