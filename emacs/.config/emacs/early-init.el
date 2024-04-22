@@ -7,7 +7,7 @@
 
 (defvar mb-customizations-file (expand-file-name "custom.el" mb-dotfiles-dir))
 
-(defvar mb-font "Iosevka Nerd Font 15")
+(defvar mb-font "Iosevka Nerd Font Mono:weight=semibold:size=26")
 
 ;; load customizations file if it exists
 (load mb-customizations-file t)
