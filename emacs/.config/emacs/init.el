@@ -1936,11 +1936,9 @@ targets."
   (if (not (package-installed-p 'indent-bars))
       (package-vc-install "https://github.com/jdtsmith/indent-bars"))
   :config
-  (setq indent-bars-prefer-character mb-is-mac-os) ;; https://github.com/d12frosted/homebrew-emacs-plus/issues/622
-  (require 'indent-bars-ts) 
-
-  (setq indent-bars-treesit-support t)
-  (setq indent-bars-treesit-ignore-blank-lines-types '("module")))
+  ;; NOTE: emacs-plus on mac doens't support :stipple face https://github.com/d12frosted/homebrew-emacs-plus/issues/622
+  ;; NOTE: emacs@29 with PGTK doens't display :stipples correctly (fixed in 30) https://github.com/jdtsmith/indent-bars/issues/3
+  (setq indent-bars-prefer-character t))
 
 
 
@@ -2402,8 +2400,8 @@ targets."
   :bind ("C-x C-a" . 'gptel-send)
   :config
   (add-hook 'gptel-pre-response-hook 'evil-normal-state)
-  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
-  (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+  ;; (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+  ;; (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
 
   (evil-define-key 'normal 'global
     (kbd "<leader>ae") 'gptel-send

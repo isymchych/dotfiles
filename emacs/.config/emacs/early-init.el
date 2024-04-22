@@ -7,7 +7,7 @@
 
 (defvar mb-customizations-file (expand-file-name "custom.el" mb-dotfiles-dir))
 
-(defcustom mb-font "Iosevka Fixed:weight=medium:size=17" "Default font to be used by Emacs." :type 'string :group 'mb-customizations)
+(defcustom mb-font "Iosevka Fixed:weight=medium:size=17" "Default font to be used by Emacs. Use \\[mb/change-font] to customize." :type 'string :group 'mb-customizations)
 
 ;; load customizations file if it exists
 (load mb-customizations-file t)
