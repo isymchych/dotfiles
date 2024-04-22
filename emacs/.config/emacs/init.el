@@ -90,6 +90,9 @@
  ;; avoid some initial frame resizing to speed up startup
  frame-inhibit-implied-resize t
 
+ ;; Don’t compact font caches during GC.
+ inhibit-compacting-font-caches t
+
  ;; no beep and blinking
  visible-bell       nil
  ring-bell-function 'ignore
@@ -355,16 +358,6 @@ narrowed."
         ((derived-mode-p 'org-mode) (org-narrow-to-subtree))
         (t (narrow-to-defun))))
 
-(defun mb/sort-columns ()
-  "Align selected columns using `column'."
-  (interactive)
-  (let (beg end column-command)
-    (setq column-command (if mb-is-linux "column -o \" \" -t" "column -t"))
-    (if (region-active-p)
-        (setq beg (region-beginning) end (region-end))
-      (setq beg (line-beginning-position) end (line-end-position)))
-    (shell-command-on-region beg end column-command (current-buffer) t nil)))
-
 (defun mb/display-ansi-colors ()
   "Replace ANSI escape chars with real colors in current buffer."
   (interactive)
@@ -420,13 +413,18 @@ narrowed."
 (defun mb/change-font ()
   "Interactively select a font and make it the default on all frames and save it."
   (interactive)
-  (when-let ((new-font (if (fboundp 'x-select-font)
-		                   (x-select-font)
-		                 (mouse-select-font)))
-             (new-font-name (font-xlfd-name new-font)))
-    (message "MB selected font: %s" new-font-name)
-    (set-frame-font new-font-name nil t)
-    (customize-save-variable 'mb-font new-font-name)))
+  ;; run in a timer so that M-x interface have time to close before font picker is visible
+  (run-with-timer
+   0.15
+   nil
+   (lambda ()
+     (when-let ((new-font (if (fboundp 'x-select-font)
+                              (x-select-font)
+                            (mouse-select-font)))
+                (new-font-name (font-xlfd-name new-font)))
+       (message "MB selected font: %s" new-font-name)
+       (set-frame-font new-font-name nil t)
+       (customize-save-variable 'mb-font new-font-name)))))
 
 
 
@@ -874,47 +872,6 @@ narrowed."
 
 
 
-;; Dimmer: make inactive tabs dim
-(use-package dimmer
-  :if window-system
-  :disabled t
-  :ensure t
-  :defer 0.5
-  :init
-  ;; https://github.com/gonewest818/dimmer.el/issues/62#issuecomment-1820362245
-  (defun advise-dimmer-config-change-handler ()
-    "Advise to only force process if no predicate is truthy."
-    (let ((ignore (cl-some (lambda (f) (and (fboundp f) (funcall f)))
-                           dimmer-prevent-dimming-predicates)))
-      (unless ignore
-        (when (fboundp 'dimmer-process-all)
-          (dimmer-process-all t)))))
-
-  (defun corfu-frame-p ()
-    "Check if the buffer is a corfu frame buffer."
-    (string-match-p "\\` \\*corfu" (buffer-name)))
-
-  (defun dimmer-configure-corfu ()
-    "Convenience settings for corfu users."
-    (add-to-list
-     'dimmer-prevent-dimming-predicates
-     #'corfu-frame-p))
-  :config
-  (setq dimmer-fraction 0.3)
-  (setq dimmer-adjustment-mode :foreground)
-  (setq dimmer-use-colorspace :rgb)
-  (dimmer-configure-magit)
-  (dimmer-configure-which-key)
-
-  (advice-add
-   'dimmer-config-change-handler
-   :override 'advise-dimmer-config-change-handler)
-  (dimmer-configure-corfu)
-
-  (dimmer-mode 1))
-
-
-
 ;; Nerd icons. Used by other packages. must use nerd font!
 ;; run M-x nerd-icons-install-fonts if icons are missing.
 (use-package nerd-icons
@@ -1158,6 +1115,7 @@ narrowed."
     ;; insert newline with Alt-Enter
     (kbd "M-<return>") 'newline
     (kbd "M-RET") 'newline
+    (kbd "C-w") 'evil-delete-backward-word
 
     ;; make Enter work as expected in minibuffer default (emacs) state
     (kbd "<return>") 'exit-minibuffer
@@ -1181,7 +1139,6 @@ narrowed."
 
   (which-key-add-key-based-replacements "SPC a" "AI actions")
   (which-key-add-key-based-replacements "SPC b" "Buffer actions")
-  (which-key-add-key-based-replacements "SPC l" "List")
   (which-key-add-key-based-replacements "SPC m" "Mode actions")
   (which-key-add-key-based-replacements "SPC h" "Help")
   (which-key-add-key-based-replacements "SPC p" "Project actions")
@@ -1190,20 +1147,23 @@ narrowed."
   (which-key-add-key-based-replacements "SPC j" "Jump to")
   (which-key-add-key-based-replacements "SPC D" "current Dir")
   (which-key-add-key-based-replacements "SPC t" "Toggle")
+  (which-key-add-key-based-replacements "SPC =" "Formatting actions")
+
+  (evil-define-key '(normal visual) 'global
+    (kbd "<leader>n")  'mb/narrow-or-widen-dwim)
 
   ;; NOTE: m is reserved for mode-local bindings
   (evil-define-key 'normal 'global
     (kbd "<leader>2")   'call-last-kbd-macro
     (kbd "<leader>q")   'evil-quit
-    (kbd "<leader>n")   'mb/narrow-or-widen-dwim
     (kbd "<leader>k")   'mb/kill-this-buffer
     (kbd "<leader>s")   'save-buffer
     (kbd "<leader>e")   'eshell
     (kbd "<leader>d")   'dired-jump
 
-    (kbd "<leader>lm") 'evil-show-marks
-    (kbd "<leader>li")  'imenu
-    (kbd "<leader> l <SPC>") 'just-one-space
+    (kbd "<leader>jm") 'evil-show-marks
+    (kbd "<leader>ji")  'imenu
+    (kbd "<leader>= <SPC>") 'just-one-space
 
     (kbd "<leader>ie") 'emoji-search
 
@@ -1219,11 +1179,7 @@ narrowed."
 
     (kbd "<leader>tn") 'display-line-numbers-mode
     (kbd "<leader>tf") 'mb/toggle-auto-fill-mode
-    (kbd "<leader>tm") 'menu-bar-mode)
-
-  (evil-define-key 'visual 'global
-    (kbd "<leader>n")  'mb/narrow-or-widen-dwim
-    (kbd "<leader>lt") 'mb/sort-columns))
+    (kbd "<leader>tm") 'menu-bar-mode))
 
 ;; integration of evil with various packages
 (use-package evil-collection
@@ -1484,10 +1440,9 @@ narrowed."
   (evil-define-key 'normal 'global
     (kbd "<leader>r") 'consult-recent-file
     (kbd "<leader>y") 'consult-yank-from-kill-ring
-    (kbd "<leader>li") 'consult-imenu
-    (kbd "<leader>le") 'consult-flymake
-    (kbd "<leader>ll") 'consult-line
-    (kbd "<leader>lo") 'consult-outline
+    ;; (kbd "<leader>je") 'consult-flymake
+    (kbd "<leader>jL") 'consult-line
+    (kbd "<leader>jo") 'consult-outline
     (kbd "gb")         'consult-buffer
     (kbd "<leader>SPC") 'consult-buffer
 
@@ -1497,7 +1452,7 @@ narrowed."
     ;; project
     (kbd "<leader>pb") 'consult-project-buffer
     (kbd "<leader>ps") 'consult-ripgrep
-    ;; (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
+    (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
     (kbd "<leader>pf") 'consult-fd
     (kbd "<leader>pF") 'consult-fd-thing-at-point))
 
@@ -1520,7 +1475,7 @@ narrowed."
   :ensure t
   :defer t
   :bind
-  (("<leader>le" . 'consult-flycheck)
+  (("<leader>je" . 'consult-flycheck)
    ("M-e l"      . 'consult-flycheck)))
 
 
@@ -1617,11 +1572,14 @@ targets."
   :ensure t
   :commands (rg-menu rg-isearch-menu rg-project)
   :init
+  ;; ensure rg-isearch-menu is loaded
+  (eval-after-load 'rg-menu '(require 'rg-isearch))
+
   (evil-define-key 'normal 'global
     (kbd "M-s R") 'rg-isearch-menu
     (kbd "M-s r") 'rg-menu
 
-    (kbd "<leader>pS") 'rg-project))
+    (kbd "<leader>pr") 'rg-project))
 
 
 
@@ -1953,6 +1911,7 @@ targets."
 (use-package rainbow-mode
   :ensure t
   :defer t
+  :bind (("<leader>tc" . 'rainbow-mode))
   :hook ((web-mode . rainbow-mode)
          (css-mode . rainbow-mode)
          (scss-mode . rainbow-mode)
@@ -1970,17 +1929,18 @@ targets."
 
 
 
-;; Highlight-indentation: highlight indentation columns
-(use-package highlight-indentation
-  :ensure t
-  :defer t
-  :diminish highlight-indentation-current-column-mode
+;; Indent-bars: highlight indentation
+(use-package indent-bars
+  :hook ((yaml-mode yaml-ts-mode prog-mode) . indent-bars-mode)
   :init
-  (add-hook 'prog-mode-hook 'highlight-indentation-current-column-mode)
-  (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
+  (if (not (package-installed-p 'indent-bars))
+      (package-vc-install "https://github.com/jdtsmith/indent-bars"))
   :config
-  (set-face-background 'highlight-indentation-face (face-background 'highlight))
-  (set-face-background 'highlight-indentation-current-column-face (face-background 'highlight)))
+  (setq indent-bars-prefer-character mb-is-mac-os) ;; https://github.com/d12frosted/homebrew-emacs-plus/issues/622
+  (require 'indent-bars-ts) 
+
+  (setq indent-bars-treesit-support t)
+  (setq indent-bars-treesit-ignore-blank-lines-types '("module")))
 
 
 
@@ -2063,7 +2023,7 @@ targets."
         magit-push-always-verify nil
 
         ;; max length of first line of commit message
-        git-commit-summary-max-length 70
+        git-commit-summary-max-length 72
 
         ;; ask me if I want a tracking upstream
         magit-set-upstream-on-push 'askifnotset
@@ -2075,6 +2035,11 @@ targets."
         ;; Don't display parent/related refs in commit buffers; they are rarely
         ;; helpful and only add to runtime costs.
         magit-revision-insert-related-refs nil)
+
+  (add-hook 'git-commit-mode-hook
+            (lambda ()
+              (setq-local fill-column git-commit-summary-max-length)
+              (mb/toggle-auto-fill-mode)))
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
 
@@ -2225,10 +2190,9 @@ targets."
   :ensure t
   :diminish lsp-mode
   :defer t
-  :hook (lsp-mode . lsp-enable-which-key-integration)
   :init
   (setq lsp-session-file (expand-file-name "lsp-session-v1" mb-save-path)
-        lsp-keymap-prefix "s-l"
+        lsp-keymap-prefix nil
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
@@ -2287,12 +2251,14 @@ targets."
             '(orderless)))
     (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion))
 
-  (evil-define-key 'normal lsp-mode-map
-    (kbd "gd") 'lsp-find-definition
-    (kbd "<leader>la") 'lsp-execute-code-action
-    (kbd "<leader>lf") 'lsp-find-references
-    (kbd "<leader>lt") 'lsp-goto-type-definition
-    (kbd "<leader>lr") 'lsp-rename))
+  (which-key-add-key-based-replacements "SPC l" "LSP")
+  (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration)
+  (add-hook 'lsp-mode-hook (lambda ()
+                             (evil-local-set-key 'normal (kbd "gd") 'lsp-find-definition)
+                             (evil-local-set-key 'normal (kbd "<leader>la") 'lsp-execute-code-action)
+                             (evil-local-set-key 'normal (kbd "<leader>lf") 'lsp-find-references)
+                             (evil-local-set-key 'normal (kbd "<leader>lt") 'lsp-goto-type-definition)
+                             (evil-local-set-key 'normal (kbd "<leader>lr") 'lsp-rename))))
 
 
 
@@ -2339,12 +2305,23 @@ targets."
     (kbd "M-e L") 'mb/toggle-flyckeck-errors-list
     (kbd "M-e b") 'flycheck-buffer))
 
-;; Flycheck-pos-tip: display flycheck error in a tooltip
-(use-package flycheck-pos-tip
+;; Flycheck-posframe: display flycheck error
+(use-package flycheck-posframe
   :ensure t
-  :after (flycheck)
+  :after flycheck
   :config
-  (flycheck-pos-tip-mode))
+  (setq flycheck-posframe-border-width 2
+        flycheck-posframe-position 'window-bottom-left-corner)
+
+  ;; Don't display popups if company is open
+  (add-hook 'flycheck-posframe-inhibit-functions #'company--active-p)
+
+  ;; Don't display popups while in insert or replace mode, as it can affect
+  ;; the cursor's position or cause disruptive input delays.
+  (add-hook 'flycheck-posframe-inhibit-functions #'evil-insert-state-p)
+  (add-hook 'flycheck-posframe-inhibit-functions #'evil-replace-state-p)
+
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 
 
 

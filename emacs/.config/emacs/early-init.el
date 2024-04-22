@@ -40,23 +40,20 @@
 (if (fboundp 'menu-bar-mode)   (menu-bar-mode -1))
 
 ;; default styles for *ALL* windows
-(setq default-frame-alist '((fullscreen . maximized)
-                            (vertical-scroll-bars . nil)
+(setq default-frame-alist '((vertical-scroll-bars . nil)
                             (horizontal-scroll-bars . nil)
 
-                            ;; Setting the face in here prevents flashes of
-                            ;; color as the theme gets activated
-                            (background-color . "#2e3440")
-
-                            (ns-appearance . dark)
                             (ns-transparent-titlebar . t)))
 
 ;; default styles for *THE FIRST* window
-(setq initial-frame-alist '(
+(setq initial-frame-alist '((fullscreen . maximized)
+
                             ;; Setting the face in here prevents flashes of
                             ;; color as the theme gets activated
                             (foreground-color . "#cccccc")
-                            ))
+                            (background-color . "#2e3440")
+
+                            (ns-appearance . dark)))
 
 ;; Font
 (setq font-use-system-font nil)
