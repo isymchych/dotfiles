@@ -417,6 +417,19 @@ narrowed."
     ))
 
 
+(defun mb/change-font ()
+  "Interactively select a font and make it the default on all frames and save it."
+  (interactive)
+  (when-let ((new-font (if (fboundp 'x-select-font)
+		                   (x-select-font)
+		                 (mouse-select-font)))
+             (new-font-name (font-xlfd-name new-font)))
+    (message "MB selected font: %s" new-font-name)
+    (set-frame-font new-font-name nil t)
+    (customize-save-variable 'mb-font new-font-name)))
+
+
+
 ;; ---------------------------------------- GLOBAL KEYBINDINGS
 
 
@@ -448,6 +461,11 @@ narrowed."
 
 ;; free up keybinding to be used as a prefix
 (global-set-key (kbd "M-e")     'nil)
+
+
+;; remove some Super- keybindings on mac
+(global-set-key (kbd "s-t")     'nil)
+(global-set-key (kbd "s-n")     'nil)
 
 (global-set-key (kbd "M-/")     'hippie-expand)
 (global-set-key (kbd "M-u")     'universal-argument)
@@ -898,9 +916,10 @@ narrowed."
 
 
 ;; Nerd icons. Used by other packages. must use nerd font!
+;; run M-x nerd-icons-install-fonts if icons are missing.
 (use-package nerd-icons
-  :ensure t
-  :config)
+  :defer t
+  :ensure t)
 
 
 
@@ -2385,7 +2404,6 @@ targets."
 ;; Dall-E-shell: talk with dall-e
 (use-package dall-e-shell
   :if mb-openai-api-key
-  :after chatgpt-shell
   :ensure t
   :defer
   :bind ("<leader>ad" . 'dall-e-shell)
@@ -2397,7 +2415,6 @@ targets."
 
 ;; Gptel: interact with chatgpt and other LLMs
 (use-package gptel
-  :after transient
   :if mb-openai-api-key
   :ensure t
   :custom

@@ -43,7 +43,7 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 * install pacman -S --needed base-devel git go vim just
 * install yay
 * install openssh, stow, rustup, sccache, lld
-* install zsh, zsh-completions, zsh-autosuggestions, zsh-syntax-highlighting, starship, ttf-nerd-fonts-symbols-extra, powerline-fonts
+* install zsh, zsh-completions, zsh-autosuggestions, zsh-syntax-highlighting, zoxide, starship, ttf-nerd-fonts-symbols-extra, powerline-fonts
 * install udisks2 to mount usb drives
 * htop
 * zip
