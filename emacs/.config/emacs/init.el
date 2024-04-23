@@ -1042,13 +1042,33 @@ narrowed."
    ;; do not move cursor back 1 position when exiting insert mode
    evil-move-cursor-back nil
 
+   ;; It's infuriating that innocuous "beginning of line" or "end of line"
+   ;; errors will abort macros, so suppress them:
    evil-kbd-macro-suppress-motion-error t
+
+   ;; Only do highlighting in selected window so that Emacs has less work
+   ;; to do highlighting them all.
+   evil-ex-interactive-search-highlight 'selected-window
 
    ;; search for whole words not only for part
    evil-symbol-word-search 'symbol)
 
   ;; Exit to normal state after save
   (add-hook 'after-save-hook 'evil-normal-state)
+
+
+  (evil-select-search-module 'evil-search-module 'evil-search)
+
+  ;; PERF: Stop copying the selection to the clipboard each time the cursor
+  ;; moves in visual mode. Why? Because on most non-X systems (and in terminals
+  ;; with clipboard plugins like xclip.el active), Emacs will spin up a new
+  ;; process to communicate with the clipboard for each movement. On Windows,
+  ;; older versions of macOS (pre-vfork), and Waylang (without pgtk), this is
+  ;; super expensive and can lead to freezing and/or zombie processes.
+  ;;
+  ;; UX: It also clobbers clipboard managers (see emacs-evil/evil#336).
+  (setq evil-visual-update-x-selection-p nil)
+
 
   (evil-set-initial-state 'minibuffer-mode           'emacs)
   (evil-set-initial-state 'inferior-emacs-lisp-mode  'emacs)
@@ -1165,6 +1185,7 @@ narrowed."
     (kbd "<leader>jm") 'evil-show-marks
     (kbd "<leader>ji")  'imenu
     (kbd "<leader>= <SPC>") 'just-one-space
+    (kbd "<leader>=s") 'sort-lines
 
     (kbd "<leader>ie") 'emoji-search
     (kbd "<leader>ic") 'insert-char
