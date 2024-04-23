@@ -378,7 +378,7 @@ exec wl-paste --watch cliphist store
 # exec mpris-proxy
 
 exec nm-applet --indicator
-exec blueman-applet
+# exec blueman-applet
 # exec safeeyes -d
 exec udiskie --appindicator
 

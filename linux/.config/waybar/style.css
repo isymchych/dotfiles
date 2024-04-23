@@ -16,11 +16,6 @@ window {
   min-height: 0;
 }
 
-/* FIXME https://github.com/Alexays/Waybar/issues/1741 */
-button, label {
-  all: unset;
-}
-
 window#waybar {
   background-color: #2e3440;
   color: #ffffff;
@@ -129,9 +124,14 @@ label:focus {
 
 #pulseaudio {
   font-size: 1.2em;
+
+  min-height: 30px;
+
   padding-top: 8px;
   padding-bottom: 8px;
-  min-height: 30px;
+
+  padding-left: 10px;
+  padding-right: 5px;
 }
 #pulseaudio.playback.muted, #pulseaudio.mic.source-muted {
   background-color: #90b1b1;
@@ -139,7 +139,7 @@ label:focus {
 }
 
 #bluetooth {
-  font-size: 1.3em;
+  font-size: 1.6em;
   padding-top: 8px;
   padding-bottom: 8px;
 }
@@ -154,11 +154,6 @@ label:focus {
   font-size: 1.6em;
   padding-top: 8px;
   padding-bottom: 8px;
-}
-
-#mpris.paused {
-  background-color: #90b1b1;
-  color: #2a5c45;
 }
 
 #power-profiles-daemon {

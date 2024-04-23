@@ -43,6 +43,12 @@
 (setq default-frame-alist '((vertical-scroll-bars . nil)
                             (horizontal-scroll-bars . nil)
 
+                            ;; Setting the face in here prevents flashes of
+                            ;; color as the theme gets activated
+                            ;; NOTE: its here because in initial-frame-alist it breaks consult M-x match color in dark theme
+                            ;; it is going to be removed in init.el
+                            (background-color . "#2e3440")
+
                             (ns-transparent-titlebar . t)))
 
 ;; default styles for *THE FIRST* window
@@ -51,7 +57,6 @@
                             ;; Setting the face in here prevents flashes of
                             ;; color as the theme gets activated
                             (foreground-color . "#cccccc")
-                            (background-color . "#2e3440")
 
                             (ns-appearance . dark)))
 

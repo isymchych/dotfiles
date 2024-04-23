@@ -60,6 +60,9 @@
   (make-directory mb-save-path))
 
 
+;; NOTE: the background-color was added in early-init.el but should be removed
+;; to avoid discrepancies in background color in new frames
+(setq default-frame-alist (assq-delete-all 'background-color default-frame-alist))
 
 ;; ---------------------------------------- CONFIG
 
@@ -1113,6 +1116,13 @@ narrowed."
   ;; insert newline only in emacs state
   (define-key evil-emacs-state-map (kbd "RET") #'newline)
 
+  ;; in prog modes I want RET in comment to continue comment in new line
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (when (derived-mode-p 'prog-mode)
+                (define-key evil-insert-state-local-map (kbd "RET") #'default-indent-new-line))))
+
+
   ;; in many modes q is close/exit etc., so leave it unbound
   (define-key evil-normal-state-map "q" nil)
   (define-key evil-normal-state-map "Q" 'evil-record-macro)
@@ -1360,7 +1370,7 @@ narrowed."
       `(orderless-without-literal . ,(substring pattern 1)))))
 
   (setq completion-styles '(basic orderless)
-        orderless-matching-styles '(orderless-literal)
+        orderless-matching-styles '(orderless-regexp)
         orderless-style-dispatchers '(without-if-bang)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion)))))
@@ -2422,10 +2432,12 @@ targets."
    (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
   :bind ("C-x C-a" . 'gptel-send)
   :config
-  (add-hook 'gptel-pre-response-hook 'evil-normal-state)
+  (defadvice gptel-send (after start-evil-normal-state activate)
+    (evil-normal-state))
 
   (evil-define-key 'normal 'global
     (kbd "<leader>ae") 'gptel-send
+    (kbd "<leader>ak") 'gptel-abort
     (kbd "<leader>ag") 'gptel)
 
   (define-key gptel-mode-map (kbd "<leader>mm") 'gptel-menu)
