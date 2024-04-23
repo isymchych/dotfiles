@@ -262,7 +262,7 @@ for_window [app_id="wdisplays"] floating enable
 for_window [class="^Wine"]        floating enable
 for_window [class="^Workrave"]    floating enable
 for_window [class="^Mojosetup"]   floating enable # GOG installer
-for_window [app_id="safeeyes"]    floating enable 
+for_window [app_id="safeeyes"]    floating enable
 for_window [class="^Gcolor3"]     floating enable
 for_window [class="^Vncviewer"]   floating enable
 for_window [class="^Remmina"]     floating enable
@@ -271,6 +271,7 @@ for_window [app_id="nm-connection-editor"]  floating enable
 for_window [class="^Gtk-recordMyDesktop"] floating enable
 # for_window [class="^Termite"]     floating enable
 for_window [app_id="com.github.wwmm.easyeffects"]  border pixel $border
+for_window [app_id="qalculate-gtk"] floating enable
 
 for_window [class="^Gnome-calculator"] floating enable border pixel $border
 for_window [class="^Gcr-prompter"]     floating enable
@@ -331,7 +332,7 @@ bindsym --to-code $mod+Shift+p exec mb-run-app
 bindsym --to-code $mod+p exec mb-run-app
 bindsym XF86Launch1 exec mb-run-app
 
-# Mako - notification daemon 
+# Mako - notification daemon
 bindsym $mod+Escape exec makoctl dismiss --all
 bindsym $mod+Shift+Escape exec makoctl restore
 

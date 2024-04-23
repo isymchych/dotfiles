@@ -119,7 +119,7 @@ $ chmod 600 ~/.ssh/key
 * swappy - simple drawing on top of images
 * yazi - file manager
 * translate-shell - Google Translate
-* mate-calc - calculator
+* qalculate-gtk - calculator
 * easyeffects - enable "auto gain" plugin, for volume normalisation
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
