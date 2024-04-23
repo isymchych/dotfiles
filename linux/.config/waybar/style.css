@@ -42,7 +42,6 @@ window#waybar {
 #clock.day-of-week {
   font-size: 1em;
   padding-top: 0;
-  padding-bottom: 1.3em;
 }
 
 #workspaces button {
@@ -88,7 +87,7 @@ window#waybar {
 }
 
 #backlight {
-  padding: 5px 2px 1px 5px;
+  padding: 8px 2px 8px 5px;
 }
 #battery {
   padding: 5px 0px 5px 2px;
@@ -124,20 +123,75 @@ label:focus {
   background-color: #000000;
 }
 
-#pulseaudio.muted {
-  background-color: #90b1b1;
-  color: #2a5c45;
-}
-
 #temperature.critical {
   background-color: #bf616a;
 }
 
 #pulseaudio {
+  font-size: 1.2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  min-height: 30px;
+}
+#pulseaudio.playback.muted, #pulseaudio.mic.source-muted {
+  background-color: #90b1b1;
+  color: #2a5c45;
+}
+
+#bluetooth {
   font-size: 1.3em;
-  padding: 5px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 #language {
+  font-size: 1.3em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+#mpris {
   font-size: 1.6em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+#mpris.paused {
+  background-color: #90b1b1;
+  color: #2a5c45;
+}
+
+#power-profiles-daemon {
+  font-size: 2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-right: 10px;
+}
+
+#systemd-failed-units {
+  color: #eb4d4b;
+
+  animation-name: blink;
+  animation-duration: 0.5s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+
+  font-size: 2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+#custom-run-app {
+  font-size: 2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+
+#custom-shutdown-menu {
+  font-size: 2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-left: 10px
 }

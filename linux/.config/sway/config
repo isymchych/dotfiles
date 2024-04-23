@@ -327,9 +327,9 @@ bindsym XF86KbdBrightnessDown exec mb-backlight --keyboard dec
 bindsym $mod+Return exec alacritty
 
 # app runner
-bindsym --to-code $mod+Shift+p exec wofi --show=run -i
-bindsym --to-code $mod+p exec wofi --show=drun -i
-bindsym XF86Launch1 exec wofi --show=drun -i
+bindsym --to-code $mod+Shift+p exec mb-run-app
+bindsym --to-code $mod+p exec mb-run-app
+bindsym XF86Launch1 exec mb-run-app
 
 # Mako - notification daemon 
 bindsym $mod+Escape exec makoctl dismiss --all

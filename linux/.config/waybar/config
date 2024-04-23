@@ -1,16 +1,41 @@
 {
   "layer": "top", // Waybar at top layer
   "position": "right", // Waybar position (top|bottom|left|right)
-  "modules-left": ["clock", "clock#date", "clock#day-of-week", "sway/workspaces", "sway/mode"],
-  "modules-center": ["sway/language", "pulseaudio", "pulseaudio#mic", "tray"],
-  "modules-right": ["cpu", "temperature", "memory", "disk", "backlight", "battery"],
+  "modules-left": [
+    "clock",
+    "clock#date",
+    "clock#day-of-week",
+    "sway/language",
+    "sway/workspaces",
+    "sway/mode"
+  ],
+  "modules-center": [
+    "mpris",
+    "pulseaudio#playback",
+    "pulseaudio#mic",
+    "bluetooth",
+    "tray"
+  ],
+  "modules-right": [
+    "custom/run-app",
+    "power-profiles-daemon",
+    "systemd-failed-units",
+    "cpu",
+    "memory",
+    // "memory#swap",
+    "temperature",
+    "disk",
+    "backlight",
+    "battery",
+    "custom/shutdown-menu"
+  ],
   // Modules configuration
   "sway/workspaces": {
     "disable-scroll": true,
     "all-outputs": true
   },
   "sway/mode": {
-    "format": "<span style=\"italic\">{}</span>"
+    "format": "<span style='italic'>{}</span>"
   },
   "tray": {
     "icon-size": 28,
@@ -32,11 +57,16 @@
     "on-click": "gsimplecal"
   },
   "cpu": {
-    "format": "CPU {usage:3}%",
+    "format": " CPU{usage:3}%",
     "tooltip": true
   },
   "memory": {
-    "format": "MEM {:3}%"
+    "format": " MEM{percentage:3}%",
+    "tooltip-format": "{used:0.1f}GiB out of {total:0.1f}GiB used"
+  },
+  "memory#swap": {
+    "format": "SWAP{swapPercentage:3}%",
+    "tooltip-format": "{swapUsed:0.1f}GiB out of {swapTotal:0.1f}GiB used"
   },
   "disk": {
     "interval": 30,
@@ -53,16 +83,16 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{capacity}% <span size=\"large\" rise=\"-2500\">{icon}</span>",
-    "format-charging": "{capacity}% ",
-    "format-plugged": "{capacity}% ",
+    "format": "<span size='large' rise='-2500'>{icon}</span> {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-plugged": "  {capacity}%",
     "format-icons": ["", "", "", "", ""]
   },
-  "pulseaudio": {
-    "format": "{volume:2}% <span size=\"large\" rise=\"-2000\">{icon}</span>",
-    "format-bluetooth": "{volume:2}% <span size=\"large\" rise=\"-2000\">{icon}</span>",
-    "format-bluetooth-muted": " <span size=\"large\" rise=\"-2000\">{icon}</span>",
-    "format-muted": "",
+  "pulseaudio#playback": {
+    "format": "<span size='large'>{icon}</span>  {volume:2}%",
+    "format-bluetooth": "<span size='large'>{icon}</span>  {volume:2}%",
+    "format-bluetooth-muted": " <span size='large' rise='-2000'>{icon}</span>",
+    "format-muted": "<span size='large'></span>",
     "format-icons": {
       "headphone": "",
       "hands-free": "",
@@ -72,20 +102,67 @@
       "car": "",
       "default": ["", "", ""]
     },
-    "on-click": "pavucontrol"
+    "on-click": "pavucontrol",
+    "ignored-sinks": ["Easy Effects Sink"]
   },
   "pulseaudio#mic": {
     "format": "{format_source}",
-    "format-source": "{volume:2}% ",
+    "format-source": "<span size='large'></span> {volume:2}%",
     "format-source-muted": "",
     "on-click": "pavucontrol -t 4",
     "on-scroll-up": "",
     "on-scroll-down": ""
   },
   "backlight": {
-    "format": "{percent}% <span size=\"x-large\" rise=\"-2000\">🌣</span>",
+    "format": "<span size='large' rise='-1000'>󰃞</span>  {percent}%",
+    "tooltip-format": "Backlight: {percent}%"
   },
   "sway/language": {
-    "format": "{shortDescription}",
+    "format": "<span text_transform='uppercase'>{shortDescription}</span>"
+  },
+  "bluetooth": {
+    "format": " {status}",
+    "format-connected": " {device_alias}",
+    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%"
+  },
+  "mpris": {
+    "format": "{player_icon}",
+    "format-paused": "{player_icon}",
+    "player-icons": {
+      "default": "▶",
+      "spotify": "<span color='#1ED760'>󰓇</span>",
+      "firefox": "<span color='#FF7139'>󰈹</span>",
+      "chrome": "",
+      "mpv": ""
+    }
+  },
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+    "tooltip": true,
+    "format-icons": {
+      "default": "<span color='orange'></span>",
+      "performance": "<span color='orange'></span>",
+      "balanced": "",
+      "power-saver": "<span color='green'></span>"
+    }
+  },
+  "systemd-failed-units": {
+    "format": "✗ {nr_failed}",
+    "format-ok": "✓"
+  },
+  "custom/run-app": {
+    "format": "󰍜",
+    "on-click": "mb-run-app",
+    "tooltip": false
+  },
+  "custom/shutdown-menu": {
+    "format": "⏻",
+    "on-click": "mb-exit",
+    "tooltip": false
   }
 }

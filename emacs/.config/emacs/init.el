@@ -726,7 +726,8 @@ narrowed."
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
   (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
 
-  (define-key dired-mode-map [remap dired-find-file] 'mb/dired-find-file-or-alternate)
+  (define-key dired-mode-map [remap dired-find-file] 'dired-find-alternate-file)
+  (define-key dired-mode-map (kbd "L") 'mb/dired-find-file-or-alternate)
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 
 
@@ -1166,6 +1167,7 @@ narrowed."
     (kbd "<leader>= <SPC>") 'just-one-space
 
     (kbd "<leader>ie") 'emoji-search
+    (kbd "<leader>ic") 'insert-char
 
     (kbd "<leader>bl") 'mb/cleanup-buffer
     (kbd "<leader>bd") 'mb/delete-current-buffer-file
@@ -2400,15 +2402,14 @@ targets."
   :bind ("C-x C-a" . 'gptel-send)
   :config
   (add-hook 'gptel-pre-response-hook 'evil-normal-state)
-  ;; (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
-  ;; (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
 
   (evil-define-key 'normal 'global
     (kbd "<leader>ae") 'gptel-send
     (kbd "<leader>ag") 'gptel)
 
   (define-key gptel-mode-map (kbd "<leader>mm") 'gptel-menu)
-  (define-key gptel-mode-map (kbd "M-RET") 'gptel-send)
+  (define-key gptel-mode-map (kbd "C-c C-c")    'gptel-send)
+  (define-key gptel-mode-map (kbd "M-RET")      'gptel-send)
   (define-key gptel-mode-map (kbd "M-<return>") 'gptel-send))
 
 
