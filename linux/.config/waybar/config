@@ -2,6 +2,7 @@
   "layer": "top", // Waybar at top layer
   "position": "right", // Waybar position (top|bottom|left|right)
   "modules-left": [
+    "custom/run-app",
     "clock",
     "clock#date",
     "clock#day-of-week",
@@ -14,11 +15,10 @@
     "pulseaudio#playback",
     "pulseaudio#mic",
     "bluetooth",
+    "power-profiles-daemon",
     "tray"
   ],
   "modules-right": [
-    "custom/run-app",
-    "power-profiles-daemon",
     "systemd-failed-units",
     "cpu",
     "memory",
@@ -86,7 +86,7 @@
     "format": "<span size='large' rise='-2500'>{icon}</span> {capacity}%",
     "format-charging": " {capacity}%",
     "format-plugged": "  {capacity}%",
-    "format-icons": ["", "", "", "", ""]
+    "format-icons": [" ", " ", " ", " ", " "]
   },
   "pulseaudio#playback": {
     "format": "<span size='large'>{icon}</span>  {volume:2}%",
@@ -133,7 +133,7 @@
     "format": "{player_icon} ▶",
     "format-paused": "{player_icon} ⏸",
     "player-icons": {
-      "default": "▶",
+      "default": "",
       "spotify": "<span color='#1ED760'>󰓇</span>",
       "firefox": "<span color='#FF7139'>󰈹</span>",
       "chrome": "",

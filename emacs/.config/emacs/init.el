@@ -1971,7 +1971,19 @@ targets."
   :config
   ;; NOTE: emacs-plus on mac doens't support :stipple face https://github.com/d12frosted/homebrew-emacs-plus/issues/622
   ;; NOTE: emacs@29 with PGTK doens't display :stipples correctly (fixed in 30) https://github.com/jdtsmith/indent-bars/issues/3
-  (setq indent-bars-prefer-character t))
+  (setq indent-bars-prefer-character
+        (or mb-is-mac-os
+            (and mb-is-linux (< emacs-major-version 30))))
+
+  (setq
+   indent-bars-color '(highlight :face-bg t :blend 0.2)
+   indent-bars-pattern "."
+   indent-bars-width-frac 0.1
+   indent-bars-pad-frac 0.1
+   indent-bars-zigzag nil
+   indent-bars-color-by-depth nil
+   indent-bars-highlight-current-depth nil
+   indent-bars-display-on-blank-lines nil))
 
 
 

@@ -11,7 +11,7 @@ window {
 * {
   border: none;
   border-radius: 0;
-  font-family: JetBrains Mono;
+  font-family: JetBrains Mono Nerd Font;
   font-size: 1em;
   min-height: 0;
 }
@@ -65,7 +65,7 @@ window#waybar {
 }
 
 #tray {
-  padding-top: 2em;
+  padding-top: 1em;
 }
 
 #tray * {
@@ -157,7 +157,7 @@ label:focus {
 }
 
 #power-profiles-daemon {
-  font-size: 2em;
+  font-size: 1.2em;
   padding-top: 8px;
   padding-bottom: 8px;
   margin-right: 10px;
@@ -188,5 +188,4 @@ label:focus {
   font-size: 2em;
   padding-top: 8px;
   padding-bottom: 8px;
-  margin-left: 10px
 }
