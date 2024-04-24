@@ -1021,6 +1021,7 @@ narrowed."
   (defvar evil-lookup-func #'helpful-at-point)
 
   ;; enable subword mode CamelCase movement in evil
+  ;; https://github.com/syl20bnr/spacemacs/blob/a58a7d79b3713bcf693bb61d9ba83d650a6aba86/layers/%2Bspacemacs/spacemacs-defaults/packages.el#L434
   (define-category ?U "Uppercase")
   (define-category ?u "Lowercase")
   (modify-category-entry (cons ?A ?Z) ?U)
@@ -1263,6 +1264,14 @@ narrowed."
   (global-evil-matchit-mode 1)
   (evil-add-command-properties #'evilmi-jump-items :jump t))
 
+;; work with args in c-style functions
+(use-package evil-args
+  :after evil
+  :ensure t
+  :init
+  (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+  (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
+
 ;; text exchange operator (select, gx, select other word, gx)
 (use-package evil-exchange
   :after evil
@@ -1273,9 +1282,7 @@ narrowed."
 ;; xml tag attribute as a text object (bound to x)
 (use-package exato
   :after evil
-  :ensure t
-  :init
-  (setq exato-key "a"))
+  :ensure t)
 
 ;; align text into columns - gl<space> or gL<space>
 (use-package evil-lion
