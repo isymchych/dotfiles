@@ -137,7 +137,7 @@ $ chmod 600 ~/.ssh/key
  * install bluez bluez-utils
  * start and enable bluetooth service
  * start and enable mpris-proxy user service
- * install blueman - bluetooth manager GUI
+ * install blueberry - GUI bluetooth tool
 
 * trash-cli
 * libsecret

@@ -1,22 +1,17 @@
+// https://docs.gtk.org/Pango/pango_markup.html
+// format string syntax https://fmt.dev/latest/syntax.html
 {
   "layer": "top", // Waybar at top layer
-  "position": "right", // Waybar position (top|bottom|left|right)
-  "modules-left": [
-    "custom/run-app",
-    "clock",
-    "clock#date",
-    "clock#day-of-week",
-    "sway/language",
-    "sway/workspaces",
-    "sway/mode"
-  ],
+  "position": "right", // Waybar position
+  "modules-left": ["custom/run-app", "clock", "sway/workspaces", "sway/mode"],
   "modules-center": [
     "mpris",
     "pulseaudio#playback",
     "pulseaudio#mic",
     "bluetooth",
     "power-profiles-daemon",
-    "tray"
+    "tray",
+    "sway/language"
   ],
   "modules-right": [
     "systemd-failed-units",
@@ -42,22 +37,21 @@
     "spacing": 12
   },
   "clock": {
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
-    "format": "{:%H:%M}",
-    "on-click": "gsimplecal"
-  },
-  "clock#date": {
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
-    "format": "{:%b %d}",
-    "on-click": "gsimplecal"
-  },
-  "clock#day-of-week": {
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>",
-    "format": "{:%A}",
+    "tooltip-format": "{calendar}",
+    "format": "<big>{0:^7%H:%M}</big>\n<span line_height='2' size='small'>{0:^10%a %b %d}</span>",
+    "calendar": {
+      "mode": "month",
+      "format": {
+        "months": "<span color='#d8dee9'><b>{}</b></span>",
+        "days": "<span><b>{}</b></span>",
+        "weekdays": "<span color='#ebcb8b'><b>{}</b></span>",
+        "today": "<span color='#ebcb8b'><b><u>{}</u></b></span>"
+      }
+    },
     "on-click": "gsimplecal"
   },
   "cpu": {
-    "format": " CPU{usage:3}%",
+    "format": " CPU{usage:>3}%",
     "tooltip": true
   },
   "memory": {
@@ -83,7 +77,7 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "<span size='large' rise='-2500'>{icon}</span> {capacity}%",
+    "format": "<span size='large' rise='-2500'>{icon}</span> {capacity:3}%",
     "format-charging": " {capacity}%",
     "format-plugged": "  {capacity}%",
     "format-icons": [" ", " ", " ", " ", " "]
@@ -114,11 +108,12 @@
     "on-scroll-down": ""
   },
   "backlight": {
-    "format": "<span size='large' rise='-1000'>󰃞</span>  {percent}%",
+    "format": "<span size='large' rise='-1000'>󰃞</span>  {percent:3}%",
     "tooltip-format": "Backlight: {percent}%"
   },
   "sway/language": {
-    "format": "<span text_transform='uppercase'>{shortDescription}</span>"
+    "format": "<span text_transform='uppercase'>{shortDescription}</span>",
+    "tooltip": false
   },
   "bluetooth": {
     "format": " {status}",
@@ -127,7 +122,7 @@
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
     "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t🔋{device_battery_percentage}%",
-    "on-click": "blueman-manager"
+    "on-click": "blueberry"
   },
   "mpris": {
     "format": "{player_icon} ▶",

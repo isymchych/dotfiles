@@ -1060,8 +1060,6 @@ narrowed."
   (add-hook 'after-save-hook 'evil-normal-state)
 
 
-  (evil-select-search-module 'evil-search-module 'evil-search)
-
   ;; PERF: Stop copying the selection to the clipboard each time the cursor
   ;; moves in visual mode. Why? Because on most non-X systems (and in terminals
   ;; with clipboard plugins like xclip.el active), Emacs will spin up a new
@@ -2444,8 +2442,7 @@ targets."
    (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
   :bind ("C-x C-a" . 'gptel-send)
   :config
-  (defadvice gptel-send (after start-evil-normal-state activate)
-    (evil-normal-state))
+  (add-hook 'gptel-pre-response-hook 'evil-normal-state)
 
   (evil-define-key 'normal 'global
     (kbd "<leader>ae") 'gptel-send
