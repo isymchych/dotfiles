@@ -54,7 +54,10 @@
 (package-initialize)
 
 (eval-when-compile
-  (require 'use-package))
+  (require 'use-package)
+
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t))
 
 (setq use-package-verbose t)
 
@@ -483,6 +486,7 @@ narrowed."
 
 ;; dabbrev: autocomplete words based on buffer text
 (use-package dabbrev
+  :ensure nil
   :config
   ;; do not split words on _ and -
   (setq dabbrev-abbrev-char-regexp "[a-zA-Z0-9?!_\-]")
@@ -495,6 +499,7 @@ narrowed."
 
 ;; hippie-expand: dabbrev on steroids
 (use-package hippie-exp
+  :ensure nil
   :config
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
                                            try-expand-dabbrev-all-buffers
@@ -509,6 +514,7 @@ narrowed."
 
 ;; Project.el: project management
 (use-package project
+  :ensure nil
   :init
   (setq project-list-file (expand-file-name "projects" mb-save-path))
   :config
@@ -539,6 +545,7 @@ narrowed."
 
 ;; Flyspell-mode: spell-checking on the fly as you type
 (use-package flyspell
+  :ensure nil
   :defer 1
   :diminish flyspell-mode
   :init
@@ -560,6 +567,7 @@ narrowed."
 
 ;; Uniquify: unique buffer names
 (use-package uniquify
+  :ensure nil
   :config
   (setq uniquify-buffer-name-style 'forward
         uniquify-separator "/"
@@ -572,6 +580,7 @@ narrowed."
 
 ;; IBuffer (local)
 (use-package ibuffer
+  :ensure nil
   :disabled
   :bind ([f2] . ibuffer)
   :init
@@ -587,6 +596,7 @@ narrowed."
 
 ;; Recentf: save recent files
 (use-package recentf
+  :ensure nil
   :config
   (setq recentf-save-file (expand-file-name "recentf" mb-save-path)
         recentf-max-menu-items 25
@@ -611,6 +621,7 @@ narrowed."
 
 ;; Save search history
 (use-package savehist
+  :ensure nil
   :config
   (setq savehist-file (expand-file-name "savehist" mb-save-path)
         savehist-save-minibuffer-history t
@@ -626,6 +637,7 @@ narrowed."
 
 ;; Saveplace: save cursor position
 (use-package saveplace
+  :ensure nil
   :init
   (setq-default save-place-file (expand-file-name "saveplace" mb-save-path))
 
@@ -636,6 +648,7 @@ narrowed."
 
 ;; Automatically update unmodified buffers whose files have changed.
 (use-package autorevert
+  :ensure nil
   :diminish auto-revert-mode
   :config
   (setq auto-revert-verbose t ; let us know when it happens
@@ -650,6 +663,7 @@ narrowed."
 ;; Subword-mode: navigate in CamelCase words
 ;; http://ergoemacs.org/emacs/emacs_subword-mode_superword-mode.html
 (use-package subword
+  :ensure nil
   :diminish subword-mode
   :init
   (global-subword-mode t))
@@ -659,6 +673,7 @@ narrowed."
 ;; Electric-pair mode: auto insert closing brackets
 ;; skip over and delete white space if it stands between the cursor and the closing delimiter
 (use-package elec-pair
+  :ensure nil
   :init
   (setq electric-pair-skip-whitespace 'chomp)
   :config
@@ -674,6 +689,7 @@ narrowed."
 
 ;; Show parens mode: highlight matching parens
 (use-package paren
+  :ensure nil
   :config
   (setq show-paren-delay 0
         ;; decrease overlay priority because
@@ -691,6 +707,7 @@ narrowed."
 
 ;; Eldoc: documentation messages
 (use-package eldoc
+  :ensure nil
   :diminish eldoc-mode
   :init
   (add-hook  'emacs-lisp-mode-hook        'turn-on-eldoc-mode)
@@ -701,6 +718,7 @@ narrowed."
 
 ;; Dired extensions
 (use-package dired-x
+  :ensure nil
   :config
   ;; Use GNU ls as `gls' from `coreutils' if available.  Add `(setq
   ;; dired-use-ls-dired nil)' to your config to suppress the Dired warning when
@@ -742,6 +760,7 @@ narrowed."
 
 ;; Emacs shell
 (use-package eshell
+  :ensure nil
   :defer t
   :init
   (setq eshell-directory-name (expand-file-name "eshell" mb-save-path)
@@ -750,6 +769,7 @@ narrowed."
 
 ;; Flymake
 (use-package flymake
+  :ensure nil
   :disabled
   :defer t
   :init
@@ -763,6 +783,7 @@ narrowed."
 
 ;; Comint-mode: interact with REPLs
 (use-package comint
+  :ensure nil
   :no-require
   :init
   (setq ansi-color-for-comint-mode t
@@ -773,6 +794,7 @@ narrowed."
 
 ;; Compilation mode
 (use-package compile
+  :ensure nil
   :no-require
   :init
   (setq compilation-always-kill t       ; kill compilation process before starting another
@@ -792,6 +814,7 @@ narrowed."
 
 ;; Ediff: resolve merge conflicts
 (use-package ediff
+  :ensure nil
   :defer t
   :init
   (setq ediff-diff-options "-w" ; turn off whitespace checking
@@ -806,7 +829,6 @@ narrowed."
 
 ;; Doom emacs themes https://github.com/doomemacs/themes
 (use-package doom-themes
-  :ensure t
   :config
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -821,7 +843,6 @@ narrowed."
 ;; Modus themes https://protesilaos.com/emacs/modus-themes
 (use-package modus-themes
   :disabled
-  :ensure t
   :config
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs nil)
@@ -842,7 +863,6 @@ narrowed."
 ;; Auto dark mode on Linux https://darkman.grtcdr.tn/
 (use-package darkman
   :if mb-is-linux
-  :ensure t
 
   :config
   (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
@@ -853,7 +873,6 @@ narrowed."
 ;; Auto dark mode on macOS
 (use-package auto-dark
   :if mb-is-mac-os
-  :ensure t
   :diminish auto-dark-mode
   :init
   ;; HACK: remove the applescript support so that this package doesn't break in CLI mode
@@ -872,14 +891,12 @@ narrowed."
 ;; Nerd icons. Used by other packages. must use nerd font!
 ;; run M-x nerd-icons-install-fonts if icons are missing.
 (use-package nerd-icons
-  :defer t
-  :ensure t)
+  :defer t)
 
 
 
 ;; Nerd icons for dired
 (use-package nerd-icons-dired
-  :ensure t
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
@@ -887,7 +904,6 @@ narrowed."
 
 ;; Mode line
 (use-package doom-modeline
-  :ensure t
   :config
   (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
         doom-modeline-minor-modes t
@@ -902,7 +918,6 @@ narrowed."
 
 ;; Nyan mode: use nyan cat in mode line to indicate scroll position
 (use-package nyan-mode
-  :ensure t
   :config
   (setq nyan-minimum-window-width 128)
   (nyan-mode))
@@ -911,7 +926,6 @@ narrowed."
 
 ;; Diminish: cleanup mode line
 (use-package diminish
-  :ensure t
   :config
   (eval-after-load 'hi-lock
     '(diminish 'hi-lock-mode)))
@@ -923,7 +937,6 @@ narrowed."
   ;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
   :disabled
   :if mb-is-mac-os
-  :ensure t
   :config
   (exec-path-from-shell-initialize))
 
@@ -931,7 +944,6 @@ narrowed."
 
 ;; writable grep, complementary package for other packages
 (use-package wgrep
-  :ensure t
   :defer t
   :config
   (setq wgrep-auto-save-buffer t))
@@ -940,7 +952,6 @@ narrowed."
 
 ;; Make clipboard work on all platforms
 (use-package xclip
-  :ensure t
   :config
   (xclip-mode 1))
 
@@ -948,7 +959,6 @@ narrowed."
 
 ;; sync emacs input mode with OS keyboard layout
 (use-package reverse-im
-  :ensure t
   :custom
   (reverse-im-input-methods '("ukrainian-computer"))
   :config
@@ -958,7 +968,6 @@ narrowed."
 
 ;; Improved undo/redo system
 (use-package undo-fu
-  :ensure t
 
   :init
   ;; increase emacs default undo limits
@@ -973,7 +982,6 @@ narrowed."
 
 ;; Save & restore undo/redo state
 (use-package undo-fu-session
-  :ensure t
   :after undo-fu
   :config
   (setq undo-fu-session-directory (expand-file-name "undo-fu-session" mb-save-path)
@@ -1000,7 +1008,6 @@ narrowed."
 
 ;; better jump list
 (use-package better-jumper
-  :ensure t
   :diminish better-jumper-local-mode
   :init
   (global-set-key [remap xref-pop-marker-stack] #'better-jumper-jump-backward)
@@ -1016,7 +1023,6 @@ narrowed."
 
 ;; manage comments
 (use-package comment-dwim-2
-  :ensure t
   :defer t
   :bind
   (([remap comment-line] . 'comment-dwim-2)
@@ -1026,7 +1032,6 @@ narrowed."
 
 ;; Visualise the undo history
 (use-package vundo
-  :ensure t
   :defer t
   :commands (vundo)
   :config
@@ -1036,7 +1041,6 @@ narrowed."
 
 ;; Vertical completion UI (like ido)
 (use-package vertico
-  :ensure t
   :init
   (vertico-mode)
 
@@ -1055,7 +1059,6 @@ narrowed."
 
 ;; Fuzzy matching algorithm
 (use-package orderless
-  :ensure t
   :init
   (defun without-if-bang (pattern _index _total)
     (cond
@@ -1074,7 +1077,6 @@ narrowed."
 
 ;; Enable rich annotations in the minibuffer
 (use-package marginalia
-  :ensure t
   :init
   (marginalia-mode))
 
@@ -1082,7 +1084,6 @@ narrowed."
 
 ;; Advanced commands in vertical completion UI
 (use-package consult
-  :ensure t
   :init
   (setq
    consult-preview-key (list :debounce 1 'any)
@@ -1176,7 +1177,6 @@ narrowed."
 ;; Jump to Flycheck error
 (use-package consult-flycheck
   :after (consult flycheck)
-  :ensure t
   :defer t
   :commands (consult-flycheck)
   :bind
@@ -1185,7 +1185,6 @@ narrowed."
 
 ;; Nerd icons for consult / completion
 (use-package nerd-icons-completion
-  :ensure t
   :after marginalia
   :config
   (nerd-icons-completion-mode)
@@ -1195,7 +1194,6 @@ narrowed."
 
 ;; Context commands for things at a point
 (use-package embark
-  :ensure t
   :commands (embark-act)
   :bind
   (("C-h B" . 'embark-bindings-at-point)
@@ -1214,7 +1212,6 @@ narrowed."
 
 
 (use-package embark-consult
-  :ensure t
   :after (embark consult)
   ;; if you want to have consult previews as you move around an
   ;; auto-updating embark collect buffer
@@ -1225,6 +1222,7 @@ narrowed."
 
 ;; https://github.com/oantolin/embark/wiki/Additional-Configuration#use-which-key-like-a-key-menu-prompt
 (use-package embark-which-key
+  :ensure nil
   :no-require t
   :after (embark which-key)
   :config
@@ -1270,7 +1268,6 @@ targets."
 ;; Rg: search using ripgrep
 (use-package rg
   :defer t
-  :ensure t
   :commands (rg-menu rg-isearch-menu rg-project)
   :init
   ;; ensure rg-isearch-menu is loaded
@@ -1279,15 +1276,13 @@ targets."
 
 
 ;; Avy: jump to char/line
-(use-package avy
-  :ensure t)
+(use-package avy)
 
 
 
 ;; Company-mode: autocomplete
 (use-package company
   :if mb-use-company
-  :ensure t
   :defer 0.5
   :diminish company-mode
   :config
@@ -1366,7 +1361,6 @@ targets."
 (use-package company-shell
   :if mb-use-company
   :after (company sh-script)
-  :ensure t
   :config
   (setq company-shell-dont-fetch-meta mb-is-mac-os) ;; fixes slowdown on mac https://github.com/Alexander-Miller/company-shell/issues/15
   (add-to-list 'company-backends 'company-shell))
@@ -1377,7 +1371,6 @@ targets."
 (use-package company-quickhelp
   :if mb-use-company
   :after company
-  :ensure t
   :bind (:map company-active-map ("M-h" . #'company-quickhelp-manual-begin))
   :config
   (setq company-quickhelp-delay nil)
@@ -1393,7 +1386,6 @@ targets."
 ;; TODO: configure multiple completion sources
 (use-package corfu
   :if mb-use-corfu
-  :ensure t
   :config
   (setq corfu-cycle t
         corfu-auto t
@@ -1433,7 +1425,6 @@ targets."
 
 ;; YASnippet: snippets
 (use-package yasnippet
-  :ensure t
   :defer t
   :commands (yas-hippie-try-expand yas-insert-snippet yas-visit-snippet-file yas-new-snippet)
   :diminish yas-minor-mode
@@ -1462,7 +1453,6 @@ targets."
 
 (use-package consult-yasnippet
   :after (yasnippet)
-  :ensure t
   :defer t
   :commands (consult-yasnippet consult-yasnippet-visit-snippet-file)
   :init
@@ -1471,7 +1461,6 @@ targets."
 
 (use-package yasnippet-snippets
   :after (yasnippet)
-  :ensure t
   :config
   (yasnippet-snippets-initialize)
   (yas-global-mode))
@@ -1480,7 +1469,6 @@ targets."
 
 ;; Correct word at point
 (use-package flyspell-correct
-  :ensure t
   :defer t
   :commands (flyspell-correct-at-point)
   :init
@@ -1490,7 +1478,6 @@ targets."
 
 ;; EditorConfig
 (use-package editorconfig
-  :ensure t
   :defer t
   :diminish editorconfig-mode
   :init
@@ -1500,7 +1487,6 @@ targets."
 
 ;; Anzu: show current search match/total matches
 (use-package anzu
-  :ensure t
   :diminish anzu-mode
   :init
   (global-anzu-mode t))
@@ -1509,7 +1495,6 @@ targets."
 
 ;; Show available keybindings in a separate window
 (use-package which-key
-  :ensure t
   :diminish which-key-mode
   :bind (("C-h w"            . 'which-key-show-major-mode)
          ("C-h W"            . 'which-key-show-top-level))
@@ -1527,7 +1512,6 @@ targets."
 
 ;; Helpful: a better *help* buffer
 (use-package helpful
-  :ensure t
   :commands helpful--read-symbol
   :hook (helpful-mode . visual-line-mode)
   :init
@@ -1544,7 +1528,6 @@ targets."
 
 ;; Highlight all matches of the word under the cursor
 (use-package highlight-thing
-  :ensure t
   :defer t
   :diminish highlight-thing-mode
   :hook (prog-mode . highlight-thing-mode)
@@ -1560,7 +1543,6 @@ targets."
 
 ;; Expand-region: expand selection like C-w in intellij idea
 (use-package expand-region
-  :ensure t
   :defer t
   :init
   (setq expand-region-contract-fast-key "W"
@@ -1570,7 +1552,6 @@ targets."
 
 ;; Rainbow-mode: highlight colors in text (e.g "red" or #3332F3)
 (use-package rainbow-mode
-  :ensure t
   :defer t
   :hook ((web-mode . rainbow-mode)
          (css-mode . rainbow-mode)
@@ -1582,7 +1563,6 @@ targets."
 
 ;; Rainbow delimiters
 (use-package rainbow-delimiters
-  :ensure t
   :defer t
   :init
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
@@ -1616,7 +1596,6 @@ targets."
 
 ;; Visual-fill-column: visually wrap lines at fill-column instead of window margin
 (use-package visual-fill-column
-  :ensure t
   :commands (visual-fill-column-mode)
   :init
   (setq-default
@@ -1642,7 +1621,6 @@ targets."
 
 ;; highlight todos
 (use-package hl-todo
-  :ensure t
   :defer t
   :init (add-hook 'prog-mode-hook 'hl-todo-mode))
 
@@ -1650,7 +1628,6 @@ targets."
 
 ;; Transient: menus, used by magit and other packages
 (use-package transient
-  :ensure t
   :init
   ;; Must be set early to prevent ~/.emacs.d/transient from being created
   (setq transient-levels-file  (expand-file-name "transient/levels.el" mb-save-path)
@@ -1665,7 +1642,6 @@ targets."
 
 ;; Magit: UI for git
 (use-package magit
-  :ensure t
   :defer t
   :commands (magit-status magit-log-all magit-log-buffer-file magit-blame)
   :config
@@ -1712,14 +1688,12 @@ targets."
 
 ;; Git-modes: modes for .gitattributes, .gitconfig and .gitignore
 (use-package git-modes
-  :ensure t
   :defer t)
 
 
 
 ;; Git-diff mode
 (use-package diff-mode
-  :ensure t
   :defer t
   :config
   (define-key diff-mode-map (kbd "j") 'diff-hunk-next)
@@ -1729,14 +1703,12 @@ targets."
 
 ;; Git-timemachine: browse through file history
 (use-package git-timemachine
-  :ensure t
   :defer t)
 
 
 
 ;; Diff-hl: highlight changes in gutter
 (use-package diff-hl
-  :ensure t
   :defer 0.5
   :config
   (setq diff-hl-draw-borders nil)
@@ -1757,7 +1729,6 @@ targets."
 
 ;; Treemacs: file tree sidebar
 (use-package treemacs
-  :ensure t
   :defer t
   :bind (("M-t" . 'treemacs-select-window)
          ("<f4>" . 'treemacs))
@@ -1775,26 +1746,22 @@ targets."
 
 ;; Treemacs nerd icons
 (use-package treemacs-nerd-icons
-  :ensure t
   :after treemacs
   :config
   (treemacs-load-theme "nerd-icons"))
 
 ;; Treemacs integration with magit
 (use-package treemacs-magit
-  :ensure t
   :after (treemacs magit))
 
 ;; Treemacs integration with lsp
 (use-package lsp-treemacs
-  :ensure t
   :after (treemacs lsp))
 
 
 
 ;; Download tree-sitter grammars
 (use-package treesit-auto
-  :ensure t
   :custom
   (treesit-auto-install 'prompt)
   :config
@@ -1818,7 +1785,6 @@ targets."
 
 ;; Language server protocol
 (use-package lsp-mode
-  :ensure t
   :diminish lsp-mode
   :defer t
   :init
@@ -1890,7 +1856,6 @@ targets."
 ;; Flycheck: lint files
 (use-package flycheck
   :diminish flycheck-mode
-  :ensure t
   :defer 1
   :init (global-flycheck-mode)
   :config
@@ -1918,7 +1883,6 @@ targets."
 
 ;; Flycheck-posframe: display flycheck error
 (use-package flycheck-posframe
-  :ensure t
   :after flycheck
   :config
   (setq flycheck-posframe-border-width 2
@@ -1933,7 +1897,6 @@ targets."
 
 ;; Eat: terminal emulator
 (use-package eat
-  :ensure t
   :hook (eshell-load . eat-eshell-mode))
 
 
@@ -1941,7 +1904,6 @@ targets."
 ;; Run code formatters like Prettier
 (use-package apheleia
   :defer 0.5
-  :ensure t
   :diminish apheleia-mode
   :init
   (apheleia-global-mode +1)
@@ -1957,6 +1919,7 @@ targets."
 
 ;; Robby mode: interact with OpenAI
 (use-package robby-mode
+  :ensure nil
   :if mb-openai-api-key
   :init
   (if (not (package-installed-p 'robby))
@@ -1981,7 +1944,6 @@ targets."
 ;; Dall-E-shell: talk with dall-e
 (use-package dall-e-shell
   :if mb-openai-api-key
-  :ensure t
   :defer
   :commands (dall-e-shell)
   :custom
@@ -1993,7 +1955,6 @@ targets."
 ;; Gptel: interact with chatgpt and other LLMs
 (use-package gptel
   :if mb-openai-api-key
-  :ensure t
   :custom
   ((gptel-api-key mb-openai-api-key)
    (gptel-max-tokens 2500)
@@ -2026,6 +1987,7 @@ targets."
 
 ;; Makefile mode
 (use-package makefile-mode
+  :ensure nil
   :no-require t
   :init
   (defun mb/use-tabs ()
@@ -2039,6 +2001,7 @@ targets."
 
 ;; Python mode
 (use-package python
+  :ensure nil
   :disabled
   :interpreter ("python" . python-mode)
   :config
@@ -2049,6 +2012,7 @@ targets."
 
 ;; C-based languages like Java
 (use-package cc-mode
+  :ensure nil
   :mode
   ("\\.java\\'" . java-mode)
   :config
@@ -2068,6 +2032,7 @@ targets."
 
 ;; XML
 (use-package nxml-mode
+  :ensure nil
   :mode ("\\.xml\\'" . nxml-mode)
   :mode ("\\.svg\\'" . nxml-mode)
   :config
@@ -2080,6 +2045,7 @@ targets."
 
 ;; Emacs Lisp
 (use-package elisp-mode
+  :ensure nil
   :init
   (add-hook 'emacs-lisp-mode-hook
             (lambda()
@@ -2091,6 +2057,7 @@ targets."
 
 ;; Shell mode
 (use-package sh-script
+  :ensure nil
   :defer t
   :init
   ;; Use sh-mode when opening `.zsh' files, and when opening Prezto runcoms.
@@ -2112,19 +2079,16 @@ targets."
 
 ;; Justfile mode syntax
 (use-package just-mode
-  :ensure t
   :defer t)
 
 ;; Run justfile recipes
 (use-package justl
-  :ensure t
   :defer t
   :commands (justl))
 
 
 ;; Markdown
 (use-package markdown-mode
-  :ensure t
   :defer t
   :config
   (add-hook 'markdown-mode-hook 'flyspell-mode)
@@ -2133,7 +2097,6 @@ targets."
 ;; Markdown treesit mode
 (use-package markdown-ts-mode
   :disabled
-  :ensure t
   :mode ("\\.md\\'" . markdown-ts-mode)
   :defer t
   :config
@@ -2144,7 +2107,6 @@ targets."
 
 ;; Lua mode
 (use-package lua-mode
-  :ensure t
   :defer t
   :config
   (message "mb: LUA MODE"))
@@ -2154,7 +2116,6 @@ targets."
 ;; Groovy mode (for Jenkinsfile)
 (use-package groovy-mode
   :disabled
-  :ensure t
   :defer t
   :config
   (message "mb: GROOVY MODE"))
@@ -2164,7 +2125,6 @@ targets."
 ;; Dockerfile mode
 (use-package dockerfile-mode
   :disabled
-  :ensure t
   :defer t
   :config
   (message "mb: DOCKERFILE MODE"))
@@ -2174,7 +2134,6 @@ targets."
 ;; Graphql mode
 (use-package graphql-mode
   :disabled
-  :ensure t
   :defer t
   :config
   (message "mb: GRAPHQL MODE"))
@@ -2183,7 +2142,6 @@ targets."
 
 ;; PKGBUILD mode
 (use-package pkgbuild-mode
-  :ensure t
   :defer t
   :mode ("\\PKGBUILD.template\\'" . pkgbuild-mode)
   :config

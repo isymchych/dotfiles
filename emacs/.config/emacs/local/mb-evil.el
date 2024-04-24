@@ -5,7 +5,6 @@
 
 ;; Evil: vim mode
 (use-package evil
-  :ensure t
   ;; this must be set before loading evil
   :init
   ;; use C-u as scroll-up
@@ -213,7 +212,6 @@
 ;; integration of evil with various packages
 (use-package evil-collection
   :after evil
-  :ensure t
   :init
   (setq
    evil-collection-setup-minibuffer t
@@ -242,21 +240,18 @@
 ;; match visual selection with * and #
 (use-package evil-visualstar
   :after evil
-  :ensure t
   :config
   (global-evil-visualstar-mode))
 
 ;; emulates surround.vim
 (use-package evil-surround
   :after evil
-  :ensure t
   :config
   (global-evil-surround-mode 1))
 
 ;; match braces/tags with %
 (use-package evil-matchit
   :after evil
-  :ensure t
   :config
   (global-evil-matchit-mode 1)
   (evil-add-command-properties #'evilmi-jump-items :jump t))
@@ -264,7 +259,6 @@
 ;; work with args in c-style functions
 (use-package evil-args
   :after evil
-  :ensure t
   :init
   (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
   (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
@@ -272,19 +266,16 @@
 ;; text exchange operator (select, gx, select other word, gx)
 (use-package evil-exchange
   :after evil
-  :ensure t
   :config
   (evil-exchange-install))
 
 ;; xml tag attribute as a text object (bound to x)
 (use-package exato
-  :after evil
-  :ensure t)
+  :after evil)
 
 ;; align text into columns - gl<space> or gL<space>
 (use-package evil-lion
   :after evil
-  :ensure t
   :config
   (evil-lion-mode))
 
@@ -405,8 +396,7 @@
 
 ;; evil-anzu: anzu integration for evil
 (use-package evil-anzu
-  :after (evil anzu)
-  :ensure t)
+  :after (evil anzu))
 
 
 ;; which-key
@@ -489,7 +479,6 @@
 ;; Treemacs integration with evil
 (evil-define-key 'normal 'global (kbd "<leader>tt") 'treemacs)
 (use-package treemacs-evil
-  :ensure t
   :after (treemacs evil))
 
 

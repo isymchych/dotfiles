@@ -6,7 +6,6 @@
 
 ;; meow: modal editing on top of emacs
 (use-package meow
-  :ensure t
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
