@@ -2,7 +2,6 @@
 ;;; Commentary:
 ;; * Spacemacs https://github.com/syl20bnr/spacemacs
 ;; * Doom Emacs https://github.com/doomemacs/doomemacs
-;; * Evil guide https://github.com/noctuid/evil-guide
 ;;; Code:
 
 
@@ -15,6 +14,8 @@
 
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
+
+(defvar mb-local-load-path (expand-file-name "local/" mb-dotfiles-dir))
 
 (defvar mb-light-theme 'doom-one-light)
 (defvar mb-dark-theme 'doom-one)
@@ -476,7 +477,7 @@ narrowed."
 
 ;; ---------------------------------------- BUILT-IN PACKAGES
 
-;; evil uses dabbrev
+;; dabbrev: autocomplete words based on buffer text
 (use-package dabbrev
   :config
   ;; do not split words on _ and -
@@ -488,7 +489,7 @@ narrowed."
 
 
 
-;; Hippie expand is dabbrev expand on steroids, used by evil
+;; hippie-expand: dabbrev on steroids
 (use-package hippie-exp
   :config
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
@@ -747,24 +748,12 @@ narrowed."
 (use-package flymake
   :disabled
   :defer t
-  :after (evil)
   :init
   ;; as flymakes fail silently there is no need to activate it on a per major mode basis
   (add-hook 'prog-mode-hook #'flymake-mode)
   (add-hook 'text-mode-hook #'flymake-mode)
   :config
-  (setq flymake-fringe-indicator-position 'right-fringe)
-
-  (evil-add-command-properties #'flymake-goto-next-error :jump t)
-  (evil-add-command-properties #'flymake-goto-prev-error :jump t)
-
-  (evil-define-key 'normal 'global
-    (kbd "M-e j") 'flymake-goto-next-error
-    (kbd "M-e M-j") 'flymake-goto-next-error
-    (kbd "M-e k") 'flymake-goto-prev-error
-    (kbd "M-e l") 'flymake-show-project-diagnostics
-    (kbd "M-e M-k") 'flymake-goto-prev-error
-    (kbd "M-e b") 'flymake-start))
+  (setq flymake-fringe-indicator-position 'right-fringe))
 
 
 
@@ -901,23 +890,7 @@ narrowed."
         doom-modeline-hud t
         doom-modeline-unicode-fallback nil
         doom-modeline-buffer-encoding nil
-        doom-modeline-env-version nil
-
-        ;; show evil register macro while recording it
-        doom-modeline-always-show-macro-register t)
-
-  ;; minibuffer colors for evil states https://emacs.stackexchange.com/a/76861
-  (defun color-minibuffer (color)
-    `(lambda ()
-       (when (minibufferp)
-         (face-remap-add-relative 'minibuffer-prompt :foreground ,color))))
-  (add-hook 'evil-normal-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-normal-state nil t)))
-  (add-hook 'evil-operator-state-entry-hook (color-minibuffer (face-foreground 'doom-modeline-evil-operator-state nil t)))
-  (add-hook 'evil-insert-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-insert-state nil t)))
-  (add-hook 'evil-replace-state-entry-hook  (color-minibuffer (face-foreground 'doom-modeline-evil-replace-state nil t)))
-  (add-hook 'evil-visual-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-visual-state nil t)))
-  (add-hook 'evil-motion-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-motion-state nil t)))
-  (add-hook 'evil-emacs-state-entry-hook    (color-minibuffer (face-foreground 'doom-modeline-evil-emacs-state nil t)))
+        doom-modeline-env-version nil)
 
   (doom-modeline-mode 1))
 
@@ -979,7 +952,7 @@ narrowed."
 
 
 
-;; Improved undo/redo system (used by evil)
+;; Improved undo/redo system
 (use-package undo-fu
   :ensure t
 
@@ -1005,432 +978,54 @@ narrowed."
 
   (global-undo-fu-session-mode))
 
-(use-package meow
+
+
+;; Personal meow config
+(use-package mb-meow
   :disabled
-  :ensure t
-  :config
-  (defun meow-setup ()
-    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-    (meow-motion-overwrite-define-key
-     '("j" . meow-next)
-     '("k" . meow-prev)
-     '("<escape>" . ignore))
-    (meow-leader-define-key
-     ;; SPC j/k will run the original command in MOTION state.
-     '("j" . "H-j")
-     '("k" . "H-k")
-     ;; Use SPC (0-9) for digit arguments.
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("0" . meow-digit-argument)
-     '("/" . meow-keypad-describe-key)
-     '("?" . meow-cheatsheet))
-    (meow-normal-define-key
-     '("0" . meow-expand-0)
-     '("9" . meow-expand-9)
-     '("8" . meow-expand-8)
-     '("7" . meow-expand-7)
-     '("6" . meow-expand-6)
-     '("5" . meow-expand-5)
-     '("4" . meow-expand-4)
-     '("3" . meow-expand-3)
-     '("2" . meow-expand-2)
-     '("1" . meow-expand-1)
-     '("-" . negative-argument)
-     '(";" . meow-reverse)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
-     '("[" . meow-beginning-of-thing)
-     '("]" . meow-end-of-thing)
-     '("a" . meow-append)
-     '("A" . meow-open-below)
-     '("b" . meow-back-word)
-     '("B" . meow-back-symbol)
-     '("c" . meow-change)
-     '("d" . meow-delete)
-     '("D" . meow-backward-delete)
-     '("e" . meow-next-word)
-     '("E" . meow-next-symbol)
-     '("f" . meow-find)
-     '("g" . meow-cancel-selection)
-     '("G" . meow-grab)
-     '("h" . meow-left)
-     '("H" . meow-left-expand)
-     '("i" . meow-insert)
-     '("I" . meow-open-above)
-     '("j" . meow-next)
-     '("J" . meow-next-expand)
-     '("k" . meow-prev)
-     '("K" . meow-prev-expand)
-     '("l" . meow-right)
-     '("L" . meow-right-expand)
-     '("m" . meow-join)
-     '("n" . meow-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
-     '("p" . meow-yank)
-     '("q" . meow-quit)
-     '("Q" . meow-goto-line)
-     '("r" . meow-replace)
-     '("R" . meow-swap-grab)
-     '("s" . meow-kill)
-     '("t" . meow-till)
-     '("u" . meow-undo)
-     '("U" . meow-undo-in-selection)
-     '("v" . meow-visit)
-     '("w" . meow-mark-word)
-     '("W" . meow-mark-symbol)
-     '("x" . meow-line)
-     '("X" . meow-goto-line)
-     '("y" . meow-save)
-     '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
-     '("'" . repeat)
-     '("<escape>" . ignore)))
-  (meow-setup)
-  (meow-global-mode 1))
+  :load-path mb-local-load-path)
 
 
-;; Evil: vim mode
-(use-package evil
-  :ensure t
-  ;; this must be set before loading evil
-  :init
-  ;; use C-u as scroll-up
-  (defvar evil-want-C-u-scroll t)
-  (defvar evil-want-Y-yank-to-eol t)
-  (defvar evil-want-C-i-jump t)
-  (defvar evil-want-keybinding nil)
-  (defvar evil-want-minibuffer t)
-  (defvar evil-undo-system 'undo-fu)
-  (defvar evil-lookup-func #'helpful-at-point)
 
-  ;; enable subword mode CamelCase movement in evil
-  ;; https://github.com/syl20bnr/spacemacs/blob/a58a7d79b3713bcf693bb61d9ba83d650a6aba86/layers/%2Bspacemacs/spacemacs-defaults/packages.el#L434
-  (define-category ?U "Uppercase")
-  (define-category ?u "Lowercase")
-  (modify-category-entry (cons ?A ?Z) ?U)
-  (modify-category-entry (cons ?a ?z) ?u)
-  (make-variable-buffer-local 'evil-cjk-word-separating-categories)
-  (add-hook 'subword-mode-hook
-            (lambda ()
-              (if subword-mode
-                  (push '(?u . ?U) evil-cjk-word-separating-categories)
-                (setq evil-cjk-word-separating-categories (default-value 'evil-cjk-word-separating-categories)))))
-  :config
-  (setq
-   evil-shift-width mb-tab-size
-   ;; more granular undo
-   evil-want-fine-undo t
-   evil-flash-delay 10
-   ;; Don't wait for any other keys after escape is pressed.
-   evil-esc-delay 0
-   ;; h/l do not wrap around to next lines
-   evil-cross-lines nil
-   evil-want-visual-char-semi-exclusive t
-   ;; do not move cursor back 1 position when exiting insert mode
-   evil-move-cursor-back nil
-
-   ;; It's infuriating that innocuous "beginning of line" or "end of line"
-   ;; errors will abort macros, so suppress them:
-   evil-kbd-macro-suppress-motion-error t
-
-   ;; Only do highlighting in selected window so that Emacs has less work
-   ;; to do highlighting them all.
-   evil-ex-interactive-search-highlight 'selected-window
-
-   ;; search for whole words not only for part
-   evil-symbol-word-search 'symbol)
-
-  ;; Exit to normal state after save
-  (add-hook 'after-save-hook 'evil-normal-state)
+;; Personal evil config
+(use-package mb-evil
+  :load-path mb-local-load-path)
 
 
-  ;; PERF: Stop copying the selection to the clipboard each time the cursor
-  ;; moves in visual mode. Why? Because on most non-X systems (and in terminals
-  ;; with clipboard plugins like xclip.el active), Emacs will spin up a new
-  ;; process to communicate with the clipboard for each movement. On Windows,
-  ;; older versions of macOS (pre-vfork), and Waylang (without pgtk), this is
-  ;; super expensive and can lead to freezing and/or zombie processes.
-  ;;
-  ;; UX: It also clobbers clipboard managers (see emacs-evil/evil#336).
-  (setq evil-visual-update-x-selection-p nil)
-
-
-  (evil-set-initial-state 'minibuffer-mode           'emacs)
-  (evil-set-initial-state 'inferior-emacs-lisp-mode  'emacs)
-  (evil-set-initial-state 'pylookup-mode             'emacs)
-  (evil-set-initial-state 'term-mode                 'emacs)
-  (evil-set-initial-state 'help-mode                 'emacs)
-  (evil-set-initial-state 'grep-mode                 'emacs)
-  (evil-set-initial-state 'bc-menu-mode              'emacs)
-  (evil-set-initial-state 'rdictcc-buffer-mode       'emacs)
-  (evil-set-initial-state 'comint-mode               'normal)
-  (evil-set-initial-state 'wdired-mode               'normal)
-  (evil-set-initial-state 'shell-mode                'insert)
-
-  (evil-mode 1)
-
-  ;; set leader key in all states
-  (evil-set-leader nil (kbd "C-SPC"))
-
-  ;; set leader key in normal & visual state
-  (evil-set-leader '(normal visual) (kbd "SPC"))
-
-  ;; Use escape to quit, and not as a meta-key.
-  (define-key evil-normal-state-map           [escape] 'keyboard-quit)
-  (define-key evil-visual-state-map           [escape] 'keyboard-quit)
-  (define-key minibuffer-local-map            [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-ns-map         [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-isearch-map    [escape] 'minibuffer-keyboard-quit)
-
-  (define-key evil-insert-state-map [escape] 'evil-normal-state)
-
-  ;; disable man look up
-  (define-key evil-motion-state-map "K" 'eldoc)
-  (define-key evil-motion-state-map (kbd " ") nil)
-
-  ;; Replace Emacs kill-ring-save with window management commands
-  (global-set-key (kbd "M-w") 'evil-window-map)
-
-  ;; insert tabs only in emacs state
-  (define-key evil-emacs-state-map (kbd "TAB") #'indent-for-tab-command)
-  ;; insert newline only in emacs state
-  (define-key evil-emacs-state-map (kbd "RET") #'newline)
-
-  ;; in prog modes I want RET in comment to continue comment in new line
-  (add-hook 'prog-mode-hook
-            (lambda ()
-              (when (derived-mode-p 'prog-mode)
-                (define-key evil-insert-state-local-map (kbd "RET") #'default-indent-new-line))))
-
-
-  ;; in many modes q is close/exit etc., so leave it unbound
-  (define-key evil-normal-state-map "q" nil)
-  (define-key evil-normal-state-map "Q" 'evil-record-macro)
-  (define-key evil-window-map "q" 'evil-window-delete)
-
-  (define-key evil-normal-state-map (kbd "M-f") 'evil-scroll-page-down)
-  (define-key evil-normal-state-map (kbd "M-b") 'evil-scroll-page-up)
-
-  (define-key evil-normal-state-map "gr" 'xref-find-references)
-  (define-key evil-normal-state-map "gD" 'xref-find-definitions-other-window)
-
-  ;; move everywhere with M-hjkl
-  (global-set-key (kbd "M-j") 'evil-next-line)
-  (global-set-key (kbd "M-k") 'evil-previous-line)
-  (global-set-key (kbd "M-h") 'left-char)
-  (global-set-key (kbd "M-l") 'right-char)
-
-  (evil-ex-define-cmd "Q[uit]" 'evil-quit)
-
-  (evil-define-key 'emacs minibuffer-mode-map
-    ;; insert newline with Alt-Enter
-    (kbd "M-<return>") 'newline
-    (kbd "M-RET") 'newline
-    (kbd "C-w") 'evil-delete-backward-word
-
-    ;; make Enter work as expected in minibuffer default (emacs) state
-    (kbd "<return>") 'exit-minibuffer
-    (kbd "RET") 'exit-minibuffer)
-
-
-  ;; Overload shifts so that they don't lose the selection
-  ;; @see http://superuser.com/a/789156
-  (defun mb/evil-shift-left-visual ()
-    (interactive)
-    (evil-shift-left (region-beginning) (region-end))
-    (evil-normal-state)
-    (evil-visual-restore))
-  (defun mb/evil-shift-right-visual ()
-    (interactive)
-    (evil-shift-right (region-beginning) (region-end))
-    (evil-normal-state)
-    (evil-visual-restore))
-  (define-key evil-visual-state-map (kbd ">") 'mb/evil-shift-right-visual)
-  (define-key evil-visual-state-map (kbd "<") 'mb/evil-shift-left-visual)
-
-  (which-key-add-key-based-replacements "SPC a" "AI actions")
-  (which-key-add-key-based-replacements "SPC b" "Buffer actions")
-  (which-key-add-key-based-replacements "SPC m" "Mode actions")
-  (which-key-add-key-based-replacements "SPC h" "Help")
-  (which-key-add-key-based-replacements "SPC p" "Project actions")
-  (which-key-add-key-based-replacements "SPC g" "Git")
-  (which-key-add-key-based-replacements "SPC i" "Insert")
-  (which-key-add-key-based-replacements "SPC j" "Jump to")
-  (which-key-add-key-based-replacements "SPC D" "current Dir")
-  (which-key-add-key-based-replacements "SPC t" "Toggle")
-  (which-key-add-key-based-replacements "SPC =" "Formatting actions")
-
-  (evil-define-key '(normal visual) 'global
-    (kbd "<leader>n")  'mb/narrow-or-widen-dwim)
-
-  ;; NOTE: m is reserved for mode-local bindings
-  (evil-define-key 'normal 'global
-    (kbd "<leader>2")   'call-last-kbd-macro
-    (kbd "<leader>q")   'evil-quit
-    (kbd "<leader>k")   'mb/kill-this-buffer
-    (kbd "<leader>s")   'save-buffer
-    (kbd "<leader>e")   'eshell
-    (kbd "<leader>d")   'dired-jump
-
-    (kbd "<leader>jm") 'evil-show-marks
-    (kbd "<leader>ji")  'imenu
-    (kbd "<leader>= <SPC>") 'just-one-space
-    (kbd "<leader>=s") 'sort-lines
-
-    (kbd "<leader>ie") 'emoji-search
-    (kbd "<leader>ic") 'insert-char
-
-    (kbd "<leader>bl") 'mb/cleanup-buffer
-    (kbd "<leader>bd") 'mb/delete-current-buffer-file
-    (kbd "<leader>br") 'mb/rename-file-and-buffer
-    (kbd "<leader>bR") 'mb/revert-buffer
-
-    (kbd "<leader>pp") 'project-switch-project
-    (kbd "<leader>pD") 'project-dired
-    (kbd "<leader>pe") 'project-eshell
-    (kbd "<leader>pk") 'project-kill-buffers
-
-    (kbd "<leader>tn") 'display-line-numbers-mode
-    (kbd "<leader>tf") 'mb/toggle-auto-fill-mode
-    (kbd "<leader>tm") 'menu-bar-mode))
-
-;; integration of evil with various packages
-(use-package evil-collection
-  :after evil
-  :ensure t
-  :init
-  (setq
-   evil-collection-setup-minibuffer t
-   evil-collection-want-unimpaired-p nil)
-
-  :config
-  (evil-collection-init)
-
-  (add-hook 'view-mode-hook
-            (lambda ()
-              (evil-collection-define-key 'normal 'view-mode-map
-                " " 'nil)))
-
-  (add-hook 'image-mode-hook
-            (lambda ()
-              (evil-collection-define-key 'normal 'image-mode-map
-                " " 'nil)))
-
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'mb/dired-up-directory
-    "l" 'dired-find-file
-    (kbd "RET") 'dired-find-alternate-file
-    " " 'nil))
-
-
-;; match visual selection with * and #
-(use-package evil-visualstar
-  :after evil
-  :ensure t
-  :config
-  (global-evil-visualstar-mode))
-
-;; emulates surround.vim
-(use-package evil-surround
-  :after evil
-  :ensure t
-  :config
-  (global-evil-surround-mode 1))
-
-;; match braces/tags with %
-(use-package evil-matchit
-  :after evil
-  :ensure t
-  :config
-  (global-evil-matchit-mode 1)
-  (evil-add-command-properties #'evilmi-jump-items :jump t))
-
-;; work with args in c-style functions
-(use-package evil-args
-  :after evil
-  :ensure t
-  :init
-  (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
-  (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))
-
-;; text exchange operator (select, gx, select other word, gx)
-(use-package evil-exchange
-  :after evil
-  :ensure t
-  :config
-  (evil-exchange-install))
-
-;; xml tag attribute as a text object (bound to x)
-(use-package exato
-  :after evil
-  :ensure t)
-
-;; align text into columns - gl<space> or gL<space>
-(use-package evil-lion
-  :after evil
-  :ensure t
-  :config
-  (evil-lion-mode))
 
 ;; better jump list
 (use-package better-jumper
-  :after evil
   :ensure t
   :diminish better-jumper-local-mode
   :init
-  (global-set-key [remap evil-jump-forward]  #'better-jumper-jump-forward)
-  (global-set-key [remap evil-jump-backward] #'better-jumper-jump-backward)
   (global-set-key [remap xref-pop-marker-stack] #'better-jumper-jump-backward)
   (global-set-key [remap xref-go-back] #'better-jumper-jump-backward)
   (global-set-key [remap xref-go-forward] #'better-jumper-jump-forward)
 
   :config
-  (setq better-jumper-use-evil-jump-advice t
-        better-jumper-use-savehist t)
+  (setq better-jumper-use-savehist t)
 
-  (better-jumper-mode 1)
+  (better-jumper-mode 1))
 
-  ;; Creates a jump point before killing a buffer. This allows you to undo
-  ;; killing a buffer easily (only works with file buffers though; it's not
-  ;; possible to resurrect special buffers).
-  (advice-add #'kill-current-buffer :around #'evil-better-jumper/set-jump-a)
-
-  ;; Create a jump point before jumping with imenu.
-  (advice-add #'imenu :around #'evil-better-jumper/set-jump-a))
 
 
 ;; manage comments
 (use-package comment-dwim-2
-  :after evil
   :ensure t
   :defer t
-  :bind (([remap comment-line] . 'comment-dwim-2)
-         ([remap comment-dwim] . 'comment-dwim-2)
-         :map evil-normal-state-map
-         ("gc"   . 'comment-dwim-2)))
+  :bind
+  (([remap comment-line] . 'comment-dwim-2)
+   ([remap comment-dwim] . 'comment-dwim-2)))
+
 
 
 ;; Visualise the undo history
 (use-package vundo
   :ensure t
   :defer t
-  :bind
-  ("<leader>u" . 'vundo)
+  :commands (vundo)
   :config
-  (setq vundo-glyph-alist vundo-unicode-symbols)
-
-  (evil-define-key 'normal vundo-mode-map (kbd "<escape>") 'vundo-quit))
+  (setq vundo-glyph-alist vundo-unicode-symbols))
 
 
 
@@ -1449,9 +1044,7 @@ narrowed."
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
   (define-key vertico-map (kbd "M-j") 'vertico-next)
-  (define-key vertico-map (kbd "M-k") 'vertico-previous)
-
-  (evil-define-key 'normal 'global (kbd "<leader>`") 'vertico-repeat))
+  (define-key vertico-map (kbd "M-k") 'vertico-previous))
 
 
 
@@ -1530,9 +1123,6 @@ narrowed."
   ;; remap existing commands
   (global-set-key [remap apropos]                       #'consult-apropos)
   (global-set-key [remap bookmark-jump]                 #'consult-bookmark)
-  (global-set-key [remap evil-show-marks]               #'consult-mark)
-  (global-set-key [remap evil-show-jumps]               #'evil-collection-consult-jump-list)
-  (global-set-key [remap evil-show-registers]           #'consult-register)
   (global-set-key [remap goto-line]                     #'consult-goto-line)
   (global-set-key [remap imenu]                         #'consult-imenu)
   (global-set-key [remap locate]                        #'consult-locate)
@@ -1547,44 +1137,25 @@ narrowed."
 
   (setq consult-fd-args "fd --color=never")
 
-  (defun consult-ripgrep-symbol-at-point (&optional dir)
+  (defun mb/consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
     (consult-ripgrep dir (if (region-active-p)
                              (mb/get-selected-text)
                            (thing-at-point 'symbol))))
 
-  (defun consult-ripgrep-in-current-dir ()
+  (defun mb/consult-ripgrep-in-current-dir ()
     (interactive)
     (consult-ripgrep default-directory))
 
-  (defun consult-fd-thing-at-point (&optional dir)
+  (defun mb/consult-fd-thing-at-point (&optional dir)
     (interactive)
     (consult-fd dir (if (region-active-p)
                         (mb/get-selected-text)
                       (thing-at-point 'filename))))
 
-  (defun consult-fd-in-current-dir ()
+  (defun mb/consult-fd-in-current-dir ()
     (interactive)
-    (consult-fd default-directory))
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>r") 'consult-recent-file
-    (kbd "<leader>y") 'consult-yank-from-kill-ring
-    ;; (kbd "<leader>je") 'consult-flymake
-    (kbd "<leader>jL") 'consult-line
-    (kbd "<leader>jo") 'consult-outline
-    (kbd "gb")         'consult-buffer
-    (kbd "<leader>SPC") 'consult-buffer
-
-    (kbd "<leader>Ds") 'consult-ripgrep-in-current-dir
-    (kbd "<leader>Df") 'consult-fd-in-current-dir
-
-    ;; project
-    (kbd "<leader>pb") 'consult-project-buffer
-    (kbd "<leader>ps") 'consult-ripgrep
-    (kbd "<leader>pS") 'consult-ripgrep-symbol-at-point
-    (kbd "<leader>pf") 'consult-fd
-    (kbd "<leader>pF") 'consult-fd-thing-at-point))
+    (consult-fd default-directory)))
 
 
 ;; jump to project
@@ -1594,9 +1165,7 @@ narrowed."
   :commands (consult-jump-project)
   :init
   (if (not (package-installed-p 'consult-jump-project))
-      (package-vc-install "https://github.com/jdtsmith/consult-jump-project"))
-  (evil-define-key 'normal 'global
-    (kbd "<leader>pp") 'consult-jump-project))
+      (package-vc-install "https://github.com/jdtsmith/consult-jump-project")))
 
 
 ;; Jump to Flycheck error
@@ -1604,9 +1173,9 @@ narrowed."
   :after (consult flycheck)
   :ensure t
   :defer t
+  :commands (consult-flycheck)
   :bind
-  (("<leader>je" . 'consult-flycheck)
-   ("M-e l"      . 'consult-flycheck)))
+  (("M-e l" . 'consult-flycheck)))
 
 
 ;; Nerd icons for consult / completion
@@ -1622,13 +1191,10 @@ narrowed."
 ;; Context commands for things at a point
 (use-package embark
   :ensure t
+  :commands (embark-act)
   :bind
   (("C-h B" . 'embark-bindings-at-point)
-   ("M-." .  'embark-act)
-   :map evil-normal-state-map
-   ("M-."        . 'embark-act)
-   ("<leader>hb" . 'embark-bindings-in-keymap)
-   ("<leader>hB" . 'embark-bindings))
+   ("M-." .  'embark-act))
 
   :config
   ;; Optionally replace the key help with a completing-read interface
@@ -1703,24 +1269,13 @@ targets."
   :commands (rg-menu rg-isearch-menu rg-project)
   :init
   ;; ensure rg-isearch-menu is loaded
-  (eval-after-load 'rg-menu '(require 'rg-isearch))
-
-  (evil-define-key 'normal 'global
-    (kbd "M-s R") 'rg-isearch-menu
-    (kbd "M-s r") 'rg-menu
-
-    (kbd "<leader>pr") 'rg-project))
+  (eval-after-load 'rg-menu '(require 'rg-isearch)))
 
 
 
 ;; Avy: jump to char/line
 (use-package avy
-  :ensure t
-  :config
-  (evil-define-key 'normal 'global
-    (kbd "<leader>jr") 'avy-resume
-    (kbd "<leader>jj") 'evil-avy-goto-char-timer
-    (kbd "<leader>jl") 'evil-avy-goto-line))
+  :ensure t)
 
 
 
@@ -1760,8 +1315,6 @@ targets."
       (apply fn args)))
 
   (advice-add #'company-capf :around #'mb/use-custom-matching-style)
-
-  (add-hook 'evil-insert-state-exit-hook 'company-abort)
 
   (eval-after-load 'eldoc
     (eldoc-add-command 'company-complete-selection
@@ -1869,17 +1422,6 @@ targets."
 
   (advice-add #'corfu-insert :after #'corfu-send-shell)
 
-  (mapc #'evil-declare-ignore-repeat
-        '(corfu-next
-          corfu-previous
-          corfu-first
-          corfu-last))
-
-  (mapc #'evil-declare-change-repeat
-        '(corfu-insert
-          corfu-insert-exact
-          corfu-complete))
-
   (global-set-key (kbd "M-p") 'completion-at-point))
 
 
@@ -1899,9 +1441,6 @@ targets."
   (global-set-key (kbd "M-y i") 'yas-insert-snippet)
   (global-set-key (kbd "M-y e") 'yas-visit-snippet-file)
   (global-set-key (kbd "M-y n") 'yas-new-snippet)
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>is") 'yas-insert-snippet)
 
   :config
   (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" mb-dotfiles-dir) t)
@@ -1923,10 +1462,7 @@ targets."
   :commands (consult-yasnippet consult-yasnippet-visit-snippet-file)
   :init
   (global-set-key (kbd "M-y i") 'consult-yasnippet)
-  (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file)
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>is") 'consult-yasnippet))
+  (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file))
 
 (use-package yasnippet-snippets
   :after (yasnippet)
@@ -1964,10 +1500,6 @@ targets."
   :init
   (global-anzu-mode t))
 
-(use-package evil-anzu
-  :after (evil anzu)
-  :ensure t)
-
 
 
 ;; Show available keybindings in a separate window
@@ -1984,8 +1516,6 @@ targets."
 
   (which-key-mode)
 
-  (push '((nil . "\\`evil-") . (nil . "😈-")) which-key-replacement-alist)
-  (push '((nil . "\\`evil-collection-unimpaired-\\(.*\\)") . (nil . "😈-cu-\\1")) which-key-replacement-alist)
   (push '(("RET" . nil) . ("⏎" . nil)) which-key-replacement-alist))
 
 
@@ -2028,12 +1558,8 @@ targets."
   :ensure t
   :defer t
   :init
-  (evil-define-key 'normal 'global (kbd "<leader>w") 'er/expand-region)
   (setq expand-region-contract-fast-key "W"
-        expand-region-reset-fast-key    "r")
-  :config
-  (evil-add-command-properties #'er/expand-region :jump t)
-  (evil-add-command-properties #'er/contract-region :jump t))
+        expand-region-reset-fast-key    "r"))
 
 
 
@@ -2041,7 +1567,6 @@ targets."
 (use-package rainbow-mode
   :ensure t
   :defer t
-  :bind (("<leader>tc" . 'rainbow-mode))
   :hook ((web-mode . rainbow-mode)
          (css-mode . rainbow-mode)
          (scss-mode . rainbow-mode)
@@ -2105,10 +1630,6 @@ targets."
       (visual-fill-column-mode arg)
       (visual-line-mode arg)))
 
-  ;; visual line mode
-  (evil-define-key 'normal 'global
-    (kbd "<leader>tv") 'mb/toggle-visual-fill-mode)
-
   :config
   (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
 
@@ -2141,12 +1662,7 @@ targets."
 (use-package magit
   :ensure t
   :defer t
-  :bind
-  (("<leader>gs" . 'magit-status)
-   ("<leader>gl" . 'magit-log-all)
-   ("<leader>gL" . 'magit-log-buffer-file)
-   ("<leader>gb" . 'magit-blame))
-
+  :commands (magit-status magit-log-all magit-log-buffer-file magit-blame)
   :config
   (setq vc-follow-symlinks nil
 
@@ -2183,14 +1699,7 @@ targets."
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
 
-  ;; make <leader> work in magit
-  (define-key magit-mode-map (kbd "SPC") nil)
-  (define-key magit-diff-mode-map (kbd "SPC") nil)
-
   (define-key magit-mode-map (kbd "M-w") nil)
-
-  ;; make M-tab work in magit status
-  (evil-define-key 'normal magit-mode-map [M-tab] 'mb/alternate-buffer)
 
   (message "mb: initialized MAGIT"))
 
@@ -2216,12 +1725,7 @@ targets."
 ;; Git-timemachine: browse through file history
 (use-package git-timemachine
   :ensure t
-  :defer t
-  :init (evil-define-key 'normal 'global (kbd "<leader>gt") 'git-timemachine)
-  :config
-  (evil-make-overriding-map git-timemachine-mode-map 'normal)
-  ;; force update evil keymaps after git-timemachine-mode loaded
-  (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps))
+  :defer t)
 
 
 
@@ -2233,22 +1737,8 @@ targets."
   (setq diff-hl-draw-borders nil)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
 
-  (evil-define-key 'normal 'global
-    (kbd "]c") 'diff-hl-next-hunk
-    (kbd "[c") 'diff-hl-previous-hunk
-    (kbd "<leader>gr") 'diff-hl-revert-hunk
-    (kbd "<leader>gd") 'diff-hl-diff-goto-hunk)
-
   (add-hook 'magit-pre-refresh-hook  'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-
-  ;; UX: Don't delete the current hunk's indicators while we're editing
-  ;; https://github.com/doomemacs/doomemacs/blob/master/modules/ui/vc-gutter/config.el#L204
-  (add-hook 'diff-hl-flydiff-mode-hook
-            (defun +vc-gutter-init-flydiff-mode-h ()
-              (if (not diff-hl-flydiff-mode)
-                  (remove-hook 'evil-insert-state-exit-hook #'diff-hl-flydiff-update)
-                (add-hook 'evil-insert-state-exit-hook #'diff-hl-flydiff-update))))
 
   (diff-hl-flydiff-mode)
 
@@ -2264,8 +1754,7 @@ targets."
 (use-package treemacs
   :ensure t
   :defer t
-  :bind (("<leader>tt" . 'treemacs)
-         ("M-t" . 'treemacs-select-window)
+  :bind (("M-t" . 'treemacs-select-window)
          ("<f4>" . 'treemacs))
   :init
   (setq treemacs-follow-after-init t
@@ -2285,11 +1774,6 @@ targets."
   :after treemacs
   :config
   (treemacs-load-theme "nerd-icons"))
-
-;; Treemacs integration with evil
-(use-package treemacs-evil
-  :ensure t
-  :after (treemacs evil))
 
 ;; Treemacs integration with magit
 (use-package treemacs-magit
@@ -2394,13 +1878,7 @@ targets."
     (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion))
 
   (which-key-add-key-based-replacements "SPC l" "LSP")
-  (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration)
-  (add-hook 'lsp-mode-hook (lambda ()
-                             (evil-local-set-key 'normal (kbd "gd") 'lsp-find-definition)
-                             (evil-local-set-key 'normal (kbd "<leader>la") 'lsp-execute-code-action)
-                             (evil-local-set-key 'normal (kbd "<leader>lf") 'lsp-find-references)
-                             (evil-local-set-key 'normal (kbd "<leader>lt") 'lsp-goto-type-definition)
-                             (evil-local-set-key 'normal (kbd "<leader>lr") 'lsp-rename))))
+  (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration))
 
 
 
@@ -2424,28 +1902,14 @@ targets."
     (progn
       (setq flycheck-indication-mode 'right-margin)))
 
-  (evil-add-command-properties #'flycheck-first-error :jump t)
-  (evil-add-command-properties #'flycheck-next-error :jump t)
-  (evil-add-command-properties #'flycheck-previous-error :jump t)
-
   ;; from Spacemacs
   (defun mb/toggle-flyckeck-errors-list ()
     "Toggle flycheck's error list window."
     (interactive)
     (-if-let (window (flycheck-get-error-list-window))
         (quit-window nil window)
-      (flycheck-list-errors)))
+      (flycheck-list-errors))))
 
-  (evil-define-key 'normal 'global
-    (kbd "M-e 1") 'flycheck-first-error
-    (kbd "M-e j") 'flycheck-next-error
-    (kbd "M-e M-j") 'flycheck-next-error
-    (kbd "M-e k") 'flycheck-previous-error
-    (kbd "M-e M-k") 'flycheck-previous-error
-    (kbd "M-e e") 'flycheck-explain-error-at-point
-    (kbd "M-e v") 'flycheck-verify-setup
-    (kbd "M-e L") 'mb/toggle-flyckeck-errors-list
-    (kbd "M-e b") 'flycheck-buffer))
 
 ;; Flycheck-posframe: display flycheck error
 (use-package flycheck-posframe
@@ -2457,11 +1921,6 @@ targets."
 
   ;; Don't display popups if company is open
   (add-hook 'flycheck-posframe-inhibit-functions #'company--active-p)
-
-  ;; Don't display popups while in insert or replace mode, as it can affect
-  ;; the cursor's position or cause disruptive input delays.
-  (add-hook 'flycheck-posframe-inhibit-functions #'evil-insert-state-p)
-  (add-hook 'flycheck-posframe-inhibit-functions #'evil-replace-state-p)
 
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 
@@ -2479,8 +1938,8 @@ targets."
   :defer 0.5
   :ensure t
   :diminish apheleia-mode
-  :init (apheleia-global-mode +1)
-  :bind (("<leader>ta" . 'apheleia-mode))
+  :init
+  (apheleia-global-mode +1)
   :config
   (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
 
@@ -2498,8 +1957,7 @@ targets."
   (if (not (package-installed-p 'robby))
       (package-vc-install "https://github.com/stevemolitor/robby"))
   :defer t
-  :bind (("<leader>ar" . 'robby-commands)
-         ("<leader>aa" . 'robby-chat))
+  :commands (robby-commands robby-chat)
   :custom
   ((robby-openai-api-key mb-openai-api-key))
   :config
@@ -2511,12 +1969,7 @@ targets."
 
   (add-hook 'robby-chat-mode-hook (lambda () (setq-local markdown-hide-markup-in-view-modes nil)))
 
-  (define-key robby-chat-mode-map (kbd "v") nil t)
-
-  (evil-define-key 'normal robby-chat-mode-map
-    (kbd "a") 'robby-chat
-    (kbd "q") 'kill-this-buffer
-    (kbd "<leader>mm") 'robby-commands))
+  (define-key robby-chat-mode-map (kbd "v") nil t))
 
 
 
@@ -2525,7 +1978,7 @@ targets."
   :if mb-openai-api-key
   :ensure t
   :defer
-  :bind ("<leader>ad" . 'dall-e-shell)
+  :commands (dall-e-shell)
   :custom
   ((dall-e-shell-welcome-function nil)
    (dall-e-shell-openai-key       mb-openai-api-key)))
@@ -2543,14 +1996,6 @@ targets."
    (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
   :bind ("C-x C-a" . 'gptel-send)
   :config
-  (add-hook 'gptel-pre-response-hook 'evil-normal-state)
-
-  (evil-define-key 'normal 'global
-    (kbd "<leader>ae") 'gptel-send
-    (kbd "<leader>ak") 'gptel-abort
-    (kbd "<leader>ag") 'gptel)
-
-  (define-key gptel-mode-map (kbd "<leader>mm") 'gptel-menu)
   (define-key gptel-mode-map (kbd "C-c C-c")    'gptel-send)
   (define-key gptel-mode-map (kbd "M-RET")      'gptel-send)
   (define-key gptel-mode-map (kbd "M-<return>") 'gptel-send))
@@ -2631,11 +2076,6 @@ targets."
 ;; Emacs Lisp
 (use-package elisp-mode
   :init
-  (evil-define-key 'normal emacs-lisp-mode-map
-    (kbd "<leader>meb") 'eval-buffer
-    (kbd "<leader>mer") 'eval-region
-    (kbd "<leader>mes") 'eval-last-sexp)
-
   (add-hook 'emacs-lisp-mode-hook
             (lambda()
               (setq mode-name "ELisp")))
@@ -2674,14 +2114,7 @@ targets."
 (use-package justl
   :ensure t
   :defer t
-  :bind (("<leader>pj" . 'justl))
-  :config
-  (evil-define-key 'normal justl-mode-map
-    (kbd "<RET>") 'justl-exec-recipe
-    (kbd "e")     'justl-exec-recipe
-    (kbd "E")     'justl-exec-eshell
-    (kbd "?")     'justl-help-popup
-    (kbd "w")     'justl-no-exec-eshell))
+  :commands (justl))
 
 
 ;; Markdown
