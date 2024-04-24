@@ -299,8 +299,7 @@
 
 
 ;; comment-dwim-2
-(with-eval-after-load 'comment-dwim-2
-  (define-key evil-normal-state-map "gc" 'comment-dwim-2))
+(define-key evil-normal-state-map "gc" 'comment-dwim-2)
 
 
 

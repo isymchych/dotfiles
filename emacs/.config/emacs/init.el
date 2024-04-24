@@ -61,7 +61,7 @@
 
 (setq use-package-verbose t)
 
-(require 'bind-key)
+(require 'bind-key) ; for :bind in use-package
 
 ;; create temp files dir if it does not exists
 (unless (file-exists-p mb-save-path)
@@ -998,7 +998,7 @@ narrowed."
   :config
   (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
         doom-modeline-minor-modes t
-        doom-modeline-hud t
+        doom-modeline-hud nil
         doom-modeline-unicode-fallback nil
         doom-modeline-buffer-encoding nil
         doom-modeline-env-version nil)
@@ -1016,6 +1016,7 @@ narrowed."
 
 
 ;; Diminish: cleanup mode line
+;; for :diminish in use-package
 (use-package diminish
   :config
   (eval-after-load 'hi-lock
@@ -1115,6 +1116,7 @@ narrowed."
 ;; manage comments
 (use-package comment-dwim-2
   :defer t
+  :commands (comment-dwim-2)
   :bind
   (([remap comment-line] . 'comment-dwim-2)
    ([remap comment-dwim] . 'comment-dwim-2)))

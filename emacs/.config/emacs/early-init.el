@@ -63,6 +63,7 @@
 ;; Font
 (setq font-use-system-font nil)
 (setq-default default-font mb-font)
+(set-face-attribute 'default nil :font mb-font)
 
 ;; set font for all windows
 (add-to-list 'default-frame-alist `(font . ,mb-font))
