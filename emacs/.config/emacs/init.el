@@ -822,6 +822,97 @@ narrowed."
         ediff-window-setup-function #'ediff-setup-windows-plain))
 
 
+
+;; Makefile mode
+(use-package makefile-mode
+  :ensure nil
+  :no-require t
+  :init
+  (defun mb/use-tabs ()
+    "Use tabs."
+    (setq tab-width        8
+          indent-tabs-mode 1))
+
+  (add-hook 'makefile-mode-hook 'mb/use-tabs)
+  (add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs))
+
+
+
+;; Python mode
+(use-package python
+  :ensure nil
+  :disabled
+  :interpreter ("python" . python-mode)
+  :config
+  (setq python-indent-offset mb-tab-size)
+  (message "mb: PYTHON MODE"))
+
+
+
+;; C-based languages like Java
+(use-package cc-mode
+  :ensure nil
+  :mode
+  ("\\.java\\'" . java-mode)
+  :config
+  ;; Set the default formatting styles for various C based modes.
+  ;; Particularly, change the default style from GNU to Java.
+  (setq c-default-style
+        '((awk-mode . "awk")
+          (other . "java")))
+
+  (add-hook 'java-mode-hook (lambda ()
+                              ;; disable auto-indent
+                              (electric-indent-local-mode 0)))
+
+  (message "mb: CC MODE"))
+
+
+
+;; XML
+(use-package nxml-mode
+  :ensure nil
+  :mode ("\\.xml\\'" . nxml-mode)
+  :mode ("\\.svg\\'" . nxml-mode)
+  :config
+
+  (setq nxml-child-indent  mb-tab-size)
+
+  (message "mb: nXML MODE"))
+
+
+
+;; Emacs Lisp
+(use-package elisp-mode
+  :ensure nil
+  :init
+  (add-hook 'emacs-lisp-mode-hook
+            (lambda()
+              (setq mode-name "ELisp")))
+  (add-hook 'lisp-interaction-mode-hook
+            (lambda() (setq mode-name "λ"))))
+
+
+
+;; Shell mode
+(use-package sh-script
+  :ensure nil
+  :defer t
+  :init
+  ;; Use sh-mode when opening `.zsh' files, and when opening Prezto runcoms.
+  (dolist (pattern '("\\.zsh\\'"
+                     "zlogin\\'"
+                     "zlogout\\'"
+                     "zpreztorc\\'"
+                     "zprofile\\'"
+                     "zshenv\\'"
+                     "zshrc\\'"))
+    (add-to-list 'auto-mode-alist (cons pattern 'sh-mode)))
+  :config
+  (message "mb: SH MODE"))
+
+
+
 ;; ---------------------------------------- 3rd PARTY PACKAGES
 
 ;; Nord theme https://github.com/arcticicestudio/nord-emacs
@@ -1981,100 +2072,6 @@ targets."
   (add-to-list 'mode-line-misc-info '(:eval (car-safe codeium-mode-line)) t)
   )
 
-
-;; ---------------------------------------- BUILT-IN LANGUAGES
-
-
-;; Makefile mode
-(use-package makefile-mode
-  :ensure nil
-  :no-require t
-  :init
-  (defun mb/use-tabs ()
-    "Use tabs."
-    (setq tab-width        8
-          indent-tabs-mode 1))
-
-  (add-hook 'makefile-mode-hook 'mb/use-tabs)
-  (add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs))
-
-
-;; Python mode
-(use-package python
-  :ensure nil
-  :disabled
-  :interpreter ("python" . python-mode)
-  :config
-  (setq python-indent-offset mb-tab-size)
-  (message "mb: PYTHON MODE"))
-
-
-
-;; C-based languages like Java
-(use-package cc-mode
-  :ensure nil
-  :mode
-  ("\\.java\\'" . java-mode)
-  :config
-  ;; Set the default formatting styles for various C based modes.
-  ;; Particularly, change the default style from GNU to Java.
-  (setq c-default-style
-        '((awk-mode . "awk")
-          (other . "java")))
-
-  (add-hook 'java-mode-hook (lambda ()
-                              ;; disable auto-indent
-                              (electric-indent-local-mode 0)))
-
-  (message "mb: CC MODE"))
-
-
-
-;; XML
-(use-package nxml-mode
-  :ensure nil
-  :mode ("\\.xml\\'" . nxml-mode)
-  :mode ("\\.svg\\'" . nxml-mode)
-  :config
-
-  (setq nxml-child-indent  mb-tab-size)
-
-  (message "mb: nXML MODE"))
-
-
-
-;; Emacs Lisp
-(use-package elisp-mode
-  :ensure nil
-  :init
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda()
-              (setq mode-name "ELisp")))
-  (add-hook 'lisp-interaction-mode-hook
-            (lambda() (setq mode-name "λ"))))
-
-
-
-;; Shell mode
-(use-package sh-script
-  :ensure nil
-  :defer t
-  :init
-  ;; Use sh-mode when opening `.zsh' files, and when opening Prezto runcoms.
-  (dolist (pattern '("\\.zsh\\'"
-                     "zlogin\\'"
-                     "zlogout\\'"
-                     "zpreztorc\\'"
-                     "zprofile\\'"
-                     "zshenv\\'"
-                     "zshrc\\'"))
-    (add-to-list 'auto-mode-alist (cons pattern 'sh-mode)))
-  :config
-  (message "mb: SH MODE"))
-
-
-
-;; ---------------------------------------- 3rd PARTY LANGUAGES
 
 
 ;; Justfile mode syntax
