@@ -202,10 +202,9 @@ label:focus {
 }
 
 #custom-run-app {
-  font-size: 2em;
+  font-size: 1.7em;
   padding-top: 8px;
   padding-bottom: 8px;
-  margin-bottom: 2px;
 }
 #custom-run-app:hover {
   transition: background-color 0.2s;
