@@ -37,6 +37,7 @@
     "spacing": 12
   },
   "clock": {
+    "interval": 20,
     "tooltip-format": "{calendar}",
     "format": "<big>{0:^7%H:%M}</big>\n<span line_height='2' size='small'>{0:^10%a %b %d}</span>",
     "calendar": {
