@@ -15,14 +15,18 @@
 ;; dir for temp files
 (defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
 
+;; dir for local elisp modules
 (defvar mb-local-load-path (expand-file-name "local/" mb-dotfiles-dir))
 
 (defvar mb-light-theme 'doom-one-light)
 (defvar mb-dark-theme 'doom-one)
 
-(defvar mb-tab-size        4)
+(defvar mb-tab-size 4)
 
-(defvar mb-use-company  t)
+(defcustom mb-use-evil t "Use evil for modal editing." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-meow nil "Use meow for modal editing." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-company t "Use company-mode for autocomplete." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-corfu nil "Use corfu for autocomplete." :type 'boolean :group 'mb-customizations)
 
 ;; see https://platform.openai.com/api-keys
 (defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
@@ -982,13 +986,14 @@ narrowed."
 
 ;; Personal meow config
 (use-package mb-meow
-  :disabled
+  :if mb-use-meow
   :load-path mb-local-load-path)
 
 
 
 ;; Personal evil config
 (use-package mb-evil
+  :if mb-use-evil
   :load-path mb-local-load-path)
 
 
@@ -1387,7 +1392,7 @@ targets."
 ;; NOTE: Feels "slow" comparing to company; has visual glitches
 ;; TODO: configure multiple completion sources
 (use-package corfu
-  :if (not mb-use-company)
+  :if mb-use-corfu
   :ensure t
   :config
   (setq corfu-cycle t
