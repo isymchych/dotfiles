@@ -285,6 +285,10 @@
 (add-hook 'text-mode-hook #'visual-line-mode)
 
 
+;; Continue comment to new line
+(setq comment-multi-line t)
+
+
 
 ;; ---------------------------------------- UTILS
 
@@ -838,6 +842,20 @@ narrowed."
 
 
 
+;; SCSS-mode
+(use-package scss-mode
+  :ensure nil
+  :mode ("\\.scss\\'" . scss-mode)
+  :init
+  ;; fix mode breaking due to missing flymake variables
+  (setq flymake-allowed-file-name-masks nil
+        flymake-err-line-patterns nil)
+  :config
+  (setq scss-compile-at-save nil)
+  (message "mb: SCSS MODE"))
+
+
+
 ;; Python mode
 (use-package python
   :ensure nil
@@ -1161,7 +1179,7 @@ narrowed."
       `(orderless-without-literal . ,(substring pattern 1)))))
 
   (setq completion-styles '(basic orderless)
-        orderless-matching-styles '(orderless-regexp)
+        ;; orderless-matching-styles '(orderless-regexp)
         orderless-style-dispatchers '(without-if-bang)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion)))))
@@ -1899,9 +1917,9 @@ targets."
         lsp-rust-analyzer-call-info-full t
         lsp-rust-build-on-save t
 
-        lsp-javascript-display-return-type-hints t
-        lsp-javascript-display-variable-type-hints t
-        lsp-javascript-display-parameter-type-hints t
+        ;; lsp-javascript-display-return-type-hints t
+        ;; lsp-javascript-display-variable-type-hints t
+        ;; lsp-javascript-display-parameter-type-hints t
 
         lsp-eldoc-enable-hover t
         lsp-eldoc-render-all nil

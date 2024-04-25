@@ -482,6 +482,7 @@
 
 
 ;; lsp-mode
+(evil-define-key 'normal 'global (kbd "<leader>tl") 'lsp)
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook (lambda ()
                              (evil-local-set-key 'normal (kbd "gd") 'lsp-find-definition)
@@ -497,7 +498,7 @@
   (evil-add-command-properties #'flycheck-next-error :jump t)
   (evil-add-command-properties #'flycheck-previous-error :jump t)
 
-  (evil-define-key 'normal 'global
+  (evil-define-key 'normal flycheck-mode-map
     (kbd "M-e 1") 'flycheck-first-error
     (kbd "M-e j") 'flycheck-next-error
     (kbd "M-e M-j") 'flycheck-next-error
@@ -522,7 +523,7 @@
   (evil-add-command-properties #'flymake-goto-next-error :jump t)
   (evil-add-command-properties #'flymake-goto-prev-error :jump t)
 
-  (evil-define-key 'normal 'global
+  (evil-define-key 'normal flymake-mode-map
     (kbd "M-e j") 'flymake-goto-next-error
     (kbd "M-e M-j") 'flymake-goto-next-error
     (kbd "M-e k") 'flymake-goto-prev-error
