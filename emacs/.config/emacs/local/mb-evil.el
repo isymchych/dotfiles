@@ -106,6 +106,9 @@
   ;; Replace Emacs kill-ring-save with window management commands
   (global-set-key (kbd "M-w") 'evil-window-map)
 
+  ;; C-u is for scroll, lets use M-u
+  (global-set-key (kbd "M-u") 'universal-argument)
+
   ;; insert tabs only in emacs state
   (define-key evil-emacs-state-map (kbd "TAB") #'indent-for-tab-command)
   ;; insert newline only in emacs state
@@ -200,10 +203,7 @@
     (kbd "<leader>br") 'mb/rename-file-and-buffer
     (kbd "<leader>bR") 'mb/revert-buffer
 
-    (kbd "<leader>pp") 'project-switch-project
-    (kbd "<leader>pD") 'project-dired
-    (kbd "<leader>pe") 'project-eshell
-    (kbd "<leader>pk") 'project-kill-buffers
+    (kbd "<leader>p") 'project-prefix-map
 
     (kbd "<leader>tn") 'display-line-numbers-mode
     (kbd "<leader>tf") 'mb/toggle-auto-fill-mode
@@ -286,15 +286,7 @@
   (global-set-key [remap evil-jump-forward]  #'better-jumper-jump-forward)
   (global-set-key [remap evil-jump-backward] #'better-jumper-jump-backward)
 
-  (setq better-jumper-use-evil-jump-advice t)
-
-  ;; Creates a jump point before killing a buffer. This allows you to undo
-  ;; killing a buffer easily (only works with file buffers though; it's not
-  ;; possible to resurrect special buffers).
-  (advice-add #'kill-current-buffer :around #'evil-better-jumper/set-jump-a)
-
-  ;; Create a jump point before jumping with imenu.
-  (advice-add #'imenu :around #'evil-better-jumper/set-jump-a))
+  (setq better-jumper-use-evil-jump-advice t))
 
 
 
@@ -329,34 +321,15 @@
     (kbd "gb")         'consult-buffer
     (kbd "<leader>SPC") 'consult-buffer
 
-    (kbd "<leader>Ds") 'mb/consult-ripgrep-in-current-dir
+    (kbd "<leader>Dg") 'mb/consult-ripgrep-in-current-dir
     (kbd "<leader>Df") 'mb/consult-fd-in-current-dir
 
     ;; project
-    (kbd "<leader>pb") 'consult-project-buffer
-    (kbd "<leader>ps") 'consult-ripgrep
-    (kbd "<leader>pS") 'mb/consult-ripgrep-symbol-at-point
-    (kbd "<leader>pf") 'consult-fd
-    (kbd "<leader>pF") 'mb/consult-fd-thing-at-point))
-
-
-;; consult-flycheck
-(evil-define-key 'normal 'global (kbd "<leader>je") 'consult-flycheck)
-
-
-;; consult-jump-project
-(evil-define-key 'normal 'global (kbd "<leader>pp") 'consult-jump-project)
+    (kbd "<leader>p") project-prefix-map))
 
 
 ;; embark
 (evil-define-key 'normal 'global (kbd "M-.") 'embark-act)
-
-
-;; rg
-(evil-define-key 'normal 'global
-  (kbd "M-s R") 'rg-isearch-menu
-  (kbd "M-s r") 'rg-menu
-  (kbd "<leader>pr") 'rg-project)
 
 
 ;; avy
@@ -437,8 +410,7 @@
 ;; magit
 (evil-define-key 'normal 'global
   (kbd "<leader>gs") 'magit-status
-  (kbd "<leader>gl") 'magit-log-all
-  (kbd "<leader>gL") 'magit-log-buffer-file
+  (kbd "<leader>gl") 'magit-log-buffer-file
   (kbd "<leader>gb") 'magit-blame)
 (with-eval-after-load 'magit
   ;; make <leader> work in magit
@@ -460,8 +432,8 @@
 ;; diff-hl
 (with-eval-after-load 'diff-hl
   (evil-define-key 'normal 'global
-    (kbd "]c") 'diff-hl-next-hunk
-    (kbd "[c") 'diff-hl-previous-hunk
+    (kbd "<leader>gn") 'diff-hl-next-hunk
+    (kbd "<leader>gp") 'diff-hl-previous-hunk
     (kbd "<leader>gr") 'diff-hl-revert-hunk
     (kbd "<leader>gd") 'diff-hl-diff-goto-hunk)
 
@@ -499,15 +471,8 @@
   (evil-add-command-properties #'flycheck-previous-error :jump t)
 
   (evil-define-key 'normal flycheck-mode-map
-    (kbd "M-e 1") 'flycheck-first-error
-    (kbd "M-e j") 'flycheck-next-error
-    (kbd "M-e M-j") 'flycheck-next-error
-    (kbd "M-e k") 'flycheck-previous-error
-    (kbd "M-e M-k") 'flycheck-previous-error
-    (kbd "M-e e") 'flycheck-explain-error-at-point
-    (kbd "M-e v") 'flycheck-verify-setup
-    (kbd "M-e L") 'mb/toggle-flyckeck-errors-list
-    (kbd "M-e b") 'flycheck-buffer))
+    (kbd "<leader>te") 'mb/toggle-flyckeck-errors-list
+    (kbd "<leader>bc") 'flycheck-buffer))
 
 
 ;; flycheck-posframe
@@ -536,17 +501,6 @@
 (evil-define-key 'normal 'global (kbd "<leader>ta") 'apheleia-mode)
 
 
-;; robby-mode
-(evil-define-key 'normal 'global
-  (kbd "<leader>ar")  'robby-commands
-  (kbd "<leader>aa")  'robby-chat)
-(with-eval-after-load 'robby-mode
-  (evil-define-key 'normal robby-chat-mode-map
-    (kbd "a") 'robby-chat
-    (kbd "q") 'kill-this-buffer
-    (kbd "<leader>mm") 'robby-commands))
-
-
 ;; dall-e-shell
 (evil-define-key 'normal 'global (kbd "<leader>ad") 'dall-e-shell)
 
@@ -563,22 +517,12 @@
     (kbd "<leader>ag") 'gptel))
 
 
-;; elisp-mode
-(evil-define-key 'normal emacs-lisp-mode-map
-  (kbd "<leader>meb") 'eval-buffer
-  (kbd "<leader>mer") 'eval-region
-  (kbd "<leader>mes") 'eval-last-sexp)
-
-
 ;; justl
-(evil-define-key 'normal 'global (kbd "<leader>pj") 'justl)
 (with-eval-after-load 'justl
   (evil-define-key 'normal justl-mode-map
-    (kbd "<RET>") 'justl-exec-recipe
     (kbd "e")     'justl-exec-recipe
     (kbd "E")     'justl-exec-eshell
-    (kbd "?")     'justl-help-popup
-    (kbd "w")     'justl-no-exec-eshell))
+    (kbd "?")     'justl-help-popup))
 
 
 ;; rainbow-mode

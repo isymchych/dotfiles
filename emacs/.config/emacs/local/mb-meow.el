@@ -3,11 +3,11 @@
 ;; * Meow guide https://github.com/meow-edit/meow
 ;;; Code:
 
-
 ;; meow: modal editing on top of emacs
 (use-package meow
   :config
-  (defun meow-setup ()
+  ;; https://github.com/meow-edit/meow/blob/master/KEYBINDING_QWERTY.org
+  (defun meow-setup-standard-qwerty ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
     (meow-motion-overwrite-define-key
      '("j" . meow-next)
@@ -92,8 +92,90 @@
      '("z" . meow-pop-selection)
      '("'" . repeat)
      '("<escape>" . ignore)))
-  (meow-setup)
+
+  ;; custom bindings
+  (defun meow-setup-custom ()
+    (setq meow-keypad-self-insert-undefined nil)
+    (setq meow-use-clipboard t) ;; use system clipboard
+
+    ;; Exit to normal state after save
+    (add-hook 'after-save-hook 'meow-normal-mode)
+
+    (which-key-add-key-based-replacements "SPC i" "Insert") ;; FIXME not working
+
+    (meow-leader-define-key
+     '("SPC" . "C-x b")   ;; switch to buffer
+     '("r"   . "C-x C-r") ;; switch to recent file
+     '("q"   . "C-x C-q") ;; kill window or quit if last window
+     '("k"   . "C-x k"  ) ;; kill buffer
+     '("s"   . "C-x C-s") ;; save buffer
+     '("e"   . eshell)
+     '("u"   . vundo)
+     '("y"   . yank-from-kill-ring)
+     '("n"   . mb/narrow-or-widen-dwim)
+     '("d"   . "C-x C-j") ;; dired-jump
+     '("w"   . er/expand-region)
+     '("Dg"  . mb/consult-ripgrep-in-current-dir)
+     '("Df"  . mb/consult-fd-in-current-dir)
+     '("`"   . vertico-repeat)
+     ;; insert
+     '("is" . yas-insert-snippet)
+     '("ie" . emoji-search)
+     '("ic" . insert-char)
+     ;; buffer
+     '("bl" . mb/cleanup-buffer)
+     '("bd" . mb/delete-current-buffer-file)
+     '("br" . mb/rename-file-and-buffer)
+     '("bR" . mb/revert-buffer)
+     '("bc" . flycheck-buffer)
+     ;; magit & friends
+     '("gs" . magit-status)
+     '("gl" . magit-log-buffer-file)
+     '("gb" . magit-blame)
+     '("gt" . git-timemachine)
+     '("gp" . diff-hl-previous-hunk)
+     '("gn" . diff-hl-next-hunk)
+     '("gr" . diff-hl-revert-hunk)
+     '("gd" . diff-hl-diff-goto-hunk)
+     ;; toggle
+     '("tn" . display-line-numbers)
+     '("tf" . mb/toggle-auto-fill-mode)
+     '("tv" . mb/toggle-visual-fill-mode)
+     '("tm" . menu-bar-mode)
+     '("tt" . treemacs)
+     '("te" . mb/toggle-flyckeck-errors-list)
+     '("ta" . apheleia-mode)
+     '("tc" . rainbow-mode)
+     ;; ai
+     '("ad" . 'dall-e-shell)
+     '("ae" . gptel-send)
+     '("ak" . gptel-abort)
+     '("ag" . gptel)
+     ;; project
+     (cons "p" project-prefix-map))
+
+    (meow-normal-define-key
+     '("<backspace>" . ignore)))
+
+  (meow-setup-standard-qwerty)
+  (meow-setup-custom)
+
   (meow-global-mode 1))
+
+
+;; lsp-mode
+(with-eval-after-load 'lsp-mode
+  (meow-leader-define-key
+   '("la" . lsp-execute-code-action)
+   '("lf" . lsp-find-references)
+   '("lt" . lsp-goto-type-definition)
+   '("lr" . lsp-rename)))
+
+
+;; gptel
+(with-eval-after-load 'gptel
+  (add-hook 'gptel-pre-response-hook 'meow-normal-mode))
+
 
 (provide 'mb-meow)
 ;;; mb-meow.el ends here

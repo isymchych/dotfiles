@@ -34,6 +34,10 @@
 ;; keep packages in emacs-version-specific directories
 ;; (setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
 
+(when (string= (getenv "MB_USE_MEOW") "true")
+  (setq
+   mb-use-meow t
+   mb-use-evil nil))
 
 ;; ---------------------------------------- INIT
 
@@ -398,6 +402,15 @@ narrowed."
       (abort-recursive-edit)
     (kill-buffer (current-buffer))))
 
+
+(defun mb/kill-window-or-quit ()
+  "Close the current window or quit Emacs if it's the last window."
+  (interactive)
+  (if (one-window-p)
+      (save-buffers-kill-emacs)
+    (delete-window)))
+
+
 (defun mb/js-to-json ()
   "Convert JS value into JSON."
   (interactive)
@@ -465,23 +478,22 @@ narrowed."
 ;; disable input methods
 (global-unset-key (kbd "C-\\"))
 
-;; prevent accidentally closed frames
-(global-unset-key (kbd "C-x C-z"))
+;; prevent accidentally closed frames (in emacsclient?)
+(global-unset-key (kbd "C-x C-z")) ;; suspend-frame
+(global-unset-key (kbd "C-z")) ;; suspend-frame
+
 
 ;; make M-tab work in terminal
 (define-key input-decode-map [?\C-\M-i] [M-tab])
 (global-set-key [M-tab]         'mb/alternate-buffer)
 
-;; free up keybinding to be used as a prefix
-(global-set-key (kbd "M-e")     'nil)
 
+(global-set-key (kbd "C-x C-q") 'mb/kill-window-or-quit)
+(global-set-key [remap kill-buffer] 'mb/kill-this-buffer)
 
 ;; remove some Super- keybindings on mac
 (global-set-key (kbd "s-t")     'nil)
 (global-set-key (kbd "s-n")     'nil)
-
-(global-set-key (kbd "M-/")     'hippie-expand)
-(global-set-key (kbd "M-u")     'universal-argument)
 
 (global-set-key [f6]    'mb/revert-buffer)
 
@@ -512,7 +524,9 @@ narrowed."
                                            try-complete-file-name
                                            try-expand-all-abbrevs
                                            try-expand-list
-                                           try-expand-line)))
+                                           try-expand-line))
+
+  (global-set-key [remap dabbrev-expand] 'hippie-expand))
 
 
 
@@ -617,6 +631,8 @@ narrowed."
   (add-hook 'server-done-hook 'recentf-save-list)
   (add-hook 'server-visit-hook 'recentf-save-list)
   (add-hook 'delete-frame-hook 'recentf-save-list)
+
+  (global-set-key (kbd "C-x C-r") 'recentf-open)
 
   (recentf-mode t)
   (recentf-track-opened-file))
@@ -753,10 +769,12 @@ narrowed."
           (dired-find-alternate-file)
         (dired-find-file))))
 
+  (define-key dired-mode-map (kbd "h")                  'mb/dired-up-directory)
   (define-key dired-mode-map [remap dired-up-directory] 'mb/dired-up-directory)
   (define-key dired-mode-map [remap quit-window]        'mb/kill-this-buffer)
 
   (define-key dired-mode-map [remap dired-find-file] 'dired-find-alternate-file)
+  (define-key dired-mode-map (kbd "l") 'dired-find-alternate-file)
   (define-key dired-mode-map (kbd "L") 'mb/dired-find-file-or-alternate)
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 
@@ -1006,6 +1024,7 @@ narrowed."
 
 ;; Nerd icons for dired
 (use-package nerd-icons-dired
+  :diminish nerd-icons-dired-mode
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
@@ -1078,16 +1097,17 @@ narrowed."
 
 ;; Improved undo/redo system
 (use-package undo-fu
-
   :init
   ;; increase emacs default undo limits
   (setq undo-limit 6710886400) ;; 64mb.
   (setq undo-strong-limit 100663296) ;; 96mb.
   (setq undo-outer-limit 1006632960) ;; 960mb.
 
+  (setq undo-fu-allow-undo-in-region t) ;; for better compatibility with meow
+
   :config
-  (global-set-key [remap undo] #'undo-fu-only-undo)
-  (global-set-key (kbd "C-S-z") #'undo-fu-only-redo))
+  (global-set-key [remap undo]      #'undo-fu-only-undo)
+  (global-set-key [remap undo-redo] #'undo-fu-only-redo))
 
 
 ;; Save & restore undo/redo state
@@ -1235,20 +1255,30 @@ narrowed."
   ;;  consult-outline support for eshell prompts
   (add-hook 'eshell-mode-hook (lambda () (setq outline-regexp eshell-prompt-regexp)))
 
-  (global-set-key (kbd "M-X") 'consult-mode-command)
-
   ;; remap existing commands
-  (global-set-key [remap apropos]                       #'consult-apropos)
-  (global-set-key [remap bookmark-jump]                 #'consult-bookmark)
-  (global-set-key [remap goto-line]                     #'consult-goto-line)
-  (global-set-key [remap imenu]                         #'consult-imenu)
-  (global-set-key [remap locate]                        #'consult-locate)
-  (global-set-key [remap load-theme]                    #'consult-theme)
-  (global-set-key [remap man]                           #'consult-man)
-  (global-set-key [remap recentf-open-files]            #'consult-recent-file)
-  (global-set-key [remap switch-to-buffer]              #'consult-buffer)
-  (global-set-key [remap switch-to-buffer-other-window] #'consult-buffer-other-window)
-  (global-set-key [remap yank-pop]                      #'consult-yank-pop)
+  (global-set-key [remap execute-extended-command-for-buffer] #'consult-mode-command)
+  (global-set-key [remap apropos]                             #'consult-apropos)
+  (global-set-key [remap bookmark-jump]                       #'consult-bookmark)
+  (global-set-key [remap goto-line]                           #'consult-goto-line)
+  (global-set-key [remap imenu]                               #'consult-imenu)
+  (global-set-key [remap locate]                              #'consult-locate)
+  (global-set-key [remap load-theme]                          #'consult-theme)
+  (global-set-key [remap man]                                 #'consult-man)
+  (global-set-key [remap recentf-open-files]                  #'consult-recent-file)
+  (global-set-key [remap recentf-open]                        #'consult-recent-file)
+  (global-set-key [remap list-buffers]                        #'consult-buffer)
+  (global-set-key [remap switch-to-buffer]                    #'consult-buffer)
+  (global-set-key [remap switch-to-buffer-other-window]       #'consult-buffer-other-window)
+  (global-set-key [remap yank-pop]                            #'consult-yank-pop)
+  (global-set-key [remap yank-from-kill-ring]                 #'consult-yank-from-kill-ring)
+  (global-set-key [remap project-switch-to-buffer]            #'consult-project-buffer)
+  (global-set-key [remap project-list-buffers]                #'consult-project-buffer)
+  (global-set-key [remap project-find-file]                   #'consult-fd)
+  (global-set-key [remap project-or-external-find-file]       #'mb/consult-fd-thing-at-point)
+  (global-set-key [remap project-find-regexp]                 #'consult-ripgrep)
+  (global-set-key [remap project-or-external-find-regexp]     #'mb/consult-ripgrep-symbol-at-point)
+
+  (global-set-key (kbd "M-g l") #'consult-line)
 
   (advice-add #'multi-occur :override #'consult-multi-occur)
 
@@ -1282,7 +1312,8 @@ narrowed."
   :commands (consult-jump-project)
   :init
   (if (not (package-installed-p 'consult-jump-project))
-      (package-vc-install "https://github.com/jdtsmith/consult-jump-project")))
+      (package-vc-install "https://github.com/jdtsmith/consult-jump-project"))
+  (global-set-key [remap project-switch-project] #'consult-jump-project))
 
 
 ;; Jump to Flycheck error
@@ -1291,7 +1322,7 @@ narrowed."
   :defer t
   :commands (consult-flycheck)
   :bind
-  (("M-e l" . 'consult-flycheck)))
+  (("M-g e" . 'consult-flycheck)))
 
 
 ;; Nerd icons for consult / completion
@@ -1382,12 +1413,23 @@ targets."
   :commands (rg-menu rg-isearch-menu rg-project)
   :init
   ;; ensure rg-isearch-menu is loaded
-  (eval-after-load 'rg-menu '(require 'rg-isearch)))
+  (eval-after-load 'rg-menu '(require 'rg-isearch))
+
+  (global-set-key (kbd "M-s g") 'rg-menu)
+  (global-set-key (kbd "M-s G") 'rg-isearch-menu)
+  (define-key project-prefix-map (kbd "R") 'rg-project))
 
 
 
 ;; Avy: jump to char/line
-(use-package avy)
+(use-package avy
+  :config
+  ;; FIXME
+  ;; (advice-add #'avy-goto-char-timer :around #'better-jumper-set-jump)
+  ;; (advice-add #'avy-goto-line :around #'better-jumper-set-jump)
+
+  (global-set-key [remap goto-char] 'avy-goto-char-timer)
+  (global-set-key (kbd "M-g M-l") 'avy-goto-line))
 
 
 
@@ -1543,12 +1585,6 @@ targets."
   ;; expand snippets with hippie expand
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
-  ;; free up the binding for a prefix
-  (global-set-key (kbd "M-y") nil)
-  (global-set-key (kbd "M-y i") 'yas-insert-snippet)
-  (global-set-key (kbd "M-y e") 'yas-visit-snippet-file)
-  (global-set-key (kbd "M-y n") 'yas-new-snippet)
-
   :config
   (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" mb-dotfiles-dir) t)
   (setq
@@ -1563,12 +1599,11 @@ targets."
   (define-key yas-minor-mode-map (kbd "TAB") nil))
 
 (use-package consult-yasnippet
-  :after (yasnippet)
   :defer t
   :commands (consult-yasnippet consult-yasnippet-visit-snippet-file)
   :init
-  (global-set-key (kbd "M-y i") 'consult-yasnippet)
-  (global-set-key (kbd "M-y e") 'consult-yasnippet-visit-snippet-file))
+  (global-set-key [remap yas-insert-snippet]     'consult-yasnippet)
+  (global-set-key [remap yas-visit-snippet-file] 'consult-yasnippet-visit-snippet-file))
 
 (use-package yasnippet-snippets
   :after (yasnippet)
@@ -1597,6 +1632,7 @@ targets."
 
 
 ;; Anzu: show current search match/total matches
+;; FIXME not needed for meow?
 (use-package anzu
   :diminish anzu-mode
   :init
@@ -1900,7 +1936,7 @@ targets."
   :defer t
   :init
   (setq lsp-session-file (expand-file-name "lsp-session-v1" mb-save-path)
-        lsp-keymap-prefix nil
+        lsp-keymap-prefix "C-c l"
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
@@ -2028,30 +2064,6 @@ targets."
 
 
 
-;; Robby mode: interact with OpenAI
-(use-package robby-mode
-  :ensure nil
-  :if mb-openai-api-key
-  :init
-  (if (not (package-installed-p 'robby))
-      (package-vc-install "https://github.com/stevemolitor/robby"))
-  :defer t
-  :commands (robby-commands robby-chat)
-  :custom
-  ((robby-openai-api-key mb-openai-api-key))
-  :config
-  (robby-mode)
-  (diminish 'robby-mode "🤖")
-
-  ;; load robby-transient so that robby-api-options command becomes available
-  (require 'robby-transients)
-
-  (add-hook 'robby-chat-mode-hook (lambda () (setq-local markdown-hide-markup-in-view-modes nil)))
-
-  (define-key robby-chat-mode-map (kbd "v") nil t))
-
-
-
 ;; Dall-E-shell: talk with dall-e
 (use-package dall-e-shell
   :if mb-openai-api-key
@@ -2073,6 +2085,7 @@ targets."
    (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
   :bind ("C-x C-a" . 'gptel-send)
   :config
+  (define-key gptel-mode-map (kbd "C-c C-m")    'gptel-menu)
   (define-key gptel-mode-map (kbd "C-c C-c")    'gptel-send)
   (define-key gptel-mode-map (kbd "M-RET")      'gptel-send)
   (define-key gptel-mode-map (kbd "M-<return>") 'gptel-send))
@@ -2101,7 +2114,12 @@ targets."
 ;; Run justfile recipes
 (use-package justl
   :defer t
-  :commands (justl))
+  :bind (
+         :map project-prefix-map
+         ("j" . justl)
+
+         :map justl-mode-map
+         ("?" . justl-help-popup)))
 
 
 ;; Markdown
