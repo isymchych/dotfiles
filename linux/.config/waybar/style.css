@@ -4,7 +4,13 @@
 * https://github.com/Alexays/Waybar/wiki/Styling
 */
 
-@define-color highlight-color #268BD2;
+@define-color bg-color #2e3440;
+@define-color color #ffffff;
+
+@define-color blink-bg-color #ffffff;
+@define-color blink-color #000000;
+
+@define-color highlight-color #ebcb8b;
 @define-color highlight-bg-color rgba(0, 0, 0, 0.3);
 @define-color urgent-color #eb4d4b;
 @define-color active-mode-color #64727d;
@@ -14,6 +20,9 @@
 
 @define-color critical-color white;
 @define-color critical-bg-color #bf616a;
+
+@define-color muted-color #2a5c45;
+@define-color muted-bg-color #90b1b1;
 
 * {
   border: none;
@@ -28,10 +37,9 @@ window {
 }
 
 window#waybar {
-  background-color: #2e3440;
-  color: #ffffff;
+  background-color: @bg-color;
+  color: @color;
   transition: background-color 0.2s;
-  border-left: 1px solid #434c5e;
 }
 
 #clock {
@@ -47,12 +55,13 @@ window#waybar {
 #workspaces button {
   padding: 0.7em 0;
   background-color: transparent;
-  color: #ffffff;
+  color: @color;
 }
 
 /* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
 #workspaces button:hover {
   background: @highlight-bg-color;
+  color: @highlight-color;
   box-shadow: inherit;
 }
 
@@ -95,8 +104,8 @@ window#waybar {
 
 @keyframes blink {
   to {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: @blink-bg-color;
+    color: @blink-color;
   }
 }
 
@@ -121,10 +130,6 @@ window#waybar {
   color: @warning-color;
 }
 
-label:focus {
-  background-color: #000000;
-}
-
 #temperature.critical {
   color: @critical-color;
   background-color: @critical-bg-color;
@@ -142,8 +147,8 @@ label:focus {
   padding-right: 5px;
 }
 #pulseaudio.playback.muted, #pulseaudio.mic.source-muted {
-  background-color: #90b1b1;
-  color: #2a5c45;
+  background-color: @muted-bg-color;
+  color: @muted-color;
 }
 #pulseaudio:hover:not(.muted):not(.source-muted) {
   transition: background-color 0.2s;

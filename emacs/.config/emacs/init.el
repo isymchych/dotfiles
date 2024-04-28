@@ -23,8 +23,6 @@
 
 (defvar mb-tab-size 4)
 
-(defcustom mb-use-evil t "Use evil for modal editing." :type 'boolean :group 'mb-customizations)
-(defcustom mb-use-meow nil "Use meow for modal editing." :type 'boolean :group 'mb-customizations)
 (defcustom mb-use-company t "Use company-mode for autocomplete." :type 'boolean :group 'mb-customizations)
 (defcustom mb-use-corfu nil "Use corfu for autocomplete." :type 'boolean :group 'mb-customizations)
 
@@ -34,10 +32,8 @@
 ;; keep packages in emacs-version-specific directories
 ;; (setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
 
-(when (string= (getenv "MB_USE_MEOW") "true")
-  (setq
-   mb-use-meow t
-   mb-use-evil nil))
+(defcustom mb-editor nil "Which keybindings to use. Evil by default." :type 'string :group 'mb-customizations)
+(setq mb-editor (or mb-editor (getenv "MB_EMACS_EDITOR") "evil"))
 
 ;; ---------------------------------------- INIT
 
@@ -456,48 +452,6 @@ narrowed."
 
 
 
-;; ---------------------------------------- GLOBAL KEYBINDINGS
-
-
-(if (window-system)
-    (progn
-      ;; zoom in / zoom out in editor
-      (global-set-key [C-mouse-4] 'text-scale-increase)
-      (global-set-key [C-mouse-5] 'text-scale-decrease)
-
-      (when mb-is-mac-os
-        (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
-        (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
-
-  (progn
-    ;; activate mouse-based scrolling
-    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
-    (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
-
-
-;; disable input methods
-(global-unset-key (kbd "C-\\"))
-
-;; prevent accidentally closed frames (in emacsclient?)
-(global-unset-key (kbd "C-x C-z")) ;; suspend-frame
-(global-unset-key (kbd "C-z")) ;; suspend-frame
-
-
-;; make M-tab work in terminal
-(define-key input-decode-map [?\C-\M-i] [M-tab])
-(global-set-key [M-tab]         'mb/alternate-buffer)
-
-
-(global-set-key (kbd "C-x C-q") 'mb/kill-window-or-quit)
-(global-set-key [remap kill-buffer] 'mb/kill-this-buffer)
-
-;; remove some Super- keybindings on mac
-(global-set-key (kbd "s-t")     'nil)
-(global-set-key (kbd "s-n")     'nil)
-
-(global-set-key [f6]    'mb/revert-buffer)
-
-
 ;; ---------------------------------------- BUILT-IN PACKAGES
 
 ;; dabbrev: autocomplete words based on buffer text
@@ -578,8 +532,15 @@ narrowed."
   (add-hook 'prog-mode-hook (lambda ()
                               (setq flyspell-consider-dash-as-word-delimiter-flag t)
                               (flyspell-prog-mode)))
+
   :config
-  (global-set-key [M-f8]  'flyspell-buffer))
+  ;; free up some bindings
+  (define-key flyspell-mode-map (kbd "C-.") nil t)
+  (define-key flyspell-mode-map (kbd "C-,") nil t)
+  (define-key flyspell-mode-map (kbd "C-;") nil t)
+  (define-key flyspell-mode-map (kbd "C-M-i") nil t)
+
+  (global-set-key (kbd "M-<f8>")  'flyspell-buffer))
 
 
 
@@ -593,22 +554,6 @@ narrowed."
         uniquify-after-kill-buffer-p t
         ;; don't muck with special buffers
         uniquify-ignore-buffers-re "^\\*"))
-
-
-
-;; IBuffer (local)
-(use-package ibuffer
-  :ensure nil
-  :disabled
-  :bind ([f2] . ibuffer)
-  :init
-  ;; use ibuffer on C-x C-b
-  (defalias 'list-buffers 'ibuffer)
-  ;; use ibuffer as default buffers list (:ls)
-  (defalias 'buffer-menu 'ibuffer)
-
-  :config
-  (define-key ibuffer-mode-map [f2]      'ibuffer-quit))
 
 
 
@@ -674,6 +619,8 @@ narrowed."
   (setq auto-revert-verbose t ; let us know when it happens
         auto-revert-use-notify nil
         auto-revert-stop-on-user-input nil
+        ;; Revert Dired and other buffers
+        global-auto-revert-non-file-buffers t
         ;; Only prompts for confirmation when buffer is unsaved.
         revert-without-query (list "."))
   (global-auto-revert-mode t))
@@ -776,7 +723,10 @@ narrowed."
   (define-key dired-mode-map [remap dired-find-file] 'dired-find-alternate-file)
   (define-key dired-mode-map (kbd "l") 'dired-find-alternate-file)
   (define-key dired-mode-map (kbd "L") 'mb/dired-find-file-or-alternate)
-  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+
+  (global-set-key [remap dired]          'dired-jump)
+  (global-set-key [remap list-directory] 'dired-jump))
 
 
 
@@ -786,7 +736,9 @@ narrowed."
   :defer t
   :init
   (setq eshell-directory-name (expand-file-name "eshell" mb-save-path)
-        eshell-aliases-file   (expand-file-name "eshell-aliases" mb-dotfiles-dir)))
+        eshell-aliases-file   (expand-file-name "eshell-aliases" mb-dotfiles-dir))
+
+  (global-set-key (kbd "C-c e") #'eshell))
 
 
 ;; Flymake
@@ -1122,17 +1074,12 @@ narrowed."
 
 
 
-;; Personal meow config
-(use-package mb-meow
-  :if mb-use-meow
-  :load-path mb-local-load-path)
-
-
-
-;; Personal evil config
-(use-package mb-evil
-  :if mb-use-evil
-  :load-path mb-local-load-path)
+;; Visualise the undo history
+(use-package vundo
+  :defer t
+  :bind (("C-c u" . vundo))
+  :config
+  (setq vundo-glyph-alist vundo-unicode-symbols))
 
 
 
@@ -1151,6 +1098,21 @@ narrowed."
 
 
 
+;; Goto last change
+(use-package goto-chg
+  :bind
+  (("C-," . goto-last-change)
+   ("C-." . goto-last-change-reverse)))
+
+
+
+;; Surround things
+(use-package surround
+  :ensure t
+  :bind-keymap ("M-'" . surround-keymap))
+
+
+
 ;; manage comments
 (use-package comment-dwim-2
   :defer t
@@ -1158,15 +1120,6 @@ narrowed."
   :bind
   (([remap comment-line] . 'comment-dwim-2)
    ([remap comment-dwim] . 'comment-dwim-2)))
-
-
-
-;; Visualise the undo history
-(use-package vundo
-  :defer t
-  :commands (vundo)
-  :config
-  (setq vundo-glyph-alist vundo-unicode-symbols))
 
 
 
@@ -1184,7 +1137,9 @@ narrowed."
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
   (define-key vertico-map (kbd "M-j") 'vertico-next)
-  (define-key vertico-map (kbd "M-k") 'vertico-previous))
+  (define-key vertico-map (kbd "M-k") 'vertico-previous)
+
+  (global-set-key (kbd "C-c `") #'vertico-repeat))
 
 
 
@@ -1278,7 +1233,8 @@ narrowed."
   (global-set-key [remap project-find-regexp]                 #'consult-ripgrep)
   (global-set-key [remap project-or-external-find-regexp]     #'mb/consult-ripgrep-symbol-at-point)
 
-  (global-set-key (kbd "M-g l") #'consult-line)
+  (global-set-key (kbd "M-g l")   #'consult-line)
+  (global-set-key (kbd "C-c SPC") #'consult-buffer)
 
   (advice-add #'multi-occur :override #'consult-multi-occur)
 
@@ -1507,7 +1463,7 @@ targets."
   (define-key company-active-map [remap scroll-down-command]  nil)
   (define-key company-active-map [remap scroll-up-command]  nil)
 
-  (global-set-key (kbd "M-p") 'company-manual-begin))
+  (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
 
 
 ;; Company-shell: better autocomplete in shell
@@ -1631,12 +1587,15 @@ targets."
 
 
 
-;; Anzu: show current search match/total matches
-;; FIXME not needed for meow?
+;; Anzu: show number of matches in mode-line while searching
 (use-package anzu
   :diminish anzu-mode
-  :init
-  (global-anzu-mode t))
+  :bind (([remap query-replace] . anzu-query-replace)
+         ([remap query-replace-regexp] . anzu-query-replace-regexp)
+         :map isearch-mode-map
+         ([remap isearch-query-replace] . anzu-isearch-query-replace)
+         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+  :hook (after-init . global-anzu-mode))
 
 
 
@@ -1679,9 +1638,9 @@ targets."
   :diminish highlight-thing-mode
   :hook (prog-mode . highlight-thing-mode)
   :config
-  (set-face-attribute 'highlight-thing nil
-                      :foreground (face-foreground 'highlight)
-                      :background (face-background 'highlight))
+  ;; (set-face-attribute 'highlight-thing nil
+  ;;                     :foreground (face-foreground 'highlight)
+  ;;                     :background (face-background 'highlight))
   ;; Don't highlight the thing at point itself
   (setq highlight-thing-exclude-thing-under-point t)
   (setq highlight-thing-delay-seconds 1.5))
@@ -1691,6 +1650,7 @@ targets."
 ;; Expand-region: expand selection like C-w in intellij idea
 (use-package expand-region
   :defer t
+  :bind (("C-c w" . er/expand-region))
   :init
   (setq expand-region-contract-fast-key "W"
         expand-region-reset-fast-key    "r"))
@@ -1826,8 +1786,6 @@ targets."
               (mb/toggle-auto-fill-mode)))
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
-
-  (define-key magit-mode-map (kbd "M-w") nil)
 
   (message "mb: initialized MAGIT"))
 
@@ -2085,7 +2043,8 @@ targets."
    (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
   :bind ("C-x C-a" . 'gptel-send)
   :config
-  (define-key gptel-mode-map (kbd "C-c C-m")    'gptel-menu)
+  (define-key gptel-mode-map (kbd "C-c L m")      'gptel-menu)
+
   (define-key gptel-mode-map (kbd "C-c C-c")    'gptel-send)
   (define-key gptel-mode-map (kbd "M-RET")      'gptel-send)
   (define-key gptel-mode-map (kbd "M-<return>") 'gptel-send))
@@ -2182,6 +2141,162 @@ targets."
   :config
   (message "mb: PKGBUILD MODE"))
 
+
+
+;; ---------------------------------------- GLOBAL KEYBINDINGS
+;; http://xahlee.info/emacs/emacs/emacs_good_keybinding.html
+;; http://xahlee.info/emacs/emacs_manual/elisp/Key-Binding-Conventions.html
+
+
+(if (window-system)
+    (progn
+      ;; zoom in / zoom out in editor
+      (global-set-key [C-mouse-4] 'text-scale-increase)
+      (global-set-key [C-mouse-5] 'text-scale-decrease)
+
+      (when mb-is-mac-os
+        (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
+        (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
+
+  (progn
+    ;; activate mouse-based scrolling
+    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+    (global-set-key (kbd "<mouse-5>") 'scroll-up-line)))
+
+
+;; disable input methods
+(global-unset-key (kbd "C-\\"))
+
+;; prevent accidentally closed frames (in emacsclient?)
+(global-unset-key (kbd "C-x C-z")) ;; suspend-frame
+(global-unset-key (kbd "C-z")) ;; suspend-frame
+
+
+;; make M-tab work in terminal
+(define-key input-decode-map [?\C-\M-i] [M-tab])
+(global-set-key [M-tab]         'mb/alternate-buffer)
+
+;; C-m automatically translates to RET, the next line prevents it
+;; (define-key input-decode-map [?\C-m] [C-m])
+
+(global-set-key (kbd "C-x C-q") 'mb/kill-window-or-quit)
+
+(global-set-key [remap kill-buffer] 'mb/kill-this-buffer)
+
+;; remove some Super- keybindings on mac
+(global-set-key (kbd "s-t")     'nil)
+(global-set-key (kbd "s-n")     'nil)
+
+(global-set-key [f6]    'mb/revert-buffer)
+
+
+(defvar-keymap mb/insert-map
+  :doc "mb prefix map for inserting things"
+  "s"  'yas-insert-snippet
+  "e"  'emoji-search
+  "c"  'insert-char)
+
+(defvar-keymap mb/buffer-map
+  :doc "mb prefix map for buffer things"
+  "l"  'mb/cleanup-buffer
+  "d"  'mb/delete-current-buffer-file
+  "r"  'mb/rename-file-and-buffer
+  "R"  'mb/revert-buffer
+  "c"  'flycheck-buffer)
+
+(defvar-keymap mb/git-map
+  :doc "mb prefix map for git things"
+  "s" 'magit-status
+  "l" 'magit-log-buffer-file
+  "b" 'magit-blame
+  "t" 'git-timemachine
+  "p" 'diff-hl-previous-hunk
+  "n" 'diff-hl-next-hunk
+  "r" 'diff-hl-revert-hunk
+  "d" 'diff-hl-diff-goto-hunk)
+
+(defvar-keymap mb/toggle-map
+  :doc "mb prefix map for toggling things"
+  "n" 'display-line-numbers
+  "f" 'mb/toggle-auto-fill-mode
+  "v" 'mb/toggle-visual-fill-mode
+  "m" 'menu-bar-mode
+  "t" 'treemacs
+  "e" 'mb/toggle-flyckeck-errors-list
+  "a" 'apheleia-mode
+  "c" 'rainbow-mode
+  "w" 'whitespace-mode)
+
+(defvar-keymap mb/ai-map
+  :doc "mb prefix map for AI things"
+  "d"  'dall-e-shell
+  "e"  'gptel-send
+  "k"  'gptel-abort
+  "g"  'gptel)
+
+(defvar-keymap mb/dir-actions-map
+  :doc "mb prefix map for Directory actions"
+  "f"  'mb/consult-fd-in-current-dir
+  "g"  'mb/consult-ripgrep-in-current-dir
+  "o"  'dired-jump-other-window)
+
+(defvar-keymap mb/format-actions-map
+  :doc "mb prefix map for Formatting actions"
+  "<SPC>"  'just-one-space
+  "s"      'sort-lines)
+
+(defvar-keymap mb/local-actions-map
+  :doc "mb prefix map for Local actions"
+  "ESC" '("Exit & do nothing" . ignore))
+
+;; define global bindings on C-c
+(which-key-add-keymap-based-replacements mode-specific-map
+  "<SPC>" '("Switch to buffer" . switch-to-buffer)
+
+  "a" `("AI"                   . ,mb/ai-map)
+  "b" `("Buffer"               . ,mb/buffer-map)
+  "D" `("Dir actions"          . ,mb/dir-actions-map)
+  "g" `("Git"                  . ,mb/git-map)
+  "i" `("Insert"               . ,mb/insert-map)
+  "L" `("Local"                . ,mb/local-actions-map)
+  "n" '("Narrow or widen DWIM" . mb/narrow-or-widen-dwim)
+  "p" `("Project"              . ,project-prefix-map)
+  "t" `("Toggle"               . ,mb/toggle-map)
+  "y" '("Visual yank"          . yank-from-kill-ring)
+
+  "=" `("Formatting"           . ,mb/format-actions-map))
+
+(global-set-key (kbd "C-c r") 'consult-recent-file)
+(global-set-key (kbd "C-c q") 'mb/kill-window-or-quit)
+(global-set-key (kbd "C-c k") 'mb/kill-this-buffer)
+(global-set-key (kbd "C-c s") 'save-buffer)
+(global-set-key (kbd "C-c d") 'dired-jump)
+
+
+;; Personal meow config
+(use-package mb-meow
+  :if (string= mb-editor "meow")
+  :load-path mb-local-load-path)
+
+
+
+;; Personal evil config
+(use-package mb-evil
+  :if (string= mb-editor "evil")
+  :load-path mb-local-load-path)
+
+
+
+;; TODO boon
+;; TODO dap-mode
+;; TODO combobulate for tree-sitter-based navigation
+;; TODO replace treemacs with dirvish
+;; TODO configure registers consult
+;; TODO consult-info to search for emacs help
+;; TODO fix avy & better-jumper integration
+;; FIXME emacs variable width fonts look bad & very small (i.e. in emacs manual info buffers)
+;; TODO repeat-mode
+;; TODO no-littering
 
 
 (provide 'init)

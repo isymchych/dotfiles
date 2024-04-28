@@ -396,6 +396,8 @@ exec_always {
     gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita'
     gsettings set org.gnome.desktop.interface font-name 'DejaVu Sans Bold Semi-Condensed 14'
 
+    gsettings set org.gnome.desktop.interface gtk-key-theme "Default"
+
     gsettings set org.gnome.desktop.interface scaling-factor 1
     gsettings set org.gnome.desktop.interface text-scaling-factor 1.3
 
