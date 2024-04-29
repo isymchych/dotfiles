@@ -58,7 +58,12 @@
 (require 'bind-key) ; for :bind in use-package
 
 ;; no-littering: organize emacs temporary files
-(use-package no-littering)
+(use-package no-littering
+  :config
+  ;; https://github.com/emacscollective/no-littering/pull/221
+  (setq treesit--install-language-grammar-out-dir-history (list (no-littering-expand-var-file-name "tree-sitter")))
+  (setq treesit-extra-load-path          (list (no-littering-expand-var-file-name "tree-sitter"))))
+
 
 ;; NOTE: the background-color was added in early-init.el but should be removed
 ;; to avoid discrepancies in background color in new frames
@@ -435,6 +440,18 @@ narrowed."
 
 
 ;; ---------------------------------------- BUILT-IN PACKAGES
+
+
+
+;; kmacro: record macros
+;; https://www.masteringemacs.org/article/keyboard-macros-are-misunderstood
+(use-package kmacro
+  :ensure nil
+  :config
+  (defalias 'kmacro-insert-macro 'insert-kbd-macro)
+  (define-key kmacro-keymap (kbd "i") #'kmacro-insert-macro))
+
+
 
 ;; dabbrev: autocomplete words based on buffer text
 (use-package dabbrev
@@ -1347,7 +1364,8 @@ targets."
   :commands (rg-menu rg-isearch-menu rg-project)
   :init
   ;; ensure rg-isearch-menu is loaded
-  (eval-after-load 'rg-menu '(require 'rg-isearch))
+  (with-eval-after-load 'rg-menu
+    (require 'rg-isearch))
 
   (global-set-key (kbd "M-s g") 'rg-menu)
   (global-set-key (kbd "M-s G") 'rg-isearch-menu)
@@ -1809,8 +1827,7 @@ targets."
 ;; Treemacs: file tree sidebar
 (use-package treemacs
   :defer t
-  :bind (("M-t" . 'treemacs-select-window)
-         ("<f4>" . 'treemacs))
+  :bind ("<f5>" . 'treemacs)
   :init
   (setq treemacs-follow-after-init t
         treemacs-is-never-other-window nil
@@ -2141,6 +2158,9 @@ targets."
 (global-unset-key (kbd "C-x C-z")) ;; suspend-frame
 (global-unset-key (kbd "C-z")) ;; suspend-frame
 
+;; remove some Super- keybindings on mac
+(global-set-key (kbd "s-t")     'nil)
+(global-set-key (kbd "s-n")     'nil)
 
 ;; make M-tab work in terminal
 (define-key input-decode-map [?\C-\M-i] [M-tab])
@@ -2153,11 +2173,13 @@ targets."
 
 (global-set-key [remap kill-buffer] 'mb/kill-this-buffer)
 
-;; remove some Super- keybindings on mac
-(global-set-key (kbd "s-t")     'nil)
-(global-set-key (kbd "s-n")     'nil)
+(global-set-key (kbd "C-x C-M-t") 'transpose-regions)
 
-(global-set-key [f6]    'mb/revert-buffer)
+(global-set-key [remap upcase-word]     'upcase-dwim)
+(global-set-key [remap downcase-word]   'downcase-dwim)
+(global-set-key [remap capitalize-word] 'capitalize-dwim)
+
+(global-set-key (kbd "<f6>") 'mb/revert-buffer)
 
 
 (defvar-keymap mb/insert-map
@@ -2187,14 +2209,15 @@ targets."
 
 (defvar-keymap mb/toggle-map
   :doc "mb prefix map for toggling things"
-  "n" 'display-line-numbers
-  "f" 'mb/toggle-auto-fill-mode
-  "v" 'mb/toggle-visual-fill-mode
-  "m" 'menu-bar-mode
-  "t" 'treemacs
-  "e" 'mb/toggle-flyckeck-errors-list
   "a" 'apheleia-mode
   "c" 'rainbow-mode
+  "e" 'mb/toggle-flyckeck-errors-list
+  "f" 'mb/toggle-auto-fill-mode
+  "m" 'menu-bar-mode
+  "n" 'display-line-numbers
+  "s" 'scroll-lock-mode
+  "t" 'treemacs
+  "v" 'mb/toggle-visual-fill-mode
   "w" 'whitespace-mode)
 
 (defvar-keymap mb/ai-map
@@ -2266,7 +2289,6 @@ targets."
 ;; TODO fix avy & better-jumper integration
 ;; FIXME emacs variable width fonts look bad & very small (i.e. in emacs manual info buffers)
 ;; TODO repeat-mode
-;; FIXME company-mode trailing numbers
 
 
 (provide 'init)
