@@ -1,4 +1,4 @@
-;;; mb-meow.el --- meow config file -*- lexical-binding: t; -*-
+;;; init-meow.el --- meow config file -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; * Meow guide https://github.com/meow-edit/meow
 ;;; Code:
@@ -130,5 +130,5 @@
   (add-hook 'gptel-pre-response-hook 'meow-normal-mode))
 
 
-(provide 'mb-meow)
-;;; mb-meow.el ends here
+(provide 'init-meow)
+;;; init-meow.el ends here

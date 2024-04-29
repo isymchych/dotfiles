@@ -12,9 +12,6 @@
 (defvar mb-is-mac-os (eq system-type 'darwin))
 (defvar mb-is-linux (eq system-type 'gnu/linux))
 
-;; dir for local elisp modules
-(defvar mb-local-load-path (expand-file-name "local/" user-emacs-directory))
-
 (defvar mb-light-theme 'doom-one-light)
 (defvar mb-dark-theme 'doom-one)
 
@@ -2285,16 +2282,16 @@ targets."
 
 
 ;; Personal meow config
-(use-package mb-meow
+(use-package init-meow
   :if (string= mb-editor "meow")
-  :load-path mb-local-load-path)
+  :load-path user-emacs-directory)
 
 
 
 ;; Personal evil config
-(use-package mb-evil
+(use-package init-evil
   :if (string= mb-editor "evil")
-  :load-path mb-local-load-path)
+  :load-path user-emacs-directory)
 
 
 

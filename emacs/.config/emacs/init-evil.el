@@ -1,4 +1,4 @@
-;;; mb-evil.el --- evil config file -*- lexical-binding: t; -*-
+;;; init-evil.el --- evil config file -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; * Evil guide https://github.com/noctuid/evil-guide
 ;;; Code:
@@ -420,5 +420,5 @@
     (kbd "?")     'justl-help-popup))
 
 
-(provide 'mb-evil)
-;;; mb-evil.el ends here
+(provide 'init-evil)
+;;; init-evil.el ends here
