@@ -1978,6 +1978,9 @@ targets."
     (progn
       (setq flycheck-indication-mode 'right-margin)))
 
+  (global-set-key [remap previous-error] 'flycheck-previous-error)
+  (global-set-key [remap next-error]     'flycheck-next-error)
+
   ;; from Spacemacs
   (defun mb/toggle-flyckeck-errors-list ()
     "Toggle flycheck's error list window."
