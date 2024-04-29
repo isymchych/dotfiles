@@ -61,8 +61,8 @@
 (use-package no-littering
   :config
   ;; https://github.com/emacscollective/no-littering/pull/221
-  (setq treesit--install-language-grammar-out-dir-history (list (no-littering-expand-var-file-name "tree-sitter")))
-  (setq treesit-extra-load-path          (list (no-littering-expand-var-file-name "tree-sitter"))))
+  (setq treesit--install-language-grammar-out-dir-history (list (no-littering-expand-var-file-name "tree-sitter/")))
+  (setq treesit-extra-load-path          (list (no-littering-expand-var-file-name "tree-sitter/"))))
 
 
 ;; NOTE: the background-color was added in early-init.el but should be removed
@@ -436,6 +436,13 @@ narrowed."
        (message "MB selected font: %s" new-font-name)
        (set-frame-font new-font-name nil t)
        (customize-save-variable 'mb-font new-font-name)))))
+
+
+;; https://emacs.stackexchange.com/a/2471
+(defun mb/invoke-C-c ()
+  "Simulate pressing C-c."
+  (interactive)
+  (setq unread-command-events (listify-key-sequence "\C-c")))
 
 
 
@@ -1882,7 +1889,7 @@ targets."
   :diminish lsp-mode
   :defer t
   :init
-  (setq lsp-keymap-prefix "C-c l"
+  (setq lsp-keymap-prefix "C-c C-l"
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
@@ -1942,7 +1949,16 @@ targets."
     (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion))
 
   (which-key-add-key-based-replacements "SPC l" "LSP")
-  (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration))
+  (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration)
+
+
+  (add-hook 'lsp-mode-hook (lambda ()
+                             (local-set-key [remap xref-find-references] 'lsp-find-references)
+
+                             (local-set-key (kbd "C-c l a") 'lsp-execute-code-action)
+                             (local-set-key (kbd "C-c l f") 'lsp-find-references)
+                             (local-set-key (kbd "C-c l t") 'lsp-goto-type-definition)
+                             (local-set-key (kbd "C-c l r") 'lsp-rename))))
 
 
 
@@ -2030,7 +2046,7 @@ targets."
    (gptel-model "gpt-4-turbo"))
   :bind ("C-x C-a" . 'gptel-send)
   :config
-  (define-key gptel-mode-map (kbd "C-c L m")      'gptel-menu)
+  (define-key gptel-mode-map (kbd "C-c l m")      'gptel-menu)
 
   (define-key gptel-mode-map (kbd "C-c C-c")    'gptel-send)
   (define-key gptel-mode-map (kbd "M-RET")      'gptel-send)
@@ -2244,26 +2260,28 @@ targets."
 
 ;; define global bindings on C-c
 (which-key-add-keymap-based-replacements mode-specific-map
-  "<SPC>" '("Switch to buffer" . switch-to-buffer)
-
   "a" `("AI"                   . ,mb/ai-map)
   "b" `("Buffer"               . ,mb/buffer-map)
   "D" `("Dir actions"          . ,mb/dir-actions-map)
   "g" `("Git"                  . ,mb/git-map)
   "i" `("Insert"               . ,mb/insert-map)
-  "L" `("Local"                . ,mb/local-actions-map)
-  "n" '("Narrow or widen DWIM" . mb/narrow-or-widen-dwim)
+  "l" `("Local-mode actions"   . ,mb/local-actions-map)
   "p" `("Project"              . ,project-prefix-map)
   "t" `("Toggle"               . ,mb/toggle-map)
-  "y" '("Visual yank"          . yank-from-kill-ring)
 
   "=" `("Formatting"           . ,mb/format-actions-map))
 
-(global-set-key (kbd "C-c r") 'consult-recent-file)
-(global-set-key (kbd "C-c q") 'mb/kill-window-or-quit)
-(global-set-key (kbd "C-c k") 'mb/kill-this-buffer)
-(global-set-key (kbd "C-c s") 'save-buffer)
+(global-set-key (kbd "C-c <SPC>") 'switch-to-buffer)
+
 (global-set-key (kbd "C-c d") 'dired-jump)
+(global-set-key (kbd "C-c k") 'mb/kill-this-buffer)
+(global-set-key (kbd "C-c n") 'mb/narrow-or-widen-dwim)
+(global-set-key (kbd "C-c q") 'mb/kill-window-or-quit)
+(global-set-key (kbd "C-c r") 'consult-recent-file)
+(global-set-key (kbd "C-c s") 'save-buffer)
+(global-set-key (kbd "C-c y") 'yank-from-kill-ring)
+
+(which-key-add-key-based-replacements "C-c l" "Local actions")
 
 
 ;; Personal meow config

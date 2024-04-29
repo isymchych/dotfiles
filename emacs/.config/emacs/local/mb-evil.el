@@ -170,7 +170,7 @@
   (evil-define-key 'normal 'global
     (kbd "C-.") nil
     (kbd "C-,") nil
-    (kbd "<SPC>") mode-specific-map))
+    (kbd "<SPC>") 'mb/invoke-C-c))
 
 ;; integration of evil with various packages
 (use-package evil-collection
@@ -374,11 +374,8 @@
 ;; lsp-mode
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook (lambda ()
-                             (evil-local-set-key 'normal (kbd "gd") 'lsp-find-definition)
-                             (evil-local-set-key 'normal (kbd "<leader>la") 'lsp-execute-code-action)
-                             (evil-local-set-key 'normal (kbd "<leader>lf") 'lsp-find-references)
-                             (evil-local-set-key 'normal (kbd "<leader>lt") 'lsp-goto-type-definition)
-                             (evil-local-set-key 'normal (kbd "<leader>lr") 'lsp-rename))))
+                             (local-set-key [remap evil-goto-definition] 'lsp-find-definition)
+                             )))
 
 
 ;; flycheck
