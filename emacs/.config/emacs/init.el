@@ -2286,15 +2286,19 @@ targets."
 
 ;; Personal meow config
 (use-package init-meow
+  :ensure nil
   :if (string= mb-editor "meow")
-  :load-path user-emacs-directory)
+  :init
+  (load (expand-file-name "init-meow" user-emacs-directory)))
 
 
 
 ;; Personal evil config
 (use-package init-evil
+  :ensure nil
   :if (string= mb-editor "evil")
-  :load-path user-emacs-directory)
+  :init
+  (load (expand-file-name "init-evil" user-emacs-directory)))
 
 
 

@@ -116,15 +116,6 @@
   (meow-global-mode 1))
 
 
-;; lsp-mode
-(with-eval-after-load 'lsp-mode
-  (meow-leader-define-key
-   '("la" . lsp-execute-code-action)
-   '("lf" . lsp-find-references)
-   '("lt" . lsp-goto-type-definition)
-   '("lr" . lsp-rename)))
-
-
 ;; gptel
 (with-eval-after-load 'gptel
   (add-hook 'gptel-pre-response-hook 'meow-normal-mode))
