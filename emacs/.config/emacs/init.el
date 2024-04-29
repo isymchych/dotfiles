@@ -12,11 +12,8 @@
 (defvar mb-is-mac-os (eq system-type 'darwin))
 (defvar mb-is-linux (eq system-type 'gnu/linux))
 
-;; dir for temp files
-(defvar mb-save-path (expand-file-name "save-files/" mb-dotfiles-dir))
-
 ;; dir for local elisp modules
-(defvar mb-local-load-path (expand-file-name "local/" mb-dotfiles-dir))
+(defvar mb-local-load-path (expand-file-name "local/" user-emacs-directory))
 
 (defvar mb-light-theme 'doom-one-light)
 (defvar mb-dark-theme 'doom-one)
@@ -28,9 +25,6 @@
 
 ;; see https://platform.openai.com/api-keys
 (defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
-
-;; keep packages in emacs-version-specific directories
-;; (setq package-user-dir (expand-file-name (concat "packages/" emacs-version "/elpa") mb-dotfiles-dir))
 
 (defcustom mb-editor nil "Which keybindings to use. Evil by default." :type 'string :group 'mb-customizations)
 (setq mb-editor (or mb-editor (getenv "MB_EMACS_EDITOR") "evil"))
@@ -63,10 +57,8 @@
 
 (require 'bind-key) ; for :bind in use-package
 
-;; create temp files dir if it does not exists
-(unless (file-exists-p mb-save-path)
-  (make-directory mb-save-path))
-
+;; no-littering: organize emacs temporary files
+(use-package no-littering)
 
 ;; NOTE: the background-color was added in early-init.el but should be removed
 ;; to avoid discrepancies in background color in new frames
@@ -134,9 +126,6 @@
 
  ;; Don't defer screen updates when performing operations.
  redisplay-dont-pause t
-
- ;; file to save customizations done through UI
- custom-file mb-customizations-file
 
  ;; skip duplicates from the kill-ring to simplify yanking
  kill-do-not-save-duplicates t
@@ -219,13 +208,6 @@
 (set-keyboard-coding-system   'utf-8)
 (set-selection-coding-system  'utf-8)
 (prefer-coding-system         'utf-8)
-
-;; dir to save info about interrupted sessions
-(setq auto-save-list-file-prefix mb-save-path)
-(setq tramp-persistency-file-name (expand-file-name "tramp" mb-save-path))
-;; dir to store some temporary files
-(setq backup-directory-alist '(("." . mb-save-path)))
-(setq url-configuration-directory (expand-file-name "url" mb-save-path))
 
 ;; Transparently open compressed files
 (auto-compression-mode t)
@@ -487,8 +469,6 @@ narrowed."
 ;; Project.el: project management
 (use-package project
   :ensure nil
-  :init
-  (setq project-list-file (expand-file-name "projects" mb-save-path))
   :config
   (push '(project-dired "Root directory") project-switch-commands)
 
@@ -523,7 +503,7 @@ narrowed."
   :init
   (when (executable-find "aspell")
     (setq ispell-program-name "aspell") ; use aspell instead of ispell
-    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" mb-save-path))
+    (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" no-littering-var-directory))
     (setq-default ispell-extra-args '("--sug-mode=ultra"
                                       "--lang=en_GB"
                                       "--camel-case")))
@@ -561,12 +541,18 @@ narrowed."
 (use-package recentf
   :ensure nil
   :config
-  (setq recentf-save-file (expand-file-name "recentf" mb-save-path)
-        recentf-max-menu-items 25
+  (setq recentf-max-menu-items 25
         recentf-max-saved-items 1000
         ;; cleanup non-existing files on startup
         ;; may have problems with remote files
         recentf-auto-cleanup 'mode)
+
+  ;; Ignore no-littering files
+  (add-to-list 'recentf-exclude
+               (recentf-expand-file-name no-littering-var-directory))
+  (add-to-list 'recentf-exclude
+               (recentf-expand-file-name no-littering-etc-directory))
+
   ;; Ignore ephemeral git commit message files
   (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
   (add-to-list 'recentf-exclude "/elpa/")
@@ -588,8 +574,7 @@ narrowed."
 (use-package savehist
   :ensure nil
   :config
-  (setq savehist-file (expand-file-name "savehist" mb-save-path)
-        savehist-save-minibuffer-history t
+  (setq savehist-save-minibuffer-history t
         savehist-autosave-interval nil ; save on kill only
         savehist-additional-variables
         '(
@@ -603,9 +588,6 @@ narrowed."
 ;; Saveplace: save cursor position
 (use-package saveplace
   :ensure nil
-  :init
-  (setq-default save-place-file (expand-file-name "saveplace" mb-save-path))
-
   :config
   (save-place-mode t))
 
@@ -734,11 +716,8 @@ narrowed."
 (use-package eshell
   :ensure nil
   :defer t
-  :init
-  (setq eshell-directory-name (expand-file-name "eshell" mb-save-path)
-        eshell-aliases-file   (expand-file-name "eshell-aliases" mb-dotfiles-dir))
+  :bind ("C-c e" . eshell))
 
-  (global-set-key (kbd "C-c e") #'eshell))
 
 
 ;; Flymake
@@ -1066,8 +1045,7 @@ narrowed."
 (use-package undo-fu-session
   :after undo-fu
   :config
-  (setq undo-fu-session-directory (expand-file-name "undo-fu-session" mb-save-path)
-        undo-fu-session-compression 'zst
+  (setq undo-fu-session-compression 'zst
         undo-fu-session-incompatible-files '("\\.gpg$" "/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
 
   (global-undo-fu-session-mode))
@@ -1535,8 +1513,8 @@ targets."
 ;; YASnippet: snippets
 (use-package yasnippet
   :defer t
-  :commands (yas-hippie-try-expand yas-insert-snippet yas-visit-snippet-file yas-new-snippet)
   :diminish yas-minor-mode
+  :commands (yas-hippie-try-expand yas-insert-snippet yas-visit-snippet-file yas-new-snippet)
   :init
   ;; expand snippets with hippie expand
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
@@ -1563,6 +1541,7 @@ targets."
 
 (use-package yasnippet-snippets
   :after (yasnippet)
+  :diminish yas-minor-mode
   :config
   (yasnippet-snippets-initialize)
   (yas-global-mode))
@@ -1638,9 +1617,10 @@ targets."
   :diminish highlight-thing-mode
   :hook (prog-mode . highlight-thing-mode)
   :config
-  ;; (set-face-attribute 'highlight-thing nil
-  ;;                     :foreground (face-foreground 'highlight)
-  ;;                     :background (face-background 'highlight))
+  (set-face-attribute
+   'highlight-thing nil
+   :foreground (face-foreground 'highlight)
+   :background (face-background 'highlight))
   ;; Don't highlight the thing at point itself
   (setq highlight-thing-exclude-thing-under-point t)
   (setq highlight-thing-delay-seconds 1.5))
@@ -1735,12 +1715,6 @@ targets."
 
 ;; Transient: menus, used by magit and other packages
 (use-package transient
-  :init
-  ;; Must be set early to prevent ~/.emacs.d/transient from being created
-  (setq transient-levels-file  (expand-file-name "transient/levels.el" mb-save-path)
-        transient-values-file  (expand-file-name "transient/values.el" mb-save-path)
-        transient-history-file (expand-file-name "transient/history.el" mb-save-path))
-
   :config
   ;; Close transient with ESC
   (define-key transient-map [escape] #'transient-quit-one))
@@ -1840,9 +1814,7 @@ targets."
   :init
   (setq treemacs-follow-after-init t
         treemacs-is-never-other-window nil
-        treemacs-sorting 'alphabetic-case-insensitive-asc
-        treemacs-persist-file (expand-file-name "treemacs-persist" mb-save-path)
-        treemacs-last-error-persist-file (expand-file-name "treemacs-last-error-persist" mb-save-path))
+        treemacs-sorting 'alphabetic-case-insensitive-asc)
 
   :config
   ;; Don't follow the cursor (it's more disruptive/jarring than helpful as a default)
@@ -1893,8 +1865,7 @@ targets."
   :diminish lsp-mode
   :defer t
   :init
-  (setq lsp-session-file (expand-file-name "lsp-session-v1" mb-save-path)
-        lsp-keymap-prefix "C-c l"
+  (setq lsp-keymap-prefix "C-c l"
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
@@ -2039,8 +2010,7 @@ targets."
   :custom
   ((gptel-api-key mb-openai-api-key)
    (gptel-max-tokens 2500)
-   (gptel-model "gpt-4-turbo")
-   (gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" mb-save-path)))
+   (gptel-model "gpt-4-turbo"))
   :bind ("C-x C-a" . 'gptel-send)
   :config
   (define-key gptel-mode-map (kbd "C-c L m")      'gptel-menu)
@@ -2296,7 +2266,7 @@ targets."
 ;; TODO fix avy & better-jumper integration
 ;; FIXME emacs variable width fonts look bad & very small (i.e. in emacs manual info buffers)
 ;; TODO repeat-mode
-;; TODO no-littering
+;; FIXME company-mode trailing numbers
 
 
 (provide 'init)

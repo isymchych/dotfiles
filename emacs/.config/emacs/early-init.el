@@ -2,15 +2,21 @@
 ;;; Commentary:
 ;;; Code:
 
-;; base configs dir
-(defvar mb-dotfiles-dir (file-name-directory (or (buffer-file-name) load-file-name)))
-
-(defvar mb-customizations-file (expand-file-name "custom.el" mb-dotfiles-dir))
-
 (defcustom mb-font "Iosevka Fixed:weight=medium:size=17" "Default font to be used by Emacs. Use \\[mb/change-font] to customize." :type 'string :group 'mb-customizations)
 
+;; redirect native compilation files into no-littering dir
+(when (fboundp 'startup-redirect-eln-cache)
+  (startup-redirect-eln-cache
+   (convert-standard-filename
+    (expand-file-name  "var/eln-cache/" user-emacs-directory))))
+
+
+;; file to save customizations done through UI
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+
 ;; load customizations file if it exists
-(load mb-customizations-file t)
+(load custom-file t)
+
 
 ;; reduce the frequency of garbage collection by making it happen on
 ;; each 100MB of allocated data (the default is on every 0.76MB)

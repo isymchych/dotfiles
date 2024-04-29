@@ -1,6 +1,4 @@
-/save-files
-/eshell
 /elpa
 /flycheck-init.el
 /eln-cache
-/tree-sitter
+/var
