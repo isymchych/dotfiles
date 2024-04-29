@@ -7,14 +7,14 @@
 (use-package evil
   ;; this must be set before loading evil
   :init
-  ;; use C-u as scroll-up
-  (defvar evil-want-C-u-scroll t)
+  (defvar evil-want-C-u-scroll nil)
   (defvar evil-want-Y-yank-to-eol t)
   (defvar evil-want-C-i-jump t)
-  (defvar evil-want-keybinding nil)
+  (defvar evil-want-keybinding nil) ;; needed for evil-collection
   (defvar evil-want-minibuffer t)
   (defvar evil-undo-system 'undo-fu)
   (defvar evil-lookup-func #'helpful-at-point)
+  (defvar evil-disable-insert-state-bindings t)
 
   ;; enable subword mode CamelCase movement in evil
   ;; https://github.com/syl20bnr/spacemacs/blob/a58a7d79b3713bcf693bb61d9ba83d650a6aba86/layers/%2Bspacemacs/spacemacs-defaults/packages.el#L434
@@ -103,9 +103,6 @@
   ;; Replace Emacs kill-ring-save with window management commands
   (global-set-key (kbd "M-w") 'evil-window-map)
 
-  ;; C-u is for scroll, lets use M-u
-  (global-set-key (kbd "M-u") 'universal-argument)
-
   ;; insert tabs only in emacs state
   (define-key evil-emacs-state-map (kbd "TAB") #'indent-for-tab-command)
   ;; insert newline only in emacs state
@@ -123,17 +120,8 @@
   (define-key evil-normal-state-map "Q" 'evil-record-macro)
   (define-key evil-window-map "q" 'evil-window-delete)
 
-  (define-key evil-normal-state-map (kbd "M-f") 'evil-scroll-page-down)
-  (define-key evil-normal-state-map (kbd "M-b") 'evil-scroll-page-up)
-
   (define-key evil-normal-state-map "gr" 'xref-find-references)
   (define-key evil-normal-state-map "gD" 'xref-find-definitions-other-window)
-
-  ;; move everywhere with M-hjkl
-  (global-set-key (kbd "M-j") 'evil-next-line)
-  (global-set-key (kbd "M-k") 'evil-previous-line)
-  (global-set-key (kbd "M-h") 'left-char)
-  (global-set-key (kbd "M-l") 'right-char)
 
   (evil-ex-define-cmd "Q[uit]" 'evil-quit)
 

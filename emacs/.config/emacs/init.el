@@ -25,6 +25,7 @@
 
 (defcustom mb-editor nil "Which keybindings to use. Evil by default." :type 'string :group 'mb-customizations)
 (setq mb-editor (or mb-editor (getenv "MB_EMACS_EDITOR") "evil"))
+(message "EDITOR MODE: %s" mb-editor)
 
 ;; ---------------------------------------- INIT
 
@@ -273,6 +274,11 @@
 (setq comment-multi-line t)
 
 
+;; Repeat deeply nested commands
+;; https://karthinks.com/software/it-bears-repeating/
+(repeat-mode t)
+
+
 
 ;; ---------------------------------------- UTILS
 
@@ -440,6 +446,20 @@ narrowed."
   "Simulate pressing C-c."
   (interactive)
   (setq unread-command-events (listify-key-sequence "\C-c")))
+
+
+
+(defun mb/previous-multilines ()
+  "Scroll down multiple lines."
+  (interactive)
+  (scroll-down (/ (window-body-height) 2)))
+
+
+
+(defun mb/next-multilines ()
+  "Scroll up multiple lines."
+  (interactive)
+  (scroll-up (/ (window-body-height) 2)))
 
 
 
@@ -2197,6 +2217,9 @@ targets."
 
 (global-set-key (kbd "<f6>") 'mb/revert-buffer)
 
+(global-set-key (kbd "M-n") 'mb/next-multilines)
+(global-set-key (kbd "M-p") 'mb/previous-multilines)
+
 
 (defvar-keymap mb/insert-map
   :doc "mb prefix map for inserting things"
@@ -2284,6 +2307,25 @@ targets."
 (which-key-add-key-based-replacements "C-c l" "Local actions")
 
 
+
+(defvar-keymap mb/window-navigation-map
+  :doc "mb prefix map for window navigation"
+  "o"  'other-window)
+
+(global-set-key (kbd "M-o") mb/window-navigation-map)
+
+
+
+
+;; Personal boon config
+(use-package init-boon
+  :ensure nil
+  :if (string= mb-editor "boon")
+  :init
+  (load (expand-file-name "init-boon" user-emacs-directory)))
+
+
+
 ;; Personal meow config
 (use-package init-meow
   :ensure nil
@@ -2302,7 +2344,6 @@ targets."
 
 
 
-;; TODO boon
 ;; TODO dap-mode
 ;; TODO combobulate for tree-sitter-based navigation
 ;; TODO replace treemacs with dirvish

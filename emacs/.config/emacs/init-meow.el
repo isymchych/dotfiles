@@ -15,8 +15,8 @@
      '("<escape>" . ignore))
     (meow-leader-define-key
      ;; SPC j/k will run the original command in MOTION state.
-     '("j" . "H-j")
-     '("k" . "H-k")
+     ;; '("j" . "H-j")
+     ;; '("k" . "H-k")
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
      '("2" . meow-digit-argument)
@@ -100,8 +100,6 @@
 
     ;; Exit to normal state after save
     (add-hook 'after-save-hook 'meow-normal-mode)
-
-    ;; (which-key-add-key-based-replacements "SPC i" "Insert") ;; FIXME not working
 
     (meow-leader-define-key
      '("SPC" . consult-buffer) ;; same as C-c SPC
