@@ -1387,7 +1387,7 @@ targets."
    company-dabbrev-downcase          nil
 
    company-require-match             nil
-   company-show-quick-access         t
+   company-show-quick-access        'left
    company-transformers             '(delete-dups)
 
    company-backends '((company-files
