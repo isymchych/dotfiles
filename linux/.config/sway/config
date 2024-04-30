@@ -15,7 +15,7 @@ set  $c_urgent      #cb4b16
 input type:keyboard {
     xkb_layout us,ua
     xkb_variant winkeys
-    xkb_options grp:win_space_toggle,grp_led:caps,caps:escape
+    xkb_options grp:win_space_toggle,grp_led:caps,caps:ctrl_modifier
 
     # chars per second
     repeat_rate 30

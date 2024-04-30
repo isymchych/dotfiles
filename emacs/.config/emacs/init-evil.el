@@ -155,10 +155,11 @@
   (global-set-key (kbd "C-c 2") 'call-last-kbd-macro)
   (global-set-key (kbd "M-g m") 'evil-show-marks)
 
+  (evil-define-key '(normal visual) 'global (kbd "<SPC>") 'mb/invoke-C-c)
+
   (evil-define-key 'normal 'global
     (kbd "C-.") nil
-    (kbd "C-,") nil
-    (kbd "<SPC>") 'mb/invoke-C-c))
+    (kbd "C-,") nil))
 
 ;; integration of evil with various packages
 (use-package evil-collection
