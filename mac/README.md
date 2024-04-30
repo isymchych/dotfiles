@@ -37,7 +37,7 @@
 
 # Settings
 * Trackpad -> enable "Tap to click"
-* Map caps lock to escape https://vim.fandom.com/wiki/Map_caps_lock_to_escape_in_macOS
+* Map caps lock to control
 * Make ctrl-c etc work https://apple.stackexchange.com/a/170671
 * Exclude projects folder from the Spotlight index to prevent high CPU usage
 
