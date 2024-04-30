@@ -1255,9 +1255,12 @@ narrowed."
   (global-set-key (kbd "M-g l")   #'consult-line)
   (global-set-key (kbd "C-c SPC") #'consult-buffer)
 
+  (global-set-key (kbd "C-c p s") #'consult-ripgrep) ;; override project-shell, for convenience
+  (global-set-key (kbd "C-c p S") #'mb/consult-ripgrep-symbol-at-point)
+
   (advice-add #'multi-occur :override #'consult-multi-occur)
 
-  (setq consult-fd-args "fd --color=never")
+  ;; (setq consult-fd-args "fd --color=never")
 
   (defun mb/consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
@@ -2352,6 +2355,7 @@ targets."
 ;; TODO fix avy & better-jumper integration
 ;; FIXME emacs variable width fonts look bad & very small (i.e. in emacs manual info buffers)
 ;; TODO repeat-mode
+;; FIXME modify consult-fd-args to ignore project prefix
 
 
 (provide 'init)
