@@ -86,15 +86,23 @@
   (evil-set-leader nil (kbd "C-SPC"))
 
   ;; Use escape to quit, and not as a meta-key.
-  (define-key evil-normal-state-map           [escape] 'keyboard-quit)
-  (define-key evil-visual-state-map           [escape] 'keyboard-quit)
-  (define-key minibuffer-local-map            [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-ns-map         [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
-  (define-key minibuffer-local-isearch-map    [escape] 'minibuffer-keyboard-quit)
-
+  (define-key evil-normal-state-map [escape] 'keyboard-quit)
+  (define-key evil-visual-state-map [escape] 'keyboard-quit)
   (define-key evil-insert-state-map [escape] 'evil-normal-state)
+
+  ;; Also quit with C-g
+  (defun mb/evil-keyboard-quit ()
+    "Keyboard quit and force normal state."
+    (interactive)
+    (and evil-mode (evil-force-normal-state))
+    (keyboard-quit))
+
+  (define-key evil-normal-state-map   (kbd "C-g") #'mb/evil-keyboard-quit)
+  (define-key evil-motion-state-map   (kbd "C-g") #'mb/evil-keyboard-quit)
+  (define-key evil-insert-state-map   (kbd "C-g") #'mb/evil-keyboard-quit)
+  (define-key evil-window-map         (kbd "C-g") #'mb/evil-keyboard-quit)
+  (define-key evil-operator-state-map (kbd "C-g") #'mb/evil-keyboard-quit)
+
 
   ;; disable man look up
   (define-key evil-motion-state-map "K" 'eldoc)
@@ -123,8 +131,6 @@
   (define-key evil-normal-state-map "gr" 'xref-find-references)
   (define-key evil-normal-state-map "gD" 'xref-find-definitions-other-window)
 
-  (evil-ex-define-cmd "Q[uit]" 'evil-quit)
-
   (evil-define-key 'emacs minibuffer-mode-map
     ;; insert newline with Alt-Enter
     (kbd "M-<return>") 'newline
@@ -151,7 +157,6 @@
   (define-key evil-visual-state-map (kbd ">") 'mb/evil-shift-right-visual)
   (define-key evil-visual-state-map (kbd "<") 'mb/evil-shift-left-visual)
 
-  (global-set-key [remap mb/kill-window-or-quit] 'evil-quit)
   (global-set-key (kbd "C-c 2") 'call-last-kbd-macro)
   (global-set-key (kbd "M-g m") 'evil-show-marks)
 
@@ -285,6 +290,20 @@
         '(corfu-insert
           corfu-insert-exact
           corfu-complete)))
+
+
+
+;; Anzu: show number of matches in mode-line while searching
+(use-package anzu
+  :diminish anzu-mode
+  :bind (([remap query-replace] . anzu-query-replace)
+         ([remap query-replace-regexp] . anzu-query-replace-regexp)
+         :map isearch-mode-map
+         ([remap isearch-query-replace] . anzu-isearch-query-replace)
+         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+  :config
+  (global-anzu-mode t))
+
 
 
 ;; evil-anzu: anzu integration for evil

@@ -6,7 +6,7 @@
 
 
 
-;; ---------------------------------------- VARS
+;;; ---------------------------------------- VARS
 
 
 (defvar mb-is-mac-os (eq system-type 'darwin))
@@ -27,7 +27,11 @@
 (setq mb-editor (or mb-editor (getenv "MB_EMACS_EDITOR") "evil"))
 (message "EDITOR MODE: %s" mb-editor)
 
-;; ---------------------------------------- INIT
+
+
+;;; ---------------------------------------- INIT
+
+
 
 (if (native-comp-available-p)
     (message "Native compilation enabled!")
@@ -67,7 +71,9 @@
 ;; to avoid discrepancies in background color in new frames
 (setq default-frame-alist (assq-delete-all 'background-color default-frame-alist))
 
-;; ---------------------------------------- CONFIG
+
+
+;;; ---------------------------------------- CONFIG
 
 ;; keep menu bar enabled only on mac since it doesn't take vertical space
 (if (and
@@ -280,7 +286,25 @@
 
 
 
-;; ---------------------------------------- UTILS
+;; Display a counter showing the number of the current and the other matches.
+(setq isearch-lazy-count t)
+(setq lazy-count-prefix-format "(%s/%s) ")
+
+;; Make regular Isearch interpret the empty space as a regular
+;; expression that matches any character between the words you give  it.
+(setq search-whitespace-regexp ".*?")
+
+
+
+;; Use rg for grep-find-command
+(with-eval-after-load 'grep
+  (grep-apply-setting
+   'grep-find-command
+   '("rg -n -H --no-heading -e '' $(git rev-parse --show-toplevel || pwd)" . 27)))
+
+
+
+;;; ---------------------------------------- UTILS
 
 
 
@@ -449,21 +473,7 @@ narrowed."
 
 
 
-(defun mb/previous-multilines ()
-  "Scroll down multiple lines."
-  (interactive)
-  (scroll-down (/ (window-body-height) 2)))
-
-
-
-(defun mb/next-multilines ()
-  "Scroll up multiple lines."
-  (interactive)
-  (scroll-up (/ (window-body-height) 2)))
-
-
-
-;; ---------------------------------------- BUILT-IN PACKAGES
+;;; ---------------------------------------- BUILT-IN PACKAGES
 
 
 
@@ -717,8 +727,11 @@ narrowed."
   (when mb-is-mac-os
     (let ((gls (executable-find "gls")))
       (when gls
-        (setq insert-directory-program gls
-              dired-listing-switches "-aBhl --group-directories-first"))))
+        (setq insert-directory-program gls))))
+
+  (setq dired-listing-switches "-aBhl  --group-directories-first")
+
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
   (put 'dired-find-alternate-file 'disabled nil)
 
@@ -921,7 +934,7 @@ narrowed."
 
 
 
-;; ---------------------------------------- 3rd PARTY PACKAGES
+;;; ---------------------------------------- 3rd PARTY PACKAGES
 
 ;; Nord theme https://github.com/arcticicestudio/nord-emacs
 ;; Solarized theme https://github.com/bbatsov/solarized-emacs
@@ -984,6 +997,13 @@ narrowed."
    auto-dark-light-theme mb-light-theme)
 
   (auto-dark-mode t))
+
+
+
+;; Spacious padding: add padding to windows
+(use-package spacious-padding
+  :config
+  (spacious-padding-mode))
 
 
 
@@ -1253,7 +1273,7 @@ narrowed."
   (global-set-key [remap project-or-external-find-regexp]     #'mb/consult-ripgrep-symbol-at-point)
 
   (global-set-key (kbd "M-g l")   #'consult-line)
-  (global-set-key (kbd "C-c SPC") #'consult-buffer)
+  (global-set-key (kbd "M-g o")   #'consult-outline)
 
   (global-set-key (kbd "C-c p s") #'consult-ripgrep) ;; override project-shell, for convenience
   (global-set-key (kbd "C-c p S") #'mb/consult-ripgrep-symbol-at-point)
@@ -1608,18 +1628,6 @@ targets."
   :diminish editorconfig-mode
   :init
   (add-hook 'prog-mode-hook 'editorconfig-mode))
-
-
-
-;; Anzu: show number of matches in mode-line while searching
-(use-package anzu
-  :diminish anzu-mode
-  :bind (([remap query-replace] . anzu-query-replace)
-         ([remap query-replace-regexp] . anzu-query-replace-regexp)
-         :map isearch-mode-map
-         ([remap isearch-query-replace] . anzu-isearch-query-replace)
-         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
-  :hook (after-init . global-anzu-mode))
 
 
 
@@ -2169,7 +2177,7 @@ targets."
 
 
 
-;; ---------------------------------------- GLOBAL KEYBINDINGS
+;;; ---------------------------------------- GLOBAL KEYBINDINGS
 ;; http://xahlee.info/emacs/emacs/emacs_good_keybinding.html
 ;; http://xahlee.info/emacs/emacs_manual/elisp/Key-Binding-Conventions.html
 
@@ -2205,8 +2213,23 @@ targets."
 (define-key input-decode-map [?\C-\M-i] [M-tab])
 (global-set-key [M-tab]         'mb/alternate-buffer)
 
+
+;; Use escape to quit, and not as a meta-key.
+(define-key minibuffer-local-map            [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-ns-map         [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+(define-key minibuffer-local-isearch-map    [escape] 'minibuffer-keyboard-quit)
+(global-set-key [escape] 'keyboard-quit)
+
+(global-set-key (kbd "C-x <escape>") 'keyboard-quit)
+(global-set-key (kbd "C-c <escape>") 'keyboard-quit)
+
 ;; C-m automatically translates to RET, the next line prevents it
 ;; (define-key input-decode-map [?\C-m] [C-m])
+
+;; ensure C-[ in GUI translates to <escape>
+(define-key input-decode-map [?\C-\[] (kbd "<escape>"))
 
 (global-set-key (kbd "C-x C-q") 'mb/kill-window-or-quit)
 
@@ -2219,9 +2242,6 @@ targets."
 (global-set-key [remap capitalize-word] 'capitalize-dwim)
 
 (global-set-key (kbd "<f6>") 'mb/revert-buffer)
-
-(global-set-key (kbd "M-n") 'mb/next-multilines)
-(global-set-key (kbd "M-p") 'mb/previous-multilines)
 
 
 (defvar-keymap mb/insert-map
@@ -2287,7 +2307,7 @@ targets."
 ;; define global bindings on C-c
 (which-key-add-keymap-based-replacements mode-specific-map
   "a" `("AI"                   . ,mb/ai-map)
-  "b" `("Buffer"               . ,mb/buffer-map)
+  "B" `("Buffer"               . ,mb/buffer-map)
   "D" `("Dir actions"          . ,mb/dir-actions-map)
   "g" `("Git"                  . ,mb/git-map)
   "i" `("Insert"               . ,mb/insert-map)
@@ -2297,7 +2317,7 @@ targets."
 
   "=" `("Formatting"           . ,mb/format-actions-map))
 
-(global-set-key (kbd "C-c <SPC>") 'switch-to-buffer)
+(global-set-key (kbd "C-c b") 'switch-to-buffer)
 
 (global-set-key (kbd "C-c d") 'dired-jump)
 (global-set-key (kbd "C-c k") 'mb/kill-this-buffer)
@@ -2310,13 +2330,7 @@ targets."
 (which-key-add-key-based-replacements "C-c l" "Local actions")
 
 
-
-(defvar-keymap mb/window-navigation-map
-  :doc "mb prefix map for window navigation"
-  "o"  'other-window)
-
-(global-set-key (kbd "M-o") mb/window-navigation-map)
-
+(global-set-key (kbd "M-g w") 'other-window)
 
 
 
@@ -2347,6 +2361,7 @@ targets."
 
 
 
+;; TODO codeium
 ;; TODO dap-mode
 ;; TODO combobulate for tree-sitter-based navigation
 ;; TODO replace treemacs with dirvish
@@ -2356,6 +2371,8 @@ targets."
 ;; FIXME emacs variable width fonts look bad & very small (i.e. in emacs manual info buffers)
 ;; TODO repeat-mode
 ;; FIXME modify consult-fd-args to ignore project prefix
+;; TODO modalka-mode
+;; TODO custom modal editing system? https://llazarek.github.io/blog/2018/07/modal-editing-in-emacs.html
 
 
 (provide 'init)

@@ -97,12 +97,15 @@
   (defun meow-setup-custom ()
     (setq meow-keypad-self-insert-undefined nil)
     (setq meow-use-clipboard t) ;; use system clipboard
+    (setq meow-keypad-ctrl-meta-prefix ?G) ;; use G instead of g as C-M- prefix
 
     ;; Exit to normal state after save
     (add-hook 'after-save-hook 'meow-normal-mode)
 
     (meow-leader-define-key
-     '("SPC" . consult-buffer) ;; same as C-c SPC
+     ;; SPC j/k will run the original command in MOTION state.
+     '("J" . "H-j")
+     '("K" . "H-k")
      )
 
     (meow-normal-define-key
@@ -110,6 +113,8 @@
 
   (meow-setup-standard-qwerty)
   (meow-setup-custom)
+
+  (push '(helpful-mode . motion) meow-mode-state-list)
 
   (meow-global-mode 1))
 
