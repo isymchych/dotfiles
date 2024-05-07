@@ -166,6 +166,12 @@ window#waybar {
   background: @highlight-bg-color;
   color: @highlight-color;
 }
+#bluetooth.no-controller {
+    color: grey;
+}
+#bluetooth.disabled {
+    color: @highlight-color;
+}
 
 #language {
   font-size: 1.3em;
