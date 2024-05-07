@@ -123,6 +123,9 @@ $ chmod 600 ~/.ssh/key
 * easyeffects - enable "auto gain" plugin, for volume normalisation
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
+* interception-caps2esc - bind CapsLock to Escape while pressing and to Control while holding
+  * copy `caps-to-esc-and-ctrl.yaml` into `/etc/interception/udevmon.d/`
+  * `systemctl enable --now udevmon.service`
 
 * nordic - dark GTK3 theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme
