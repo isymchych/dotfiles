@@ -34,6 +34,8 @@
 * Stretchly - break time reminder
     brew install --cask stretchly
 * Install Telegram
+* Karabiner elements - remap keys
+    brew install karabiner-elements
 
 # Settings
 * Trackpad -> enable "Tap to click"

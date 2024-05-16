@@ -113,15 +113,6 @@
 
   ;; insert tabs only in emacs state
   (define-key evil-emacs-state-map (kbd "TAB") #'indent-for-tab-command)
-  ;; insert newline only in emacs state
-  (define-key evil-emacs-state-map (kbd "RET") #'newline)
-
-  ;; in prog modes I want RET in comment to continue comment in new line
-  (add-hook 'prog-mode-hook
-            (lambda ()
-              (when (derived-mode-p 'prog-mode)
-                (define-key evil-insert-state-local-map (kbd "RET") #'default-indent-new-line))))
-
 
   ;; in many modes q is close/exit etc., so leave it unbound
   (define-key evil-normal-state-map "q" nil)

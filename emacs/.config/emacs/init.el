@@ -1025,7 +1025,7 @@ narrowed."
 ;; Mode line
 (use-package doom-modeline
   :config
-  (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
+  (setq doom-modeline-buffer-file-name-style 'truncate-with-project
         doom-modeline-minor-modes t
         doom-modeline-hud nil
         doom-modeline-unicode-fallback nil
@@ -1249,6 +1249,29 @@ narrowed."
   ;;  consult-outline support for eshell prompts
   (add-hook 'eshell-mode-hook (lambda () (setq outline-regexp eshell-prompt-regexp)))
 
+  ;; (setq consult-fd-args "fd --color=never")
+
+  (defun mb/consult-ripgrep-symbol-at-point (&optional dir)
+    (interactive)
+    (consult-ripgrep dir (if (region-active-p)
+                             (mb/get-selected-text)
+                           (thing-at-point 'symbol))))
+
+  (defun mb/consult-ripgrep-in-current-dir ()
+    (interactive)
+    (consult-ripgrep default-directory))
+
+  (defun mb/consult-fd-thing-at-point (&optional dir)
+    (interactive)
+    (consult-fd dir (if (region-active-p)
+                        (mb/get-selected-text)
+                      (thing-at-point 'filename))))
+
+  (defun mb/consult-fd-in-current-dir ()
+    (interactive)
+    (consult-fd default-directory))
+
+
   ;; remap existing commands
   (global-set-key [remap execute-extended-command-for-buffer] #'consult-mode-command)
   (global-set-key [remap apropos]                             #'consult-apropos)
@@ -1275,32 +1298,10 @@ narrowed."
   (global-set-key (kbd "M-g l")   #'consult-line)
   (global-set-key (kbd "M-g o")   #'consult-outline)
 
-  (global-set-key (kbd "C-c p s") #'consult-ripgrep) ;; override project-shell, for convenience
-  (global-set-key (kbd "C-c p S") #'mb/consult-ripgrep-symbol-at-point)
+  (define-key project-prefix-map (kbd "s") #'consult-ripgrep) ;; override project-shell, for convenience
+  (define-key project-prefix-map (kbd "S") #'mb/consult-ripgrep-symbol-at-point)
 
-  (advice-add #'multi-occur :override #'consult-multi-occur)
-
-  ;; (setq consult-fd-args "fd --color=never")
-
-  (defun mb/consult-ripgrep-symbol-at-point (&optional dir)
-    (interactive)
-    (consult-ripgrep dir (if (region-active-p)
-                             (mb/get-selected-text)
-                           (thing-at-point 'symbol))))
-
-  (defun mb/consult-ripgrep-in-current-dir ()
-    (interactive)
-    (consult-ripgrep default-directory))
-
-  (defun mb/consult-fd-thing-at-point (&optional dir)
-    (interactive)
-    (consult-fd dir (if (region-active-p)
-                        (mb/get-selected-text)
-                      (thing-at-point 'filename))))
-
-  (defun mb/consult-fd-in-current-dir ()
-    (interactive)
-    (consult-fd default-directory)))
+  (advice-add #'multi-occur :override #'consult-multi-occur))
 
 
 ;; jump to project
@@ -1481,21 +1482,24 @@ targets."
   (define-key company-active-map (kbd "<tab>") #'company-complete-selection)
   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
 
+  (define-key company-active-map (kbd "<return>") #'company-complete-selection)
+  (define-key company-active-map (kbd "RET") #'company-complete-selection)
+
   ;; https://emacs.stackexchange.com/a/24800
   ;; <return> is for windowed Emacs; RET is for terminal Emacs
-  (dolist (key '("<return>" "RET"))
-    ;; Here we are using an advanced feature of define-key that lets
-    ;; us pass an "extended menu item" instead of an interactive
-    ;; function. Doing this allows RET to regain its usual
-    ;; functionality when the user has not explicitly interacted with
-    ;; Company.
-    (define-key company-active-map (kbd key)
-                `(menu-item nil company-complete
-                            :filter ,(lambda (cmd)
-                                       (when (or (company-explicit-action-p)
-                                                 ;; or if previewing just one completion candidate
-                                                 (eq company-candidates-length 1))
-                                         cmd)))))
+  ;; (dolist (key '("<return>" "RET"))
+  ;;   ;; Here we are using an advanced feature of define-key that lets
+  ;;   ;; us pass an "extended menu item" instead of an interactive
+  ;;   ;; function. Doing this allows RET to regain its usual
+  ;;   ;; functionality when the user has not explicitly interacted with
+  ;;   ;; Company.
+  ;;   (define-key company-active-map (kbd key)
+  ;;               `(menu-item nil company-complete
+  ;;                           :filter ,(lambda (cmd)
+  ;;                                      (when (or (company-explicit-action-p)
+  ;;                                                ;; or if previewing just one completion candidate
+  ;;                                                (eq company-candidates-length 1))
+  ;;                                        cmd)))))
 
   (define-key company-active-map (kbd "<f1>") nil)
 
