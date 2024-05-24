@@ -1508,9 +1508,7 @@ targets."
   (define-key company-active-map (kbd "C-s")  nil)
   (define-key company-active-map (kbd "M-l")  'company-show-location)
   (define-key company-active-map [remap scroll-down-command]  nil)
-  (define-key company-active-map [remap scroll-up-command]  nil)
-
-  (global-set-key (kbd "TAB") 'company-indent-or-complete-common))
+  (define-key company-active-map [remap scroll-up-command]  nil))
 
 
 ;; Company-shell: better autocomplete in shell
@@ -2297,6 +2295,7 @@ targets."
   :doc "mb prefix map for Directory actions"
   "f"  'mb/consult-fd-in-current-dir
   "g"  'mb/consult-ripgrep-in-current-dir
+  "s"  'mb/consult-ripgrep-in-current-dir
   "o"  'dired-jump-other-window)
 
 (defvar-keymap mb/format-actions-map
