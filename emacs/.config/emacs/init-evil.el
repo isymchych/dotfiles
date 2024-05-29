@@ -123,9 +123,9 @@
   (define-key evil-normal-state-map "gD" 'xref-find-definitions-other-window)
 
   (evil-define-key 'emacs minibuffer-mode-map
-    ;; insert newline with Alt-Enter
-    (kbd "M-<return>") 'newline
-    (kbd "M-RET") 'newline
+    ;; insert newline with Ctrl-Enter
+    (kbd "C-<return>") 'newline
+    (kbd "C-RET") 'newline
     (kbd "C-w") 'evil-delete-backward-word
 
     ;; make Enter work as expected in minibuffer default (emacs) state
