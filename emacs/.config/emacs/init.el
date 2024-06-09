@@ -1587,7 +1587,7 @@ targets."
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
   :config
-  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" mb-dotfiles-dir) t)
+  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory) t)
   (setq
    yas-verbosity          2
    yas-wrap-around-region t)
@@ -2076,7 +2076,7 @@ targets."
   :custom
   ((gptel-api-key mb-openai-api-key)
    (gptel-max-tokens 2500)
-   (gptel-model "gpt-4-turbo"))
+   (gptel-model "gpt-4o"))
   :bind ("C-x C-a" . 'gptel-send)
   :config
   (define-key gptel-mode-map (kbd "C-c l m")      'gptel-menu)
