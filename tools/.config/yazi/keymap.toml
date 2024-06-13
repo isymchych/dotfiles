@@ -25,5 +25,5 @@
 
 [[manager.prepend_keymap]]
   on = [ "g", "m" ]
-  run = "[ -d \"/run/media/$USER\" ] && cd \"/run/media/$USER\""
+  run = "cd \"/run/media/$USER\""
   desc = "Go to mounted media"

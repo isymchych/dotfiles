@@ -101,6 +101,5 @@
       "before": ["<leader>", "e"],
       "commands": ["workbench.view.explorer"]
     }
-  ],
-  "workbench.colorTheme": "Default Light Modern"
+  ]
 }

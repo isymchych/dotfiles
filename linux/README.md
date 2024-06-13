@@ -121,7 +121,6 @@ $ chmod 600 ~/.ssh/key
 * swappy - simple drawing on top of images
 * yazi - file manager
 * translate-shell - Google Translate
-* qalculate-gtk - calculator
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
 
@@ -177,6 +176,7 @@ $ chmod 600 ~/.ssh/key
 * mpv, mpv-mpris - video player
 * imv - image viewer
 * yt-dlp - download videos from video hosting services
+* qalculate-gtk - calculator
 
 * slack
 * skype
