@@ -13,14 +13,16 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 * use `systemd-boot` boot manager
 
 ## Install Arch
+* to make terminal font larger type `setfont ter-132b`
 * locale en_GB.UTF-8 cause week starts from Monday not from Sunday like in en_US.UTF-8 (but generate both locales, just in case)
 * in /etc/systemd/logind.conf
   * set KillUserProcesses=yes to kill user processes on logout
   * set HandlePowerKey=suspend
-  * set HandleLidSwitch=lock
+  * ?? set HandleLidSwitch=lock
 * in /etc/pacman.conf
   * enable multilib
   * enable color output
+  * enable parallel downloads (5)
 * add kernel parameters: mitigations=off random.trust_cpu=on
 
 * create/configure Swapfile if needed
@@ -43,7 +45,7 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 * install pacman -S --needed base-devel git go vim just
 * install yay
 * install openssh, stow, rustup, sccache, lld
-* install zsh, zsh-completions, zsh-autosuggestions, zsh-syntax-highlighting, zoxide, starship, ttf-nerd-fonts-symbols-extra, powerline-fonts
+* install zsh, zsh-completions, zsh-autosuggestions, zsh-syntax-highlighting, zoxide, starship, ttf-nerd-fonts-symbols, powerline-fonts
 * install udisks2 to mount usb drives
 * htop
 * zip
@@ -63,7 +65,7 @@ $ chmod 600 ~/.ssh/key
 * clone dotfiles from github
 * stow zsh & git; switch user to zsh
 * stow vim, cd dotfiles/vim; ./install.sh
-* mkdir ~/.local/share/applications ~/.cargo
+* mkdir ~/.local/share/applications ~/.cargo ~/bin
 * stow linux, kdiff3, emacs, newsboat
 * install pipewire pipewire-pulse
 
@@ -77,6 +79,7 @@ $ chmod 600 ~/.ssh/key
  * copy dotfiles/linux/run-sway.sh into /usr/local/bin/
  * Update `/etc/greetd/config.toml`: `command = "agreety --cmd run-sway.sh"`
  * `systemctl edit greetd` and change service type to `idle` to prevent systemd logs overwriting login prompt
+ * ? configure autologin
 
 ## Environment
 * sway, ttf-dejavu
@@ -105,7 +108,6 @@ $ chmod 600 ~/.ssh/key
 * qt5ct - qt5 configuration tool
 * alacritty - terminal, stow alacritty
 * OR wezterm - terminal, stow wezterm
-* safeeyes - break reminder
 * wlsunset - adjust display color temperature at night
 * udiskie - automounter for removable media
 * network-manager-applet - network manager applet
@@ -120,12 +122,8 @@ $ chmod 600 ~/.ssh/key
 * yazi - file manager
 * translate-shell - Google Translate
 * qalculate-gtk - calculator
-* easyeffects - enable "auto gain" plugin, for volume normalisation
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
-* interception-caps2esc - bind CapsLock to Escape while pressing and to Control while holding
-  * copy `caps-to-esc-and-ctrl.yaml` into `/etc/interception/udevmon.d/`
-  * `systemctl enable --now udevmon.service`
 
 * nordic - dark GTK3 theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme
@@ -135,6 +133,10 @@ $ chmod 600 ~/.ssh/key
 * ttf-fira-mono - Fira Mono font
 * noto-fonts, noto-fonts-emoji - Noto fonts (and maybe noto-fonts-cjk)
 * ttc-iosevka - Iosevka Term mono font
+
+* interception-caps2esc - bind CapsLock to Escape while pressing and to Control while holding
+  * copy `caps-to-esc-and-ctrl.yaml` into `/etc/interception/udevmon.d/`
+  * `systemctl enable --now udevmon.service`
 
 * if bluetooth
  * install bluez bluez-utils
@@ -163,9 +165,11 @@ $ chmod 600 ~/.ssh/key
   * add accounts
   * configure to synchronise only latest 30 days
 * Chromium
+* easyeffects - enable "auto gain" plugin, for volume normalisation
 * transmission-gtk
 * telegram-desktop
 * newsboat - rss reader
+* safeeyes - break reminder
 * file-roller - archive manager
 * gparted
 * wdisplays-git - display configuration GUI

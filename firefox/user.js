@@ -40,7 +40,6 @@ user_pref("apz.gtk.kinetic_scroll.enabled", false);
 user_pref("mousewheel.default.delta_multiplier_y", 55);
 
 // better privacy
-user_pref("privacy.trackingprotection.enabled", true);
 user_pref("media.peerconnection.ice.default_address_only", true);
 user_pref("toolkit.telemetry.enabled", false);
 user_pref("privacy.donottrackheader.enabled", true);
