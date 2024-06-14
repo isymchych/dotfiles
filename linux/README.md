@@ -32,7 +32,7 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 * start/enable systemd-timesyncd
 * install networkmanager, enable/start NetworkManager.service
 * install dnsmasq, enable/start it
-* if laptop, install tlp and enable service
+* if laptop, install tlp and enable service - good preferences by default
 
 * install & configure sudo
 * create user, set password
@@ -85,7 +85,7 @@ $ chmod 600 ~/.ssh/key
 * sway, ttf-dejavu
 * swaylock
 * swayidle
-* waybar, otf-font-awesome
+* waybar, otf-font-awesome, ttf-jetbrains-mono-nerd
 * xorg-xwayland
 * kanshi - automatically switch display configurations
 * wl-clipboard - cli tools for interacting with clipboard
@@ -124,30 +124,32 @@ $ chmod 600 ~/.ssh/key
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
 
-* nordic - dark GTK3 theme
+* gnome-themes-extra - needed for dark theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme
 * papirus-icon-theme - icon theme
-* ttf-jetbrains-mono - JetBrains Mono font
-* ttf-droid - Droid font
-* ttf-fira-mono - Fira Mono font
 * noto-fonts, noto-fonts-emoji - Noto fonts (and maybe noto-fonts-cjk)
-* ttc-iosevka - Iosevka Term mono font
+* ttc-iosevka, ttf-iosevka-nerd, ttf-iosevkaterm-nerd - Iosevka Term mono font
+
+<!-- * nordic - dark GTK3 theme -->
+<!-- * ttf-jetbrains-mono - JetBrains Mono font -->
+<!-- * ttf-droid - Droid font -->
+<!-- * ttf-fira-mono - Fira Mono font -->
 
 * interception-caps2esc - bind CapsLock to Escape while pressing and to Control while holding
   * copy `caps-to-esc-and-ctrl.yaml` into `/etc/interception/udevmon.d/`
   * `systemctl enable --now udevmon.service`
 
 * if bluetooth
- * install bluez bluez-utils
+ <!-- * install bluez bluez-utils -->
+ * install blueberry - GUI bluetooth tool
  * start and enable bluetooth service
  * start and enable mpris-proxy user service
- * install blueberry - GUI bluetooth tool
 
 * trash-cli
 * libsecret
 * xdg-utils
 * imagemagick
-* xdg-desktop-portal-gtk
+* xdg-desktop-portal-xapp
 * xdg-desktop-portal-wlr - for screensharing
   * enable pipewire user service
   * enable chrome://flags/#enable-webrtc-pipewire-capturer
@@ -167,6 +169,7 @@ $ chmod 600 ~/.ssh/key
 * easyeffects - enable "auto gain" plugin, for volume normalisation
 * transmission-gtk
 * telegram-desktop
+* spotify
 * newsboat - rss reader
 * safeeyes - break reminder
 * file-roller - archive manager
@@ -211,6 +214,18 @@ $ chmod 600 ~/.ssh/key
   * VDPAU support: mesa-vdpau, lib32-mesa-vdpau
 * Gstreamer support - gstreamer-vaapi
 * tweak video acceleration settings in firefox config
+
+# Fingerprint scanner
+* install fprintd
+* add these lines to `/etc/pam.d/{system-local-login,swaylock,sudo,su}`
+```
+# the first line is only needed for swaylock, to be able to auth with password
+auth            sufficient      pam_unix.so try_first_pass likeauth nullok
+auth            sufficient      pam_fprintd.so
+```
+
+# Firmware update service
+* install fwupd, gnome-firmware
 
 ## Hibernation
 * create swapfile

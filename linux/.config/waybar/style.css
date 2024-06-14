@@ -33,7 +33,7 @@
 }
 
 window {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 window#waybar {
@@ -85,7 +85,7 @@ window#waybar {
 #tray * {
   /* set font for tray context menus */
   font-family: DejaVu Sans Bold Semi-Condensed;
-  font-size: 22px;
+  font-size: 18px;
 }
 
 #cpu,
