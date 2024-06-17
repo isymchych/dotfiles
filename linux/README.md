@@ -41,6 +41,11 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 # passwd <username>
 ```
 
+* To change linux console font
+  * install terminus-font
+  * add `FONT=ter124n` to `/etc/vconsole.conf` and restart systemd-vconsole-setup.service
+    * `24` is font size, `n` means normal <https://gist.github.com/danielcbaldwin/0eb3def2478150b32ad27280f8a937fb>
+
 ## Install basic cli and configs
 * install pacman -S --needed base-devel git go vim just
 * install yay
