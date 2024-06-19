@@ -1,17 +1,12 @@
 "query:Unread Articles:unread = \"yes\""
 http://blog.1024cores.net/feeds/posts/default "programming"
 https://blog.codinghorror.com/rss/ "programming"
-https://lionet.livejournal.com/data/rss/ "programming"
-https://thedeemon.livejournal.com/data/rss/ "programming"
-http://hackflow.com/atom.xml "programming"
 http://danluu.com/atom.xml "programming"
 http://matt.might.net/articles/feed.rss "programming"
 http://feeds.feedburner.com/JavascriptJavascript "web/javascript"
 http://feeds.feedburner.com/addyosmani "web/javascript"
 https://overreacted.io/rss.xml "web/javascript"
-https://gaperton.livejournal.com/data/rss/ "web"
 https://feeds.feedburner.com/ponyfoo "web"
-https://rreverser.com/rss/ "web"
 http://feeds.feedburner.com/FlyingMachineStudios "clojure"
 https://adambard.com/blog/feed.xml "clojure"
 http://inchingforward.blogspot.com/feeds/posts/default "clojure"
@@ -22,18 +17,14 @@ https://nullprogram.com/blog/index.rss "hackers"
 https://mdswanson.com/atom.xml "hackers"
 http://feeds.feedburner.com/AmazonByteflow "hackers"
 https://marijnhaverbeke.nl/blog/feed.atom "hackers"
-https://tonsky.livejournal.com/data/rss/ "hackers"
 http://reangdblog.blogspot.com/feeds/posts/default "hackers"
 https://danielmiessler.com/feed/ "hackers"
 http://blog.fogus.me/feed/ "hackers"
 https://blog.acolyer.org/feed/ "hackers"
 https://writings.stephenwolfram.com/feed/ "hackers"
-https://drewdevault.com/feed.xml "hackers"
 https://gbracha.blogspot.com/feeds/posts/default "hackers"
 https://apenwarr.ca/log/rss.php "hackers"
-https://plakhov.livejournal.com/data/atom/ "life"
 http://feeds.feedburner.com/michaelbabich "life"
-http://blog.golovatyi.info/feed/ "life"
 https://fasterthanli.me/index.xml "hackers"
 https://lucumr.pocoo.org/feed.atom
 https://thesephist.com/index.xml
@@ -43,3 +34,4 @@ https://www.rozhkov.me/rss/
 https://ecton.dev/rss.xml
 https://research.swtch.com/feed.atom
 https://pketh.org/feed.xml
+https://www.rifters.com/crawl?feed=atom
