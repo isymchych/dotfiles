@@ -36,6 +36,17 @@ input type:touchpad {
     pointer_accel 0.2 # (between -1 and 1)
 }
 
+# Lenovo T14 trackpoint
+input 2:10:TPPS/2_Elan_TrackPoint {
+    accel_profile "flat"
+    pointer_accel -0.2 # (between -1 and 1)
+}
+
+input type:mouse {
+    accel_profile "flat" # or "flat"
+    pointer_accel -0.2 # (between -1 and 1)
+}
+
 
 # Output configuration
 output * background #002B36 solid_color

@@ -1,3 +1,4 @@
 alias cdmedia="cd /run/media/$USER"
 
 export ARHIV_ROOT=~/arhiv
+export PATH="${HOME}/.local/bin:$PATH"

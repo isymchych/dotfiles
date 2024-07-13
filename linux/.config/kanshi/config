@@ -12,6 +12,10 @@ profile home2k60 {
     output "AOC AG271QG Unknown" enable mode 2560x1440
     # exec swaymsg 'output "AOC AG271QG Unknown" enable mode --custom "2560x1440@144Hz"'
 }
+profile home2k60-dock {
+    output eDP-1 disable
+    output "AOC AG271QG 0x01010101" enable mode 2560x1440
+}
 profile home2k144 {
     output eDP-1 disable
     output "AOC AG271QG Unknown" enable mode 2560x1440@144
