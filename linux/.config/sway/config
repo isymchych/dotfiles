@@ -207,6 +207,8 @@ assign [class="Skype"] 7
 assign [class="TelegramDesktop"] 7
 assign [app_id="telegramdesktop"] 7
 assign [app_id="org.telegram.desktop"] 7
+assign [app_id="signal"] 7
+assign [class="Signal"] 7
 assign [class="Slack"] 7
 assign [class="discord"] 7
 assign [class="Franz"] 7
@@ -290,11 +292,15 @@ for_window [class="^Gcr-prompter"]     floating enable
 for_window [class="^File-roller"]      floating enable border pixel $border
 
 for_window [app_id="org.telegram.desktop"] border pixel $border
+for_window [app_id="signal"] border pixel $border
+for_window [class="Signal"] border pixel $border
 
 for_window [class="^Chrome" title="^Developer Tools.*"] floating disable, move to workspace 5
 for_window [window_role="^bubble$"] floating enable
 
 for_window [title="^Spotify.*"] border pixel $border
+
+for_window [app_id="arhiv-desktop"]  border pixel $border
 
 # enable floating for apps with custom app_id FLOAT
 for_window [app_id="FLOAT"] floating enable
@@ -367,6 +373,9 @@ bindsym --to-code $mod+e exec gtk-launch emacs
 
 # emoji picker
 bindsym --to-code $mod+Shift+e exec rofimoji
+
+# arhiv
+bindsym --to-code $mod+a exec arhiv-desktop
 
 
 # AUTOSTART

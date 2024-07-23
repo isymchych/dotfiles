@@ -1929,7 +1929,7 @@ targets."
         lsp-diagnostics-provider :flycheck
         lsp-diagnostic-clean-after-change t
 
-        lsp-inlay-hint-enable t
+        lsp-inlay-hint-enable nil
 
         lsp-rust-analyzer-proc-macro-enable t
         lsp-rust-analyzer-cargo-load-out-dirs-from-check t

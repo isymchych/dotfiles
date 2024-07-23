@@ -240,8 +240,9 @@ auth            sufficient      pam_fprintd.so
 
 ## Printing
 * install cups, avahi, nss-mdns
-* edit `/etc/nsswitch.conf` and change the hosts line to include `mdns_minimal [NOTFOUND=return] before resolve and dns`  [source](https://wiki.archlinux.org/title/avahi#Hostname_resolution)
+* edit `/etc/nsswitch.conf` and change the hosts line to include `mdns_minimal [NOTFOUND=return]` before resolve and dns  [source](https://wiki.archlinux.org/title/avahi#Hostname_resolution)
 * disable `systemd-resolved` service due to conflict with avahi
+* enable and start cups service
 
 ## Tips
 * configure max login attempts and login block time in `/etc/security/faillock.conf` [more info](https://wiki.archlinux.org/title/security#Lock_out_user_after_three_failed_login_attempts)
