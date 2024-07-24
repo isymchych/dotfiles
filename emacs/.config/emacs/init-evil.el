@@ -299,7 +299,7 @@
 
 ;; evil-anzu: anzu integration for evil
 (use-package evil-anzu
-  :after (evil anzu))
+  :after evil)
 
 
 ;; which-key
