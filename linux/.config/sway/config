@@ -375,7 +375,7 @@ bindsym --to-code $mod+e exec gtk-launch emacs
 bindsym --to-code $mod+Shift+e exec rofimoji
 
 # arhiv
-bindsym --to-code $mod+a exec arhiv-desktop
+bindsym --to-code $mod+f exec arhiv-desktop
 
 
 # AUTOSTART
