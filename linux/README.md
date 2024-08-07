@@ -125,6 +125,7 @@ $ chmod 600 ~/.ssh/key
 * wf-recorder - record the screen
 * swappy - simple drawing on top of images
 * yazi - file manager
+* p7zip - 7z/zip cli archiver for yazi
 * translate-shell - Google Translate
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
@@ -178,7 +179,7 @@ $ chmod 600 ~/.ssh/key
 * spotify
 * newsboat - rss reader
 * safeeyes - break reminder
-* file-roller - archive manager
+* file-roller - GUI archive manager
 * gparted
 * wdisplays-git - display configuration GUI
 * zathura, zathura-pdf-mupdf - pdf viewer
