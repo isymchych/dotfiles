@@ -1295,7 +1295,7 @@ narrowed."
   (global-set-key [remap project-find-regexp]                 #'consult-ripgrep)
   (global-set-key [remap project-or-external-find-regexp]     #'mb/consult-ripgrep-symbol-at-point)
 
-  (global-set-key (kbd "M-g l")   #'consult-line)
+  (global-set-key (kbd "M-g M-l") #'consult-line)
   (global-set-key (kbd "M-g o")   #'consult-outline)
 
   (define-key project-prefix-map (kbd "s") #'consult-ripgrep) ;; override project-shell, for convenience
@@ -1429,7 +1429,7 @@ targets."
   ;; (advice-add #'avy-goto-line :around #'better-jumper-set-jump)
 
   (global-set-key [remap goto-char] 'avy-goto-char-timer)
-  (global-set-key (kbd "M-g M-l") 'avy-goto-line))
+  (global-set-key (kbd "M-g l") 'avy-goto-line))
 
 
 
@@ -1858,6 +1858,23 @@ targets."
     (diff-hl-margin-mode))
 
   (global-diff-hl-mode))
+
+
+
+;; Casual-dired: transient bindings for dired
+(use-package casual-dired
+  :ensure t
+  :bind (:map dired-mode-map ("M-h" . casual-dired-tmenu)))
+
+;; Casual-avy: transient bindings for avy
+(use-package casual-avy
+  :ensure t
+  :bind ("M-g a" . casual-avy-tmenu))
+
+;; Casual-isearch: transient bindings for isearch
+(use-package casual-isearch
+  :ensure t
+  :bind (:map isearch-mode-map ("<f2>" . casual-isearch-tmenu)))
 
 
 
