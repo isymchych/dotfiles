@@ -8,7 +8,6 @@
 * `gitui` - git UI
 * `delta` - show git diffs
 * `fzf` - fuzzy matcher
-* `zoxide` - better cd
 * `sad` - search/replace tool
 * `wget`
 * `htop`

@@ -11,7 +11,8 @@
     "bluetooth",
     "power-profiles-daemon",
     "tray",
-    "sway/language"
+    "sway/language",
+    "idle_inhibitor"
   ],
   "modules-right": [
     "systemd-failed-units",
@@ -35,6 +36,13 @@
   "tray": {
     "icon-size": 28,
     "spacing": 12
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    }
   },
   "clock": {
     "interval": 20,

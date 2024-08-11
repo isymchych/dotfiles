@@ -88,6 +88,14 @@ window#waybar {
   font-size: 18px;
 }
 
+#idle_inhibitor {
+  font-size: 1.5em;
+  padding-right: 7px;
+}
+#idle_inhibitor.activated {
+  color: @highlight-color;
+}
+
 #cpu,
 #memory,
 #disk,
