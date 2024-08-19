@@ -84,8 +84,8 @@ window#waybar {
 
 #tray * {
   /* set font for tray context menus */
-  font-family: DejaVu Sans Bold Semi-Condensed;
-  font-size: 18px;
+  font-family: Noto Sans;
+  font-size: 16px;
 }
 
 #idle_inhibitor {

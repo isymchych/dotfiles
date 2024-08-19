@@ -1,6 +1,6 @@
 include ./solarized-light-theme
 
-set font "DejaVu Sans Bold Semi-Condensed 10"
+set font "Noto Sans 10"
 
 set window-title-basename "true"
 set selection-clipboard "clipboard"
@@ -9,4 +9,3 @@ set recolor "true" # dark mode by default
 set recolor-keephue "false"
 
 set adjust-open "best-fit"
-

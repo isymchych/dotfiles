@@ -87,7 +87,9 @@ $ chmod 600 ~/.ssh/key
  * ? configure autologin
 
 ## Environment
-* sway, ttf-dejavu
+* sway
+* ttf-dejavu
+* noto-fonts, noto-fonts-emoji - Noto fonts
 * swaylock
 * swayidle
 * waybar, otf-font-awesome, ttf-jetbrains-mono-nerd
@@ -134,7 +136,6 @@ $ chmod 600 ~/.ssh/key
 * gnome-themes-extra - needed for dark theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme
 * papirus-icon-theme - icon theme
-* noto-fonts, noto-fonts-emoji - Noto fonts (and maybe noto-fonts-cjk)
 * ttc-iosevka, ttf-iosevka-nerd, ttf-iosevkaterm-nerd - Iosevka Term mono font
 
 <!-- * nordic - dark GTK3 theme -->

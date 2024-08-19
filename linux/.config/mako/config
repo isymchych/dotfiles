@@ -2,7 +2,7 @@ max-history=10
 max-visible=7
 default-timeout=5000
 
-font=DejaVu Sans Bold Semi-Condensed 14
+font=Noto Sans 14
 text-color=#ffffff
 background-color=#2e3440d0
 border-size=1
