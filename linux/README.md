@@ -187,7 +187,7 @@ $ chmod 600 ~/.ssh/key
 * mpv, mpv-mpris - video player
 * imv - image viewer
 * yt-dlp - download videos from video hosting services
-* qalculate-gtk - calculator
+* gnome-calculator - calculator
 
 * slack
 * skype

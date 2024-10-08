@@ -53,4 +53,4 @@ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
 # export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/nvidia_icd.json" # NVIDIA vulkan driver
 # export WLR_RENDERER=vulkan
 
-exec systemd-cat -t sway sway --unsupported-gpu
+exec systemd-cat -t sway sway

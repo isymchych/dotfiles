@@ -284,7 +284,7 @@ for_window [app_id="nm-connection-editor"]  floating enable
 for_window [class="^Gtk-recordMyDesktop"] floating enable
 # for_window [class="^Termite"]     floating enable
 for_window [app_id="com.github.wwmm.easyeffects"]  border pixel $border
-for_window [app_id="qalculate-gtk"] floating enable
+for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="blueberry.py"] floating enable
 
 for_window [class="^Gnome-calculator"] floating enable border pixel $border
