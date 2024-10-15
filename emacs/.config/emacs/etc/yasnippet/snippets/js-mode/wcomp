@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: wcomp
+# key: wcomp
+# --
+interface ${1}Props {}
+const ${1} = ({ }: ${1}Props) => {
+  return (
+    $0
+  );
+};
+
+export { ${1} };
