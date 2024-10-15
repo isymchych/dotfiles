@@ -945,9 +945,6 @@ narrowed."
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
 
-  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  ;; (doom-themes-treemacs-config)
-
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
@@ -1878,36 +1875,6 @@ targets."
 
 
 
-;; Treemacs: file tree sidebar
-(use-package treemacs
-  :defer t
-  :bind ("<f5>" . 'treemacs)
-  :init
-  (setq treemacs-follow-after-init t
-        treemacs-is-never-other-window nil
-        treemacs-sorting 'alphabetic-case-insensitive-asc)
-
-  :config
-  ;; Don't follow the cursor (it's more disruptive/jarring than helpful as a default)
-  (treemacs-follow-mode -1)
-  (treemacs-project-follow-mode t))
-
-;; Treemacs nerd icons
-(use-package treemacs-nerd-icons
-  :after treemacs
-  :config
-  (treemacs-load-theme "nerd-icons"))
-
-;; Treemacs integration with magit
-(use-package treemacs-magit
-  :after (treemacs magit))
-
-;; Treemacs integration with lsp
-(use-package lsp-treemacs
-  :after (treemacs lsp))
-
-
-
 ;; Download tree-sitter grammars
 (use-package treesit-auto
   :custom
@@ -2297,7 +2264,6 @@ targets."
   "m" 'menu-bar-mode
   "n" 'display-line-numbers
   "s" 'scroll-lock-mode
-  "t" 'treemacs
   "v" 'mb/toggle-visual-fill-mode
   "w" 'whitespace-mode)
 
