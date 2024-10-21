@@ -936,6 +936,19 @@ narrowed."
 
 ;;; ---------------------------------------- 3rd PARTY PACKAGES
 
+
+
+;; Fix PATH on Mac
+(use-package exec-path-from-shell
+  ;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
+  ;; :disabled https://github.com/d12frosted/homebrew-emacs-plus/issues/720
+  :if mb-is-mac-os
+  :config
+  (exec-path-from-shell-initialize))
+
+
+
+
 ;; Nord theme https://github.com/arcticicestudio/nord-emacs
 ;; Solarized theme https://github.com/bbatsov/solarized-emacs
 
@@ -1047,16 +1060,6 @@ narrowed."
   :config
   (eval-after-load 'hi-lock
     '(diminish 'hi-lock-mode)))
-
-
-
-;; Fix PATH on Mac
-(use-package exec-path-from-shell
-  ;; Not needed ATM since the emacs-plus injects path on build https://github.com/d12frosted/homebrew-emacs-plus#injected-path
-  :disabled
-  :if mb-is-mac-os
-  :config
-  (exec-path-from-shell-initialize))
 
 
 
