@@ -75,6 +75,7 @@
 (message "Using font %s" mb-font)
 
 ;; Improve lsp-mode performance https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
-(setenv "LSP_USE_PLISTS" "true")
+;; disabled due to https://github.com/emacs-lsp/lsp-mode/issues/4059#issuecomment-1560520842
+;; (setenv "LSP_USE_PLISTS" "true")
 
 ;;; early-init.el ends here
