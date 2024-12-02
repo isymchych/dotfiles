@@ -1787,8 +1787,6 @@ targets."
   :config
   (setq vc-follow-symlinks nil
 
-        ;; open magit status in same window as current buffer
-        magit-status-buffer-switch-function 'switch-to-buffer
         ;; ask me if I want to include a revision when rewriting
         magit-rewrite-inclusive 'ask
         ;; ask me to save buffers
