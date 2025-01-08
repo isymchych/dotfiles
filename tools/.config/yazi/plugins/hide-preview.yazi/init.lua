@@ -1,3 +1,4 @@
+--- @sync entry
 -- https://github.com/sxyazi/yazi/issues/51#issuecomment-1913283446
 
 return {
