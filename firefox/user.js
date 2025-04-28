@@ -37,7 +37,7 @@ user_pref("media.ffvpx.enabled", false);
 user_pref("apz.gtk.kinetic_scroll.enabled", false);
 
 // lower touch scroll sensitivity
-user_pref("mousewheel.default.delta_multiplier_y", 55);
+// user_pref("mousewheel.default.delta_multiplier_y", 80);
 
 // better privacy
 user_pref("media.peerconnection.ice.default_address_only", true);

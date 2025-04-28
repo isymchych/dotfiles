@@ -1912,42 +1912,10 @@ targets."
         lsp-idle-delay 0.6
         lsp-keep-workspace-alive nil
         lsp-enable-suggest-server-download nil
-        lsp-enable-file-watchers nil
         lsp-auto-execute-action nil
 
         lsp-diagnostics-provider :flycheck
-        lsp-diagnostic-clean-after-change t
-
-        lsp-inlay-hint-enable nil
-
-        lsp-rust-analyzer-proc-macro-enable t
-        lsp-rust-analyzer-cargo-load-out-dirs-from-check t
-        lsp-rust-analyzer-call-info-full t
-        lsp-rust-build-on-save t
-
-        ;; lsp-javascript-display-return-type-hints t
-        ;; lsp-javascript-display-variable-type-hints t
-        ;; lsp-javascript-display-parameter-type-hints t
-
-        lsp-eldoc-enable-hover t
-        lsp-eldoc-render-all nil
-        lsp-signature-render-documentation t
-        lsp-signature-doc-lines 4 ;; render everything
-
-        lsp-enable-folding nil
-        lsp-enable-imenu t
-        lsp-enable-indentation nil
-        lsp-enable-links t
-        lsp-enable-on-type-formatting  nil
-        lsp-enable-symbol-highlighting nil
-        lsp-enable-text-document-color t
-        lsp-enable-xref t
-
-        lsp-enable-snippet nil
-
         lsp-lens-enable nil
-
-        lsp-semantic-tokens-enable t
 
         lsp-completion-default-behaviour :insert
         lsp-completion-provider (if mb-use-company :capf :none)
@@ -1955,9 +1923,6 @@ targets."
         lsp-completion-show-kind t
 
         lsp-modeline-code-actions-segments '(count name)
-
-        lsp-headerline-breadcrumb-enable t
-        lsp-headerline-breadcrumb-segments '(symbols)
 
         lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
   :config
@@ -2045,17 +2010,6 @@ targets."
         '("npx" "prettier" "--stdin-filepath" filepath))
   (setf (alist-get 'prettier-json apheleia-formatters)
         '("npx" "prettier" "--stdin-filepath" filepath "--parser=json")))
-
-
-
-;; Dall-E-shell: talk with dall-e
-(use-package dall-e-shell
-  :if mb-openai-api-key
-  :defer
-  :commands (dall-e-shell)
-  :custom
-  ((dall-e-shell-welcome-function nil)
-   (dall-e-shell-openai-key       mb-openai-api-key)))
 
 
 
@@ -2274,7 +2228,6 @@ targets."
 
 (defvar-keymap mb/ai-map
   :doc "mb prefix map for AI things"
-  "d"  'dall-e-shell
   "e"  'gptel-send
   "k"  'gptel-abort
   "g"  'gptel)

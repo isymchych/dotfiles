@@ -15,7 +15,7 @@ export SDL_VIDEODRIVER=wayland
 export MOZ_ENABLE_WAYLAND=1
 
 # fallback to X11 for QT
-# export QT_QPA_PLATFORM=xcb
+export QT_QPA_PLATFORM="wayland;xcb"
 
 export MOZ_DBUS_REMOTE=1 # https://mastransky.wordpress.com/2020/03/16/wayland-x11-how-to-run-firefox-in-mixed-environment/
 

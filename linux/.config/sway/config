@@ -14,7 +14,6 @@ set  $c_urgent      #cb4b16
 # Input configuration, for all options see `man xkeyboard-config`
 input type:keyboard {
     xkb_layout us,ua
-    xkb_variant winkeys
     xkb_options grp:win_space_toggle,grp_led:caps,caps:ctrl_modifier,ctrl:swap_ralt_rctl
 
     # chars per second

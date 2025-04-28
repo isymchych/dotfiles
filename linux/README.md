@@ -132,6 +132,7 @@ $ chmod 600 ~/.ssh/key
 * playerctl - CLI to control MPRIS-compatible players (including browsers)
 * rofimoji - pick & insert emoji
 * android-file-transfer - MTP client for android to browse & send files
+* systemctl-tui - TUI for systemctl services & their logs
 
 * gnome-themes-extra - needed for dark theme
 * adwaita, adwaita-qt5 (gtk default) - GTK3 theme
@@ -212,6 +213,7 @@ $ chmod 600 ~/.ssh/key
 * install typescript typescript-language-server eslint-language-server@2.4.4 (needed for emacs-lsp)
   * npm i -g vscode-langservers-extracted
 * android-tools, android-udev
+* uv - fast python package & project manager
 
 
 ## Configure hardware acceleration
