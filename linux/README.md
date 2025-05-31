@@ -189,6 +189,8 @@ $ chmod 600 ~/.ssh/key
 * imv - image viewer
 * yt-dlp - download videos from video hosting services
 * gnome-calculator - calculator
+* syncthing - file sync
+* iftop - CLI network connections monitor
 
 * slack
 * skype

@@ -6,6 +6,9 @@ user_pref("browser.tabs.allowTabDetach", false);
 
 user_pref("browser.tabs.drawInTitlebar", false);
 
+// enable tab groups
+user_pref("browser.tabs.groups.enabled", true);
+
 // make tabs take less space
 // user_pref("browser.uidensity", 1);
 

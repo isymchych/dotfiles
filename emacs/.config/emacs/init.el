@@ -1806,6 +1806,8 @@ targets."
         transient-default-level 5
         transient-display-buffer-action '(display-buffer-below-selected)
 
+        magit-bury-buffer-function #'magit-restore-window-configuration
+
         magit-diff-refine-hunk t ; show granular diffs in selected hunk
         ;; Don't display parent/related refs in commit buffers; they are rarely
         ;; helpful and only add to runtime costs.
