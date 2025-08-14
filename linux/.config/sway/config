@@ -398,9 +398,10 @@ exec nm-applet --indicator
 exec udiskie --appindicator
 
 # https://github.com/swaywm/sway/wiki#gtk-applications-take-20-seconds-to-start
-exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+# XDG_CURRENT_DESKTOP is necessary for WebRTC screen sharing work on wayland (through xdg-desktop-portal wlr & gtk)
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec hash dbus-update-activation-environment 2>/dev/null && \
-     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec systemctl --user start mako.service # it depends on WAYLAND_DISPLAY
 
 

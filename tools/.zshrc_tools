@@ -1,2 +1,5 @@
+# configure theme for difftastic
+export DFT_BACKGROUND=light
+
 alias y=yazi
 alias j=just

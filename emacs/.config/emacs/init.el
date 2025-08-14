@@ -1630,7 +1630,6 @@ targets."
 
 ;; EditorConfig
 (use-package editorconfig
-  :defer t
   :diminish editorconfig-mode
   :init
   (add-hook 'prog-mode-hook 'editorconfig-mode))
@@ -1839,6 +1838,13 @@ targets."
 
 
 
+;; Difftastic: syntax-aware diffs
+(use-package difftastic
+  :ensure t
+  :defer t)
+
+
+
 ;; Git-timemachine: browse through file history
 (use-package git-timemachine
   :defer t)
@@ -1970,6 +1976,12 @@ targets."
   (global-set-key [remap previous-error] 'flycheck-previous-error)
   (global-set-key [remap next-error]     'flycheck-next-error)
 
+  (flycheck-add-mode 'javascript-eslint 'html-ts-mode)
+  (add-hook 'html-ts-mode-hook
+            (lambda ()
+              (setq-local flycheck-checker 'javascript-eslint)
+              (flycheck-mode)))
+
   ;; from Spacemacs
   (defun mb/toggle-flyckeck-errors-list ()
     "Toggle flycheck's error list window."
@@ -2099,7 +2111,6 @@ targets."
 
 ;; Dockerfile mode
 (use-package dockerfile-mode
-  :disabled
   :defer t
   :config
   (message "mb: DOCKERFILE MODE"))

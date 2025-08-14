@@ -118,7 +118,7 @@ $ chmod 600 ~/.ssh/key
 * wlsunset - adjust display color temperature at night
 * udiskie - automounter for removable media
 * network-manager-applet - network manager applet
-* nm-connection-editor, networkmanager-openvpn - network manager ui
+* nm-connection-editor, networkmanager-openvpn, libnma-gtk4 - network manager ui
 * pavucontrol - pulseaudio utils
 * wofi - command runner
 * gsimplecal - calendar

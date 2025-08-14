@@ -11,6 +11,13 @@ shutdown
 halt
 poweroff"
 
+confirm() {
+  wofi --dmenu <<EOF | grep -q '^yes$'
+no
+yes
+EOF
+}
+
 res=$(echo "$cases" | wofi --dmenu)
 
 case "$res" in
@@ -18,19 +25,19 @@ case "$res" in
         mb-lock-screen
         ;;
     "logout")
-        swaymsg exit
+        confirm && swaymsg exit
         ;;
     "suspend" | "sleep")
         mb-lock-screen & systemctl suspend
         ;;
     "hibernate")
-        mb-lock-screen & systemctl hibernate
+        confirm && mb-lock-screen & systemctl hibernate
         ;;
     "reboot" | "restart")
-        systemctl reboot
+        confirm && systemctl reboot
         ;;
     "shutdown" | "poweroff" | "halt")
-        systemctl poweroff
+        confirm && systemctl poweroff
         ;;
 esac
 

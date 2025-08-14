@@ -43,6 +43,7 @@ alias gp='git push'
 alias gpull='git pull'
 alias tree='tree -hsFC --du --dirsfirst'
 alias -r jsut='just'
+alias dc='sudo docker-compose'
 
 
 
@@ -82,7 +83,7 @@ setopt autocd                   # cd to a folder just by typing it's name
 bindkey -e
 
 # Enable Ctrl-x-e to edit command line
-autoload -U edit-command-line 
+autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 bindkey '^x^e' edit-command-line

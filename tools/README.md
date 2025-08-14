@@ -5,9 +5,12 @@
 * `fd` - find files
 * `tokei` - count lines of code
 * `just` - task runner
-* `gitui` - git UI
-* `delta` - show git diffs
 * `fzf` - fuzzy matcher
 * `sad` - search/replace tool
 * `wget`
 * `htop`
+* `gitui` - git UI
+* `delta` - show git diffs
+* `difftastic` - better syntax-aware diffs
+* `mergiraf` - solve merge conflicts; syntax-aware
+* `rainfrog` - CLI DB client
