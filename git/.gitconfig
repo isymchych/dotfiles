@@ -1,5 +1,5 @@
 [mergetool]
-	keepBackup = false
+  keepBackup = false
 
 [core]
   autocrlf = input
@@ -9,21 +9,22 @@
   attributesfile = ~/.gitattributes
 
 [color]
-	ui = true
+  ui = true
 
 [push]
-	default = simple
+  default = simple
+  autoSetupRemote = true
 
 [pull]
-	ff = only
+  ff = only
 
 [alias]
-	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-	st = status
-	comm = commit
-	ch = checkout
-	get-submodules = submodule update --init --recursive
-	b = branch
+  lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  st = status
+  comm = commit
+  ch = checkout
+  get-submodules = submodule update --init --recursive
+  b = branch
   # Difftastic aliases, so `git dlog` is `git log` with difftastic and so on.
   dlog = -c diff.external=difft log --ext-diff
   dshow = -c diff.external=difft show --ext-diff
@@ -41,55 +42,55 @@
   external = difft
 
 [http]
-	postBuffer = 524288000
+  postBuffer = 524288000
 
 [include]
-	path = ~/.gitconfig_local
+  path = ~/.gitconfig_local
 
 [merge]
-	conflictstyle = diff3
-	tool = kdiff3
+  conflictstyle = diff3
+  tool = kdiff3
 
 [merge "mergiraf"]
   name = mergiraf
   driver = mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L
 
 [filter "lfs"]
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+  clean = git-lfs clean -- %f
 
 [init]
-	defaultBranch = main
+  defaultBranch = main
 
 [pager]
-	branch = false
+  branch = false
 
-	diff = delta
-	log = delta
-	reflog = delta
-	show = delta
+  diff = delta
+  log = delta
+  reflog = delta
+  show = delta
 
 [interactive]
-	diffFilter = delta --color-only --features=interactive
+  diffFilter = delta --color-only --features=interactive
 
 [delta]
-	features = decorations
-	side-by-side = false
-	syntax-theme = Solarized (light)
-	navigate = true    # use n and N to move between diff sections
+  features = decorations
+  side-by-side = false
+  syntax-theme = Solarized (light)
+  navigate = true    # use n and N to move between diff sections
 
 [delta "interactive"]
-	keep-plus-minus-markers = false
+  keep-plus-minus-markers = false
 
 [delta "decorations"]
-	commit-decoration-style = blue ol
-	commit-style = raw
-	file-style = omit
-	hunk-header-decoration-style = blue box
-	hunk-header-file-style = red
-	hunk-header-line-number-style = "#067a00"
-	hunk-header-style = file line-number syntax
+  commit-decoration-style = blue ol
+  commit-style = raw
+  file-style = omit
+  hunk-header-decoration-style = blue box
+  hunk-header-file-style = red
+  hunk-header-line-number-style = "#067a00"
+  hunk-header-style = file line-number syntax
 [credential]
-	helper = /usr/lib/git-core/git-credential-libsecret
+  helper = /usr/lib/git-core/git-credential-libsecret

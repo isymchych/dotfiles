@@ -58,6 +58,7 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 * tmux
 * tree
 * ntfs-3g
+* dosfstools, mtools - for fat32
 * upower
 * downgrade - allows to downgrade packages
 * reflector - rate pacman mirrors
