@@ -371,7 +371,7 @@ bindsym --to-code $mod+i exec cliphist list | wofi -d -p "Select item to copy" |
 bindsym --to-code $mod+e exec gtk-launch emacs
 
 # emoji picker
-bindsym --to-code $mod+Shift+e exec rofimoji
+bindsym --to-code $mod+Shift+e exec rofimoji --action copy
 
 # arhiv
 bindsym --to-code $mod+f exec arhiv-desktop

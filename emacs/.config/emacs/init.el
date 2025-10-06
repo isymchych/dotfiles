@@ -1630,9 +1630,11 @@ targets."
 
 ;; EditorConfig
 (use-package editorconfig
+  :defer t
   :diminish editorconfig-mode
   :init
-  (add-hook 'prog-mode-hook 'editorconfig-mode))
+  (add-hook 'prog-mode-hook 'editorconfig-mode-apply)
+  (add-hook 'text-mode-hook 'editorconfig-mode-apply))
 
 
 
@@ -1716,7 +1718,7 @@ targets."
 
 ;; Indent-bars: highlight indentation
 (use-package indent-bars
-  :hook ((yaml-mode yaml-ts-mode prog-mode) . indent-bars-mode)
+  :hook ((yaml-mode yaml-ts-mode prog-mode html-ts-mode) . indent-bars-mode)
   :init
   (if (not (package-installed-p 'indent-bars))
       (package-vc-install "https://github.com/jdtsmith/indent-bars"))
@@ -1907,6 +1909,7 @@ targets."
   (add-hook 'typescript-ts-mode-hook #'lsp-deferred)
   (add-hook 'rust-ts-mode-hook #'lsp-deferred)
   (add-hook 'yaml-ts-mode-hook #'lsp-deferred) ;; https://github.com/redhat-developer/yaml-language-server
+  (add-hook 'html-ts-mode-hook #'lsp-deferred) ;; https://github.com/angular/vscode-ng-language-service
   )
 
 

@@ -4,3 +4,4 @@
 .emacs-project
 .log/
 FLYCHECK_XXY*
+.aider*
