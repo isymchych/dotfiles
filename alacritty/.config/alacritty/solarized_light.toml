@@ -4,6 +4,7 @@
 [colors.primary]
 background = '#fdf6e3'
 foreground = '#586e75'
+dim_foreground = '#657b83'   # slightly muted but still readable
 
 # Normal colors
 [colors.normal]
@@ -14,7 +15,7 @@ yellow  = '#b58900'
 blue    = '#268bd2'
 magenta = '#d33682'
 cyan    = '#2aa198'
-white   = '#eee8d5'
+white   = '#586e75'   # ANSI 37 -> readable, matches normal text tone
 
 # Bright colors
 [colors.bright]
@@ -25,4 +26,4 @@ yellow  = '#657b83'
 blue    = '#839496'
 magenta = '#6c71c4'
 cyan    = '#93a1a1'
-white   = '#fdf6e3'
+white   = '#073642'   # ANSI 97 -> darker high-contrast "bright" so it doesn't vanish
