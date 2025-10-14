@@ -43,7 +43,7 @@ alias gp='git push'
 alias gpull='git pull'
 alias tree='tree -hsFC --du --dirsfirst'
 alias -r jsut='just'
-alias dc='sudo docker-compose'
+alias dc='docker-compose'
 
 
 
