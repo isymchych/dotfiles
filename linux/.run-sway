@@ -42,7 +42,7 @@ export YARN_BIN="$HOME/.config/yarn/global/node_modules/.bin"
 export RUST_BIN="$HOME/.cargo/bin"
 export PATH=$PATH:$NPM_BIN:$YARN_BIN:$RUST_BIN
 
-export TERMINAL=alacritty
+export TERMINAL="xterm"
 export BROWSER=firefox
 
 # for gcr-ssh-agent

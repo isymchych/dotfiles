@@ -114,8 +114,9 @@ $ chmod 600 ~/.ssh/key
 * xorg-xhost
 * wmname
 * qt5ct - qt5 configuration tool
-* alacritty - terminal, stow alacritty
-* OR wezterm - terminal, stow wezterm
+* alacritty - terminal backend; configs must call `linux/bin/xterm` shim
+* OR ghostty - terminal backend, stow ghostty
+* OR wezterm - terminal backend, stow wezterm
 * wlsunset - adjust display color temperature at night
 * udiskie - automounter for removable media
 * network-manager-applet - network manager applet

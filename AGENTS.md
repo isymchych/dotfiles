@@ -5,6 +5,7 @@
 - Platform overrides belong in `linux/` and `mac/`; isolate OS-specific tweaks there to avoid cross-platform regressions.
 - Keep per-tool docs close to their package (`emacs/README.md`, `tools/README.md`); update them alongside config changes.
 - When introducing a new package, name the directory after the target application and recreate the exact directory hierarchy that Stow should deploy.
+- Point any launcher bindings at the `linux/bin/xterm` shim so the actual terminal choice stays centralized.
 
 ## Build, Test, and Development Commands
 - `stow -nv <pkg>` — dry-run to confirm the symlink plan and detect clobbers before writing.

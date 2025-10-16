@@ -1,5 +1,22 @@
 #!/usr/bin/env bash
 
 # GIO has a hardcoded list of supported terminals
-# xterm is in that list 
-alacritty -e "$@"
+# xterm is in that list
+
+set -euo pipefail
+
+# If the caller already passes alacritty flags (e.g. -t/-e),
+# just forward them unchanged so existing bindings keep working.
+for arg in "$@"; do
+    if [[ "$arg" == "-e" ]]; then
+        exec alacritty "$@"
+    fi
+done
+
+# Basic xterm compatibility: when invoked without -e, treat the
+# arguments as a command that should run inside the terminal.
+if [[ $# -eq 0 ]]; then
+    exec alacritty
+fi
+
+exec alacritty -e "$@"
