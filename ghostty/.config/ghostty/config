@@ -12,5 +12,4 @@ cursor-style = block
 cursor-style-blink = false
 shell-integration-features = no-cursor
 
-theme = Solarized Dark Patched
-# theme = Builtin Solarized Light
+theme = dark:Solarized Dark Patched,light:Builtin Solarized Light

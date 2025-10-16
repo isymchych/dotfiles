@@ -6,6 +6,7 @@
 - Keep per-tool docs close to their package (`emacs/README.md`, `tools/README.md`); update them alongside config changes.
 - When introducing a new package, name the directory after the target application and recreate the exact directory hierarchy that Stow should deploy.
 - Point any launcher bindings at the `linux/bin/xterm` shim so the actual terminal choice stays centralized.
+- The `linux/bin/xterm` shim currently launches `ghostty`; pass `-e` yourself only when you need non-default command execution semantics.
 
 ## Build, Test, and Development Commands
 - `stow -nv <pkg>` — dry-run to confirm the symlink plan and detect clobbers before writing.
