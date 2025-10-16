@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sed -i 's/solarized_light/solarized_dark/' ~/.config/alacritty/alacritty.toml
+sed -i --follow-symlinks 's/solarized_light/solarized_dark/' ~/.config/alacritty/alacritty.toml
