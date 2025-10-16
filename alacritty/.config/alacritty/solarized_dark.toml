@@ -3,7 +3,8 @@
 # Default colors
 [colors.primary]
 background = '#002b36'
-foreground = '#839496'
+foreground = '#93a1a1'
+dim_foreground = '#839496'   # base0: dim text still readable without popping
 
 # Normal colors
 [colors.normal]
@@ -14,11 +15,11 @@ yellow  = '#b58900'
 blue    = '#268bd2'
 magenta = '#d33682'
 cyan    = '#2aa198'
-white   = '#eee8d5'
+white   = '#93a1a1'
 
 # Bright colors
 [colors.bright]
-black   = '#002b36'
+black   = '#586e75'
 red     = '#cb4b16'
 green   = '#586e75'
 yellow  = '#657b83'
