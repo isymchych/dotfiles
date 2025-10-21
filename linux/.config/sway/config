@@ -344,7 +344,7 @@ bindsym XF86KbdBrightnessUp exec mb-backlight --keyboard inc
 bindsym XF86KbdBrightnessDown exec mb-backlight --keyboard dec
 
 # terminal
-bindsym $mod+Return exec xterm
+bindsym $mod+Return exec ghostty --working-directory=/home/isymchych/
 
 # app runner
 bindsym --to-code $mod+Shift+p exec mb-run-app
@@ -359,10 +359,10 @@ bindsym $mod+Shift+Escape exec makoctl restore
 bindsym --release Print exec mb-screenshot
 
 # file manager
-bindsym --to-code $mod+n exec xterm -t "Yazi" -e yazi
+bindsym --to-code $mod+n exec xterm -e yazi
 
 # google translate
-bindsym --to-code $mod+t exec xterm -t "Translate" --class "FLOAT" -e trans -shell
+bindsym --to-code $mod+t exec xterm --title="Translate" --class="FLOAT" -e trans -shell
 
 # clipboard manager
 bindsym --to-code $mod+i exec cliphist list | wofi -d -p "Select item to copy" | cliphist decode | wl-copy

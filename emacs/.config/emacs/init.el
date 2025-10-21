@@ -1675,13 +1675,18 @@ targets."
 (use-package highlight-thing
   :defer t
   :diminish highlight-thing-mode
-  :hook (prog-mode . highlight-thing-mode)
+  :commands highlight-thing-mode
+  :init
+  (defun mb-highlight-thing-enable-unless-lsp ()
+    (unless (bound-and-true-p lsp-mode)
+      (highlight-thing-mode 1)))
+  (defun mb-highlight-thing-disable-for-lsp ()
+    (when highlight-thing-mode
+      (highlight-thing-mode -1)))
+  (add-hook 'prog-mode-hook #'mb-highlight-thing-enable-unless-lsp)
+  (with-eval-after-load 'lsp-mode
+    (add-hook 'lsp-mode-hook #'mb-highlight-thing-disable-for-lsp))
   :config
-  (set-face-attribute
-   'highlight-thing nil
-   :foreground (face-foreground 'highlight)
-   :background (face-background 'highlight))
-  ;; Don't highlight the thing at point itself
   (setq highlight-thing-exclude-thing-under-point t)
   (setq highlight-thing-delay-seconds 1.5))
 
@@ -1936,6 +1941,9 @@ targets."
         lsp-modeline-code-actions-segments '(count name)
 
         lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
+
+  (setq lsp-volar-take-over-mode nil)
+  (setq lsp-volar-hybrid-mode t)
   :config
   (when mb-use-company
     (defun mb/lsp-mode-setup-completion ()
@@ -1945,7 +1953,6 @@ targets."
 
   (which-key-add-key-based-replacements "SPC l" "LSP")
   (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration)
-
 
   (add-hook 'lsp-mode-hook (lambda ()
                              (local-set-key [remap xref-find-references] 'lsp-find-references)
@@ -2016,17 +2023,17 @@ targets."
 
 ;; Run code formatters like Prettier
 (use-package apheleia
-  :defer 0.5
   :diminish apheleia-mode
   :init
   (apheleia-global-mode +1)
   :config
+  (defun mb-apheleia-disallowed-buffer-p ()
+    (and buffer-file-name
+         (or (string-match-p "\\.component\\.html\\'" buffer-file-name)
+             (string-equal (file-name-nondirectory buffer-file-name) "package.json"))))
+  (add-to-list 'apheleia-inhibit-functions #'mb-apheleia-disallowed-buffer-p)
   (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
-
-  (setf (alist-get 'prettier apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath))
-  (setf (alist-get 'prettier-json apheleia-formatters)
-        '("npx" "prettier" "--stdin-filepath" filepath "--parser=json")))
+  )
 
 
 

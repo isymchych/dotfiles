@@ -5,11 +5,15 @@
 # on Ghostty's website, at https://ghostty.org/docs/config.
 
 font-family = Iosevka Term Medium
-font-size = 15
+font-size = 16
 window-padding-x = 2
 
 cursor-style = block
 cursor-style-blink = false
-shell-integration-features = no-cursor
+shell-integration-features = no-cursor, no-title
+
+link-url = true
 
 theme = dark:Solarized Dark Patched,light:Builtin Solarized Light
+
+keybind = alt+enter=new_window
