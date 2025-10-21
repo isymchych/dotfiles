@@ -9,14 +9,14 @@ set -euo pipefail
 # just forward them unchanged so existing bindings keep working.
 for arg in "$@"; do
     if [[ "$arg" == "-e" ]]; then
-        exec ghostty "$@"
+        exec wezterm "$@"
     fi
 done
 
 # Basic xterm compatibility: when invoked without -e, treat the
 # arguments as a command that should run inside the terminal.
 if [[ $# -eq 0 ]]; then
-    exec ghostty
+    exec wezterm
 fi
 
-exec ghostty -e "$@"
+exec wezterm -e "$@"
