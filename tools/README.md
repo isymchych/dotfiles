@@ -14,3 +14,4 @@
 * `difftastic` - better syntax-aware diffs
 * `mergiraf` - solve merge conflicts; syntax-aware
 * `rainfrog` - CLI DB client
+* `ast-grep` - structural code search and rewrite

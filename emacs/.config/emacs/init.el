@@ -17,8 +17,9 @@
 
 (defvar mb-tab-size 4)
 
-(defcustom mb-use-company t "Use company-mode for autocomplete." :type 'boolean :group 'mb-customizations)
-(defcustom mb-use-corfu nil "Use corfu for autocomplete." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-company nil "Use company-mode for autocomplete." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-corfu t "Use corfu for autocomplete." :type 'boolean :group 'mb-customizations)
+
 
 ;; see https://platform.openai.com/api-keys
 (defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
@@ -1579,6 +1580,15 @@ targets."
 
   (global-set-key (kbd "M-p") 'completion-at-point))
 
+(use-package cape
+  :if mb-use-corfu
+  :after (corfu)
+  :config
+
+  ;; https://github.com/minad/corfu/issues/188#issuecomment-1148658471
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/3555
+  (advice-add #'lsp-completion-at-point :around #'cape-wrap-noninterruptible))
+
 
 
 ;; YASnippet: snippets
@@ -1906,6 +1916,8 @@ targets."
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode)
 
+  (add-to-list 'auto-mode-alist '("\\.mts\\'" . typescript-ts-mode))
+
   (add-hook 'hack-local-variables-hook
             (lambda () (when (derived-mode-p 'ts-mode) (lsp))))
 
@@ -2009,7 +2021,8 @@ targets."
         flycheck-posframe-position 'window-bottom-left-corner)
 
   ;; Don't display popups if company is open
-  (add-hook 'flycheck-posframe-inhibit-functions #'company--active-p)
+  (when mb-use-company
+    (add-hook 'flycheck-posframe-inhibit-functions #'company--active-p))
 
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 
