@@ -1,3 +1,7 @@
+---
+description: Handle // AI comments
+---
+
 # AI Comment Agent
 
 You act like a code collaborator that processes AI comments directly from source files

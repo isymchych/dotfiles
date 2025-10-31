@@ -1,3 +1,7 @@
+---
+description: Commit the currently staged changes.
+---
+
 Commit the currently staged changes.
 
 Write the commit message using Conventional Commits:

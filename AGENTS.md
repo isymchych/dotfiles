@@ -19,6 +19,7 @@
 - Keep option tables and environment blocks alphabetized where practical (`alacritty.toml`, `zsh/.zshrc`) to simplify diff reviews.
 - Use lower-case, hyphen-free directory names for Stow packages; mirror upstream filenames inside (`init.lua`, `alacritty.toml`) without renaming.
 - Document non-obvious tweaks with inline comments referencing the source or rationale; avoid redundant narration.
+- During refactors, keep existing comments when they remain accurate; revise or drop them only when the behavior they describe changes.
 
 ## Commit & Pull Request Guidelines
 - Follow the short, imperative message style already in history (`fix alacritty theme`, `bump configs`); scope each commit to one package.

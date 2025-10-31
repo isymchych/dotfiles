@@ -4,6 +4,7 @@ reload-threads 10
 max-items 20
 text-width 90
 article-sort-order date-asc
+cleanup-on-quit yes
 
 # solarized
 include /usr/share/doc/newsboat/contrib/colorschemes/solarized-light
