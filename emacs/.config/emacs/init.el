@@ -1640,11 +1640,10 @@ targets."
 
 ;; EditorConfig
 (use-package editorconfig
-  :defer t
   :diminish editorconfig-mode
-  :init
-  (add-hook 'prog-mode-hook 'editorconfig-mode-apply)
-  (add-hook 'text-mode-hook 'editorconfig-mode-apply))
+  :config
+  (add-hook 'prog-mode-hook 'editorconfig-apply)
+  (add-hook 'text-mode-hook 'editorconfig-apply))
 
 
 
@@ -1685,8 +1684,7 @@ targets."
 (use-package highlight-thing
   :defer t
   :diminish highlight-thing-mode
-  :commands highlight-thing-mode
-  :init
+  :config
   (defun mb-highlight-thing-enable-unless-lsp ()
     (unless (bound-and-true-p lsp-mode)
       (highlight-thing-mode 1)))
@@ -1696,7 +1694,7 @@ targets."
   (add-hook 'prog-mode-hook #'mb-highlight-thing-enable-unless-lsp)
   (with-eval-after-load 'lsp-mode
     (add-hook 'lsp-mode-hook #'mb-highlight-thing-disable-for-lsp))
-  :config
+
   (setq highlight-thing-exclude-thing-under-point t)
   (setq highlight-thing-delay-seconds 1.5))
 
@@ -1888,20 +1886,10 @@ targets."
 
 
 
-;; Casual-dired: transient bindings for dired
-(use-package casual-dired
-  :ensure t
-  :bind (:map dired-mode-map ("M-h" . casual-dired-tmenu)))
-
 ;; Casual-avy: transient bindings for avy
 (use-package casual-avy
   :ensure t
   :bind ("M-g a" . casual-avy-tmenu))
-
-;; Casual-isearch: transient bindings for isearch
-(use-package casual-isearch
-  :ensure t
-  :bind (:map isearch-mode-map ("<f2>" . casual-isearch-tmenu)))
 
 
 
