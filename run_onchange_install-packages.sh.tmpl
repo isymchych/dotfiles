@@ -1,0 +1,33 @@
+{{- $osID := "" -}}
+{{- with .chezmoi.osRelease }}
+  {{- $osID = or .id "" -}}
+{{- end -}}
+{{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
+#!/bin/bash
+set -euo pipefail
+
+pacman_packages=(
+{{- range .packages.linux.arch.pacman }}
+  {{ . | quote }}
+{{- end }}
+)
+
+if [ "${#pacman_packages[@]}" -gt 0 ]; then
+  sudo pacman -S --needed "${pacman_packages[@]}"
+fi
+
+aur_packages=(
+{{- range .packages.linux.arch.aur }}
+  {{ . | quote }}
+{{- end }}
+)
+
+if [ "${#aur_packages[@]}" -gt 0 ]; then
+  if ! command -v yay >/dev/null 2>&1; then
+    printf 'Missing AUR helper (install yay) to install: %s\n' "${aur_packages[*]}" >&2
+    exit 1
+  fi
+
+  yay -S --needed "${aur_packages[@]}"
+fi
+{{- end -}}
