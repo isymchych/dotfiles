@@ -1,3 +1,9 @@
+{{- if eq .chezmoi.os "darwin" -}}
+export TERMINAL=iTerm
+
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{- else if eq .chezmoi.os "linux" -}}
 alias remove_final_newline="perl -pi -e 'chomp if eof'"
 
 alias ydl='noglob yt-dlp -o "%(playlist_index|)s%(playlist_index& - |)s%(title)s.%(ext)s" --format "bestvideo[height<=1080]+bestaudio"'
@@ -19,4 +25,4 @@ alias -r ctlu='systemctl --user'
 
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
+{{- end -}}

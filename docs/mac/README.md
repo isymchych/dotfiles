@@ -7,10 +7,10 @@
 * ITerm 2:
   * brew tap homebrew/cask-versions
   * brew install --cask iterm2-beta
-  * Preferences -> General/Preferences -> Check "Load preferences from a custom folder or URL" and use dotfiles/mac/ITerm2 dir
-* brew install git git-delta stow zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions starship coreutils
+  * Preferences -> General/Preferences -> Check "Load preferences from a custom folder or URL" and point it at `~/.config/iterm2`
+* brew install git git-delta chezmoi zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions starship coreutils
 * Clone dotfiles
-* stow vim, zsh, emacs, git, mac, tools, kdiff
+* `chezmoi init --source="$HOME/dotfiles" && chezmoi apply`
 * Use zsh as a shell `chsh -s /bin/zsh`
 * CLI tools
     brew install aspell editorconfig fd gitui htop jq just yazi fnm ripgrep tokei wget

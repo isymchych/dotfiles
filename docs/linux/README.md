@@ -49,7 +49,7 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 ## Install basic cli and configs
 * install pacman -S --needed base-devel git go vim just
 * install yay
-* install openssh, stow, rustup, sccache, lld
+* install openssh, chezmoi, rustup, sccache, lld
 * install zsh, zsh-completions, zsh-autosuggestions, zsh-syntax-highlighting, starship, ttf-nerd-fonts-symbols, powerline-fonts
 * install udisks2 to mount usb drives
 * htop
@@ -69,10 +69,9 @@ $ chmod 700 ~/.ssh
 $ chmod 600 ~/.ssh/key
 ```
 * clone dotfiles from github
-* stow zsh & git; switch user to zsh
-* stow vim, cd dotfiles/vim; ./install.sh
-* mkdir ~/.local/share/applications ~/.cargo ~/bin
-* stow linux, kdiff3, emacs, newsboat
+* `chezmoi init --source="$HOME/dotfiles" --destination="$HOME"`
+* `chezmoi apply` (run with `--dry-run` first on a fresh host)
+* switch user to zsh `chsh -s /bin/zsh`
 * install pipewire pipewire-pulse
 
 ## GUI
@@ -114,9 +113,10 @@ $ chmod 600 ~/.ssh/key
 * xorg-xhost
 * wmname
 * qt5ct - qt5 configuration tool
-* alacritty - terminal backend; configs must call `linux/bin/xterm` shim
-* OR ghostty - terminal backend, stow ghostty
-* OR wezterm - terminal backend, stow wezterm
+* terminal - configs invoke the `~/bin/xterm` shim
+  * alacritty
+  * OR ghostty
+  * OR wezterm
 * wlsunset - adjust display color temperature at night
 * udiskie - automounter for removable media
 * network-manager-applet - network manager applet
