@@ -1,6 +1,8 @@
 # dotfiles
 
-This repository is being converted into my primary [chezmoi](https://www.chezmoi.io/) source of truth. To bootstrap a new host:
+This repository relies on [chezmoi](https://www.chezmoi.io/) to manage dotfiles.
+
+To bootstrap a new host:
 
 ```bash
 chezmoi init --source="$HOME/dotfiles" --destination="$HOME"
