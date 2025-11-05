@@ -3,5 +3,6 @@ export DFT_BACKGROUND=light
 
 alias y=yazi
 alias j=just
+alias cz=chezmoi
 
 eval "$(fnm env --use-on-cd --resolve-engines --shell zsh)"
