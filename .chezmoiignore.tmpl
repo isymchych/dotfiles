@@ -1,0 +1,13 @@
+{{- if ne .chezmoi.os "darwin" }}
+Library/**
+dot_config/com.googlecode.iterm2.plist
+dot_config/iterm2-default.json
+dot_config/karabiner/**
+dot_zprofile
+run_once_macos-defaults.sh
+{{- end }}
+firefox/**
+docs/**
+AGENTS.md
+README.md
+LICENSE
