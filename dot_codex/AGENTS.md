@@ -10,7 +10,7 @@
 * In git repository's AGENTS.md don't reference untracked files.
 * For large or repetitive refactors, prefer authoring focused scripts.
 * Prefer **deterministic**, **repeatable**, and **auditable** solutions.
-* Don't make changes unless explicitly asked.
+* Don't make changes unless explicitly asked. You can suggest me to do something.
 * When writing text be concise, precise, and non-fluffy; use active voice.
 
 * I'm expert in **Rust**, **TypeScript**, **JavaScript**.
