@@ -2,6 +2,7 @@
 
 ## Project Structure & Module Organization
 - `dot_*` entries are copied into `$HOME` by chezmoi; keep the prefix to control target paths.
+- Chezmoi ignores source files whose names already start with `.`; if the target begins with `.`, name the source `dot_<name>` (e.g. `dot_yas-parents`).
 - `dot_config/` mirrors `~/.config`; prefer `.tmpl` variants when values differ per host.
 - `bin/` holds `executable_*` shims that chezmoi installs to `~/.local/bin`.
 - `docs/` contains platform notes (`docs/linux`, `docs/mac`); keep secrets out and reference `.chezmoidata` instead.
@@ -34,4 +35,5 @@
 ## Machine-Specific Configuration
 - Favor templates (`.tmpl`) or `.chezmoi.osRelease` checks over duplicating configs.
 - Keep secrets and host-only files ignored via `.chezmoiignore`.
+- In `.chezmoiignore`, patterns operate on the rendered target tree (e.g. `.config/...`, `.local/bin/<tool>`, `.local/share/chezmoi/run_onchange_*.sh`); the file is templated even without a `.tmpl` suffix, so gate OS-specific blocks accordingly.
 - Use `dot_zshrc_local.tmpl` and `run_onchange_*` scripts for overrides; defaults must stay safe cross-platform.

@@ -17,8 +17,8 @@
 
 (defvar mb-tab-size 4)
 
-(defcustom mb-use-company nil "Use company-mode for autocomplete." :type 'boolean :group 'mb-customizations)
-(defcustom mb-use-corfu t "Use corfu for autocomplete." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-company t "Use company-mode for autocomplete." :type 'boolean :group 'mb-customizations)
+(defcustom mb-use-corfu nil "Use corfu for autocomplete." :type 'boolean :group 'mb-customizations)
 
 
 ;; see https://platform.openai.com/api-keys
