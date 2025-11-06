@@ -6,6 +6,32 @@ dot_config/karabiner/**
 dot_zprofile
 run_once_macos-defaults.sh
 {{- end }}
+{{- if ne .chezmoi.os "linux" }}
+bin/executable_mb-check-vulnerabilities
+bin/executable_mb-colorpicker
+bin/executable_mb-exit
+bin/executable_mb-lock-screen
+bin/executable_mb-open-80
+bin/executable_mb-player
+bin/executable_mb-run-app
+bin/executable_mb-screenshot
+bin/executable_mb-wine-cleanup-menu-entries
+bin/executable_update-pacman-mirrors.sh
+dot_config/darkman/**
+dot_config/gtk-3.0/**
+dot_config/kanshi/**
+dot_config/mako/**
+dot_config/systemd/**
+dot_config/sway/**
+dot_config/waybar/**
+dot_config/wofi/**
+dot_config/zathura/**
+dot_local/share/applications/**
+dot_local/share/dark-mode.d/**
+dot_local/share/light-mode.d/**
+dot_run-sway
+run_onchange_install-packages.sh
+{{- end }}
 firefox/**
 docs/**
 AGENTS.md
