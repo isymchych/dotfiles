@@ -1,0 +1,41 @@
+firefox/**
+docs/**
+AGENTS.md
+README.md
+LICENSE
+
+{{ if ne .chezmoi.os "darwin" }}
+Library/**
+.config/com.googlecode.iterm2.plist
+.config/iterm2-default.json
+.config/karabiner/**
+.zprofile
+macos-defaults.sh
+{{ end }}
+
+{{ if ne .chezmoi.os "linux" }}
+.local/bin/mb-check-vulnerabilities
+.local/bin/mb-colorpicker
+.local/bin/mb-exit
+.local/bin/mb-lock-screen
+.local/bin/mb-open-80
+.local/bin/mb-player
+.local/bin/mb-run-app
+.local/bin/mb-screenshot
+.local/bin/mb-wine-cleanup-menu-entries
+.local/bin/update-pacman-mirrors.sh
+.config/darkman/**
+.config/gtk-3.0/**
+.config/kanshi/**
+.config/mako/**
+.config/systemd/**
+.config/sway/**
+.config/waybar/**
+.config/wofi/**
+.config/zathura/**
+.local/share/applications/**
+.local/share/dark-mode.d/**
+.local/share/light-mode.d/**
+.run-sway
+.local/share/chezmoi/run_onchange_install-packages.sh
+{{ end }}
