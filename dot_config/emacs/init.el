@@ -541,7 +541,7 @@ narrowed."
 
   ;; Improve detection of project root https://andreyor.st/posts/2022-07-16-project-el-enhancements/
   (defcustom project-root-markers
-    '("Cargo.lock" ".git" ".emacs-project" "deno.json" "package.json")
+    '("Cargo.lock" ".git" ".emacs-project")
     "Files or directories that indicate the root of a project."
     :type '(repeat string)
     :group 'project)
@@ -1601,7 +1601,6 @@ targets."
   (add-to-list 'hippie-expand-try-functions-list 'yas-hippie-try-expand)
 
   :config
-  (add-to-list 'yas-snippet-dirs (expand-file-name "snippets" user-emacs-directory) t)
   (setq
    yas-verbosity          2
    yas-wrap-around-region t)

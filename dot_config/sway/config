@@ -217,7 +217,7 @@ assign [class="HipChat"] 7
 
 assign [app_id="liferea"]  8
 assign [class="Thunderbird" instance="Mail"] 8
-assign [app_id="thunderbird"] 8
+assign [app_id="org.mozilla.Thunderbird"] 8
 
 assign [app_id="transmission-gtk"]  9
 assign [app_id="com.transmissionbt.transmission.*"]  9
@@ -259,7 +259,7 @@ for_window [class="^Slack"] border pixel $border
 for_window [class="^Thunderbird" instance="Calendar"] floating enable
 for_window [class="^Thunderbird" instance="Msgcompose"] floating enable
 for_window [class="^Thunderbird"] border pixel $border
-for_window [app_id="thunderbird"] border pixel $border
+for_window [app_id="org.mozilla.Thunderbird"] border pixel $border
 
 for_window [class="^jetbrains-idea"]     border pixel $border
 for_window [class="^jetbrains-webstorm"] border pixel $border
