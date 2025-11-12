@@ -22,6 +22,11 @@
 - Name executable scripts `executable_<tool>` so chezmoi marks them executable on apply.
 - Keep template variables lowercase snake_case and derive host details from `.chezmoidata`.
 
+## Theme Switching Scripts
+- Pair every app-specific theme toggle with matching scripts in `dot_local/share/dark-mode.d/` and `dot_local/share/light-mode.d/`, named `executable_<app>-theme.sh`.
+- Keep scripts minimal: shebang, blank line, then a single command that swaps the light and dark tokens (typically a `sed -i --follow-symlinks` substitution mirroring the rest of the repo).
+- Keep the literal theme tokens in sync with their tracked dotfiles (e.g. `dot_gemini/settings.json`) so the sed substitutions match what chezmoi installs.
+
 ## Testing Guidelines
 - Run `shellcheck bin/<script>` (or `bash -n`) before committing shell changes.
 - Execute `chezmoi diff` and `chezmoi apply --dry-run` on macOS and Linux when touching OS-conditional templates.
