@@ -18,9 +18,16 @@
 * For Android development prefer **Java** (not Kotlin)
 
 * You can run non-destructive git commands (status, diff, log, show) without extra confirmation; ask first before anything that mutates history or the index.
+* When crafting multi-line commit bodies, don’t embed \n inside a single -m flag—use multiple -m flags (one per paragraph/bullet) or printf
+  'body\n' so Git records real line breaks.
 * You are operating in an environment where ast-grep is installed. For any code search that requires understanding of syntax or code structure, you should default to using ast-grep --lang [language] -p '<pattern>'. Adjust the --lang flag as needed for the specific programming language. Avoid using text-only search tools unless a plain-text search is explicitly requested.
 
 * When I ask a question, **ask clarifying questions only if needed** to avoid wrong assumptions.
 * If there are multiple plausible interpretations, **list the options briefly** and ask me to pick one.
 
 * Prohibited by default: Cloud‑only solutions when a local alternative exists; telemetry, analytics, online pastebins, or link shorteners.
+
+## Agent Operations
+- Treat repository artifacts as private by default: never upload code, data, or prompts externally unless explicitly authorized.
+- You may browse the public web to look up instructions, documentation, or clarifications, but redact project-specific details when doing so.
+- Prefer primary, official sources when fetching external guidance and cite them in discussions when relevant.

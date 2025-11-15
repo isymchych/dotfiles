@@ -200,6 +200,7 @@
 
  ;; Always rescan buffer for imenu
  imenu-auto-rescan t
+ imenu-flatten t
 
  ;; Add ukrainian input method
  default-input-method "ukrainian-computer"

@@ -12,7 +12,8 @@
     "power-profiles-daemon",
     "tray",
     "sway/language",
-    "idle_inhibitor"
+    "idle_inhibitor",
+    "custom/pomodoro"
   ],
   "modules-right": [
     "systemd-failed-units",
@@ -163,6 +164,14 @@
     "format": "󰍜",
     "on-click": "mb-run-app",
     "tooltip": false
+  },
+  "custom/pomodoro": {
+    "exec": "~/.config/waybar/pomodoro_timer.sh check",
+    "interval": 1,
+    "return-type": "json",
+    "format": "[{text}]",
+    "on-click": "~/.config/waybar/pomodoro_timer.sh start",
+    "on-click-right": "~/.config/waybar/pomodoro_timer.sh reset"
   },
   "custom/shutdown-menu": {
     "format": "⏻",

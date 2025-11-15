@@ -110,6 +110,32 @@ window#waybar {
   padding: 5px 0px 5px 8px;
 }
 
+#custom-pomodoro {
+  margin-top: 14px;
+  padding: 6px 6px 6px 6px;
+  font-weight: 600;
+  font-size: 1.4em;
+  min-width: 70px;
+}
+
+#custom-pomodoro.pomodoro--running {
+  color: @highlight-color;
+}
+
+#custom-pomodoro.pomodoro--idle {
+  color: @color;
+  opacity: 0.8;
+}
+
+#custom-pomodoro.pomodoro--done {
+  animation-name: blink;
+  animation-duration: 0.7s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  color: @critical-color;
+}
+
 @keyframes blink {
   to {
     background-color: @blink-bg-color;
