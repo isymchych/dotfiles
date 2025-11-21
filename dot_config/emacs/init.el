@@ -2245,7 +2245,7 @@ targets."
   "e" 'mb/toggle-flyckeck-errors-list
   "f" 'mb/toggle-auto-fill-mode
   "m" 'menu-bar-mode
-  "n" 'display-line-numbers
+  "n" 'display-line-numbers-mode
   "s" 'scroll-lock-mode
   "v" 'mb/toggle-visual-fill-mode
   "w" 'whitespace-mode)

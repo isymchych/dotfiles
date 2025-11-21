@@ -12,8 +12,8 @@
     "power-profiles-daemon",
     "tray",
     "sway/language",
-    "idle_inhibitor",
-    "custom/pomodoro"
+    "idle_inhibitor"
+    // "custom/pomodoro"
   ],
   "modules-right": [
     "systemd-failed-units",
