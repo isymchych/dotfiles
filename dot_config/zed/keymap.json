@@ -1,0 +1,83 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+    },
+  },
+  {
+    "context": "Editor && vim_mode == insert",
+    "bindings": {
+      // "j k": "vim::NormalBefore"
+    },
+  },
+  {
+    "context": "vim_mode == normal || vim_mode == visual",
+    "bindings": {
+      "s": "vim::PushSneak",
+      "shift-s": "vim::PushSneakBackward",
+    },
+  },
+
+  // Necessary for which-key, see https://github.com/zed-industries/zed/pull/43618#issuecomment-3662435510
+  {
+    "context": "(VimControl && !menu)",
+    "bindings": {
+      "space": null, // Disable the default action vim::WrappingRight
+    },
+  },
+
+  {
+    "context": "vim_mode == normal",
+    "bindings": {
+      "space p f": [
+        "task::Spawn",
+        { "task_name": "tv:find-files", "reveal_target": "center" },
+      ],
+      "space p s": [
+        "task::Spawn",
+        { "task_name": "tv:find-in-files", "reveal_target": "center" },
+      ],
+      "space g s": [
+        "task::Spawn",
+        { "task_name": "gitu", "reveal_target": "center" },
+      ],
+    },
+  },
+
+  // Auto exit insert mode and save when pressing ctrl + s
+  {
+    "context": "Editor && vim_mode == insert && !VimWaiting && !menu",
+    "bindings": {
+      "ctrl-s": ["workspace::SendKeystrokes", "escape ctrl-s"],
+    },
+  },
+
+  // expand/contract visual selection
+  {
+    "context": "Editor && vim_mode == visual && !menu",
+    "bindings": {
+      "v": "editor::SelectLargerSyntaxNode",
+      "V": "editor::SelectSmallerSyntaxNode",
+    },
+  },
+
+  // navigate tabs
+  {
+    "bindings": {
+      "alt-k": "vim::GoToPreviousTab",
+    },
+  },
+  {
+    "bindings": {
+      "alt-j": "vim::GoToTab",
+    },
+  },
+]

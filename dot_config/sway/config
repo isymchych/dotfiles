@@ -25,11 +25,11 @@ input type:keyboard {
 
 # man 5 sway-input
 input type:touchpad {
-    scroll_factor 0.4
+    scroll_factor 1.5
     dwt enabled
     click_method clickfinger
     tap enabled
-    natural_scroll disabled
+    natural_scroll enabled
 
     accel_profile "adaptive" # or "flat"
     pointer_accel 0.2 # (between -1 and 1)

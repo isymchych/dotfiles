@@ -18,7 +18,6 @@ Re-run `chezmoi diff` before every apply to catch surprises, and keep host-speci
 - `tokei` — code line counts
 - `just` — task runner
 - `fzf` — fuzzy matcher
-- `sad` — structural search/replace
 - `wget` — HTTP(S) downloads
 - `htop` — system monitor
 - `gitui` — TUI for git
@@ -26,6 +25,10 @@ Re-run `chezmoi diff` before every apply to catch surprises, and keep host-speci
 - `difftastic` — syntax-aware diffs
 - `mergiraf` — semantic merge driver
 - `rainfrog` — CLI database client
+- `television` - fuzzy file finder / search
+
+## Optional CLI tools
+- `sad` — structural search/replace, with preview
 - `ast-grep` — structural code search/rewrite
 
 ## Zsh setup

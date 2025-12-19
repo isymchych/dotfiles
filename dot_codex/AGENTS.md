@@ -20,7 +20,6 @@
 * You can run non-destructive git commands (status, diff, log, show) without extra confirmation; ask first before anything that mutates history or the index.
 * When crafting multi-line commit bodies, don’t embed \n inside a single -m flag—use multiple -m flags (one per paragraph/bullet) or printf
   'body\n' so Git records real line breaks.
-* You are operating in an environment where ast-grep is installed. For any code search that requires understanding of syntax or code structure, you should default to using ast-grep --lang [language] -p '<pattern>'. Adjust the --lang flag as needed for the specific programming language. Avoid using text-only search tools unless a plain-text search is explicitly requested.
 * Run `shellcheck <script>` when working on shell scripts to catch issues early.
 
 * When I ask a question, **ask clarifying questions only if needed** to avoid wrong assumptions.

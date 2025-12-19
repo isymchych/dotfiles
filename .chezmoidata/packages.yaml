@@ -13,8 +13,6 @@ packages:
         - gitui       # TUI for git
         - git-delta   # git diff viewer
         - difftastic  # syntax-aware diffs
-        - ast-grep    # structural code search/rewrite
       aur:
-        - sad         # structural search/replace
         - mergiraf    # semantic merge driver
         - rainfrog    # CLI database client

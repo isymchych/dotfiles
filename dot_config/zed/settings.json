@@ -8,25 +8,67 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
   "gutter": {
-    "line_numbers": false
+    "line_numbers": false,
   },
   "show_signature_help_after_edits": true,
   "git": {
     "inline_blame": {
-      "enabled": false
-    }
+      "enabled": false,
+    },
   },
   "telemetry": {
     "diagnostics": false,
-    "metrics": false
+    "metrics": false,
   },
+  "tab_bar": {
+    "show": true,
+    "show_nav_history_buttons": false,
+  },
+  "tabs": {
+    "file_icons": true,
+    "git_status": true,
+  },
+  "notification_panel": {
+    "button": false,
+  },
+
   "vim_mode": true,
+  "vim": {
+    "enable_vim_sneak": true,
+  },
+
+  "which_key": {
+    "enabled": true,
+    "delay_ms": 600,
+  },
+
+  // Indentation, rainbow indentation
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware",
+  },
+
+  // Inlay hints preconfigured by Zed: Go, Rust, Typescript and Svelte
+  "inlay_hints": {
+    "enabled": true,
+  },
+
+  // Use zed commit editor
+  "terminal": {
+    "env": {
+      "EDITOR": "zeditor --wait",
+    },
+    "font_size": 14,
+    "font_family": "Iosevka Nerd Font Mono",
+  },
+
+  // UI
   "ui_font_size": 20,
   "ui_font_family": "Iosevka Nerd Font Mono",
   "buffer_font_size": 17,
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "One Dark"
-  }
+    "dark": "One Dark",
+  },
 }
