@@ -249,6 +249,8 @@ for_window [class="^Emacs"] border pixel $border
 for_window [app_id="Emacs"] border pixel $border
 for_window [app_id="emacs"] border pixel $border
 
+for_window [app_id="dev.zed.Zed"] border pixel $border
+
 for_window [class="Steam"] border pixel $border
 for_window [class="^Steam" title="Steam - News"] floating enable
 

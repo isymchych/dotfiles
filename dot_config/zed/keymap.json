@@ -18,11 +18,21 @@
       // "j k": "vim::NormalBefore"
     },
   },
+
+  // Sneak motion
   {
     "context": "vim_mode == normal || vim_mode == visual",
     "bindings": {
       "s": "vim::PushSneak",
       "shift-s": "vim::PushSneakBackward",
+    },
+  },
+
+  // add missing visual mode binding for Vim Exchange
+  {
+    "context": "vim_mode == visual",
+    "bindings": {
+      "shift-x": "vim::Exchange",
     },
   },
 
@@ -49,6 +59,9 @@
         "task::Spawn",
         { "task_name": "gitu", "reveal_target": "center" },
       ],
+      "space b": "tab_switcher::ToggleAll",
+      "space s": "workspace::Save",
+      "space k": "pane::CloseActiveItem",
     },
   },
 
@@ -78,6 +91,38 @@
   {
     "bindings": {
       "alt-j": "vim::GoToTab",
+    },
+  },
+
+  // MiniQuotes
+  {
+    "context": "vim_operator == a || vim_operator == i || vim_operator == cs",
+    "bindings": {
+      // mini.ai plugin behavior
+      "q": "vim::MiniQuotes",
+      "b": "vim::MiniBrackets",
+    },
+  },
+
+  // vim navigation in docks
+  {
+    "context": "Dock",
+    "bindings": {
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+    },
+  },
+
+  // subword motion & operators
+  {
+    "context": "VimControl && !menu",
+    "bindings": {
+      "w": "vim::NextSubwordStart",
+      "b": "vim::PreviousSubwordStart",
+      "e": "vim::NextSubwordEnd",
+      "g e": "vim::PreviousSubwordEnd",
     },
   },
 ]

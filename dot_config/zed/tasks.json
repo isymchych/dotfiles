@@ -71,7 +71,7 @@
     "label": "gitu",
     "command": "gitu",
     "reveal_target": "center",
-    "hide": "always",
+    "hide": "on_success",
     "env": {
       "VISUAL": "zeditor",
       "GIT_EDITOR": "vim",
@@ -79,7 +79,7 @@
   },
 
   {
-    "label": "yazi:folder",
+    "label": "yazi:current-folder",
     "command": "yazi",
     "args": ["$ZED_DIRNAME"],
     "hide": "always",
@@ -92,9 +92,9 @@
   },
 
   {
-    "label": "xterm:current-folder",
-    "command": "xterm",
-    "args": ["--cwd", "$ZED_DIRNAME"],
+    "label": "term:current-folder",
+    "command": "sh",
+    "args": ["xterm", "--cwd", "$ZED_DIRNAME"],
     "reveal": "never",
     "hide": "always",
     "allow_concurrent_runs": true,

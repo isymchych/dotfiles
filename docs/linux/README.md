@@ -218,6 +218,7 @@ $ chmod 600 ~/.ssh/key
   * npm i -g vscode-langservers-extracted
 * android-tools, android-udev
 * uv - fast python package & project manager
+* Rootless docker
 
 
 ## Configure hardware acceleration

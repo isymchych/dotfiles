@@ -26,6 +26,7 @@ Re-run `chezmoi diff` before every apply to catch surprises, and keep host-speci
 - `mergiraf` — semantic merge driver
 - `rainfrog` — CLI database client
 - `television` - fuzzy file finder / search
+- `lazydocker` - TUI for Docker
 
 ## Optional CLI tools
 - `sad` — structural search/replace, with preview

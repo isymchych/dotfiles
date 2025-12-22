@@ -7,6 +7,21 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "preview_tabs": {
+    "enable_preview_multibuffer_from_code_navigation": true,
+    "enable_preview_from_file_finder": true,
+  },
+  "title_bar": {
+    "show_menus": false,
+    "show_user_picture": false,
+    "show_sign_in": false,
+    "show_branch_icon": true,
+  },
+  "colorize_brackets": true,
+  "completion_menu_scrollbar": "auto",
+  "toolbar": {
+    "code_actions": false,
+  },
   "gutter": {
     "line_numbers": false,
   },
@@ -25,6 +40,7 @@
     "show_nav_history_buttons": false,
   },
   "tabs": {
+    "show_diagnostics": "off",
     "file_icons": true,
     "git_status": true,
   },
@@ -33,9 +49,6 @@
   },
 
   "vim_mode": true,
-  "vim": {
-    "enable_vim_sneak": true,
-  },
 
   "which_key": {
     "enabled": true,
@@ -44,6 +57,9 @@
 
   // Indentation, rainbow indentation
   "indent_guides": {
+    "background_coloring": "disabled",
+    "active_line_width": 3,
+    "line_width": 1,
     "enabled": true,
     "coloring": "indent_aware",
   },
@@ -51,6 +67,13 @@
   // Inlay hints preconfigured by Zed: Go, Rust, Typescript and Svelte
   "inlay_hints": {
     "enabled": true,
+  },
+
+  "diagnostics": {
+    "inline": {
+      "enabled": true,
+      "max_severity": null,
+    },
   },
 
   // Use zed commit editor
