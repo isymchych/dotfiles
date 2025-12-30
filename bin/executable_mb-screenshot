@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+screenshots_dir="$HOME/temp/screenshots"
+mkdir -p "$screenshots_dir"
+
+timestamp="$(date +%Y%m%d_%H%M%S_%3N)"
+outfile="$screenshots_dir/screenshot_${timestamp}.png"
 
 cases="screen
 window
@@ -8,13 +15,13 @@ res=$(echo "$cases" | wofi --dmenu)
 
 case "$res" in
     "screen")
-        grim - | swappy -f -
+        grim - | swappy -f - -o "$outfile"
         ;;
     "window")
-        grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.focused?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"')" - | swappy -f - 
+        grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.focused?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"')" - | swappy -f - -o "$outfile"
         ;;
     "part of the screen")
-        grim -g "$(slurp)" - | swappy -f -
+        grim -g "$(slurp)" - | swappy -f - -o "$outfile"
         ;;
 esac
 

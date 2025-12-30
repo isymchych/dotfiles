@@ -73,6 +73,16 @@ config.mouse_bindings = {
 }
 config.keys = {
   {
+    key = "-",
+    mods = "SUPER",
+    action = act.DisableDefaultAssignment,
+  },
+  {
+    key = "=",
+    mods = "SUPER",
+    action = act.DisableDefaultAssignment,
+  },
+  {
     key = "Enter",
     mods = "ALT",
     action = act.EmitEvent("spawn-window-in-current-cwd"),
