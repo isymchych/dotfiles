@@ -24,7 +24,7 @@
 * Use `gh` CLI to interact with github PRs & comments
 
 * Run `shellcheck <script>` when working on shell scripts to catch issues early.
-* Screenshots ("use a screenshot") - pick newest PNG in `~/temp/screenshots`
+* Look for screenshots in `~/temp/screenshots`. Usually you need to pick newest PNG.
 
 * When I ask a question, **ask clarifying questions only if needed** to avoid wrong assumptions.
 * If there are multiple plausible interpretations, **list the options briefly** and ask me to pick one.

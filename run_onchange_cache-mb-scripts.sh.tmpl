@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v deno >/dev/null 2>&1; then
+  exit 0
+fi
+
+cd "$HOME/.config/mb-scripts"
+shopt -s nullglob
+scripts=(./scripts/*.ts)
+if (( ${#scripts[@]} == 0 )); then
+  exit 0
+fi
+
+deno cache --lock=deno.lock "${scripts[@]}"
