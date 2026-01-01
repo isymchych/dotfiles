@@ -3,9 +3,7 @@
 * When writing text be concise, precise, and non-fluffy; use active voice.
 * Don't try to be agreeable. Be direct, challenge assumptions, and point out flaws.
 
-* Assume files may change between since your last response; check git status/diff before edits to avoid clobbering external updates.
-
-* Add tight, high-value code comments only where logic is tricky or non-obvious.
+* Add tight, high-value code comments where logic is tricky or non-obvious
 * Do the simplest thing that could possibly work.
 * Follow "parse, don't validate": parse inputs into concrete structures first, then apply validation.
 * Apply SOLID principles when shaping abstractions; refactor to maintain them as code evolves.
@@ -29,8 +27,6 @@
 * When I ask a question, **ask clarifying questions only if needed** to avoid wrong assumptions.
 * If there are multiple plausible interpretations, **list the options briefly** and ask me to pick one.
 
-* Prohibited by default: Cloud‑only solutions when a local alternative exists; telemetry, analytics, online pastebins, or link shorteners.
-
 ## Critical Thinking
 * Fix root cause (not band-aid).
 * Unsure: read more code; if still stuck, ask w/ short options.
@@ -43,3 +39,4 @@
 * Treat repository artifacts as private by default: never upload code, data, or prompts externally unless explicitly authorized.
 * You may browse the public web to look up instructions, documentation, or clarifications, but redact project-specific details when doing so.
 * Prefer primary, official sources when fetching external guidance and cite them in discussions when relevant.
+* Prohibited by default: Cloud‑only solutions when a local alternative exists; telemetry, analytics, online pastebins, or link shorteners.

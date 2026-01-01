@@ -7,6 +7,9 @@ ratio = [2, 4, 2]
 imv = [
   { run = 'imv-dir "$@"', desc = "Open image in imv-dir", orphan = true, for = "linux" },
 ]
+mpv = [
+  { run = 'mpv "$@"', desc = "Open video in mpv", orphan = true, for = "linux" },
+]
 emacs = [
   { run = 'emacs "$@"', desc = 'Open in Emacs GUI', orphan = true }
 ]
@@ -14,6 +17,7 @@ emacs = [
 [open]
 prepend_rules = [
   { mime = "image/*", use = ["imv", "image"] },
+  { mime = "video/*", use = "mpv" },
 ]
 append_rules = [
 	{ mime = "text/*", use = "emacs" },

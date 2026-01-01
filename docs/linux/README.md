@@ -126,8 +126,9 @@ $ chmod 600 ~/.ssh/key
 * gsimplecal - calendar
 * grim - capture the screenshot
 * slurp - select the part of the screen
+* satty - simple drawing on top of images
 * wf-recorder - record the screen
-* swappy - simple drawing on top of images
+* kooha - simple GUI for recording the screen
 * yazi - file manager
 * p7zip - 7z/zip cli archiver for yazi
 * translate-shell - Google Translate
@@ -152,7 +153,6 @@ $ chmod 600 ~/.ssh/key
 
 * if bluetooth
  <!-- * install bluez bluez-utils -->
- * install blueberry - GUI bluetooth tool
  * start and enable bluetooth service
  * start and enable mpris-proxy user service
 
