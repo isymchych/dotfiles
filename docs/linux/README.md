@@ -207,6 +207,8 @@ $ chmod 600 ~/.ssh/key
 * tokei - count lines of code
 * kdiff3
 * delta - better git diffs
+* `git-spr` <https://github.com/ejoffe/spr> - stacked pull requests for GitHub
+* `github-cli` - CLI for interacting with GitHub
 * watchexec - run commands on file change
 * cargo-outdated
 * cargo-release - helpers for release management

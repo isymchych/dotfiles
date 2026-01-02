@@ -18,7 +18,5 @@ emacs = [
 prepend_rules = [
   { mime = "image/*", use = ["imv", "image"] },
   { mime = "video/*", use = "mpv" },
-]
-append_rules = [
-	{ mime = "text/*", use = "emacs" },
+  { mime = "text/*", use = "emacs" },
 ]

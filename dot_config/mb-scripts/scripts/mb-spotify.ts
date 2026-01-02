@@ -395,7 +395,7 @@ const cmdAuth = async (parsed: ParsedArgs): Promise<void> => {
   const clientId = stringFlag(parsed.flags, "client-id") ?? existing?.client_id;
 
   if (!clientId) {
-    throw new Error("client id missing; create a Spotify app and pass --client-id");
+    throw new Error("client id missing; create a Spotify app and pass --client-id. See https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app");
   }
 
   let listener: Deno.Listener;
