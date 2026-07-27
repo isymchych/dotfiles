@@ -74,10 +74,12 @@
 - When parsing external CLI/API JSON, keep boundary schemas permissive for extra fields on provider-owned nested objects and normalize into strict internal domain types because providers can add or return undocumented metadata.
 - Prefer named domain/result types over nested utility types such as `Promise<Awaited<ReturnType<typeof fn>>>`; explicit types keep public helper contracts readable.
 - When inspecting installed Pi package APIs in this repo, start from root-level `node_modules/@earendil-works/*/dist/*.d.ts` and exclude `*.map` from code searches because workspace dependencies are hoisted and sourcemaps make compiled output noisy.
+- When changing dotfiles behavior that introduces or depends on installed tools, update the relevant platform docs so fresh-host setup stays reproducible.
 
 ## Intent Ledger
 
 - For Sway session daemons, prefer user systemd units pulled by `sway-session.target`; keep `dotfiles/dot_config/sway/config` focused on compositor settings and keybindings.
+- For terminal-backed GUI launches in dotfiles, prefer the `xterm` shim over hardcoded terminal emulators so backend selection stays centralized.
 - When runtime helpers are needed by multiple workspaces, put them in an explicit workspace package such as `packages/shared` rather than a root-level `lib/`, so dependency ownership and imports remain clear.
 - For local npm workspace dependencies, use the package's declared version such as `"0.0.0"`; do not use the `workspace:` protocol because npm does not support it.
 

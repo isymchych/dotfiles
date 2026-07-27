@@ -319,6 +319,7 @@ for_window [app_id="arhiv-desktop"]  border pixel $border
 
 # enable floating for apps with custom app_id FLOAT
 for_window [app_id="FLOAT"] floating enable, resize set width 60 ppt height 60 ppt, move position center
+for_window [app_id="bluetui"] floating enable, resize set width 60 ppt height 60 ppt, move position center
 
 # KEYBINDINGS
 

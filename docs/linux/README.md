@@ -163,11 +163,9 @@ $ chmod 600 ~/.ssh/key
   - `systemctl enable --now udevmon.service`
 
 - if bluetooth
-
- <!-- * install bluez bluez-utils -->
-
-- start and enable bluetooth service
-- start and enable mpris-proxy user service
+  - install bluez, bluez-utils, bluetui
+  - start and enable bluetooth service
+  - start and enable mpris-proxy user service
 
 - trash-cli
 - libsecret
