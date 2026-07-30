@@ -82,6 +82,7 @@
 - For terminal-backed GUI launches in dotfiles, prefer the `xterm` shim over hardcoded terminal emulators so backend selection stays centralized.
 - When runtime helpers are needed by multiple workspaces, put them in an explicit workspace package such as `packages/shared` rather than a root-level `lib/`, so dependency ownership and imports remain clear.
 - For local npm workspace dependencies, use the package's declared version such as `"0.0.0"`; do not use the `workspace:` protocol because npm does not support it.
+- For Pi constrained tool sampling, enable strict JSON-schema sampling only on schemas compatible with provider strict mode; OpenAI strict tools require every declared property to be listed in `required`, so TypeBox optional properties need nullable-normalization or must remain non-strict.
 
 ## Pi Configuration
 

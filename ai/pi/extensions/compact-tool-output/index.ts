@@ -175,19 +175,22 @@ function formatReadTarget(
   return target;
 }
 
-const numberedReadSchema = Type.Object({
-  path: Type.String({ description: "Path to the file to read (relative or absolute)" }),
-  offset: Type.Optional(
-    Type.Number({ description: "Line number to start reading from (1-indexed)" }),
-  ),
-  limit: Type.Optional(Type.Number({ description: "Maximum number of lines to read" })),
-  show_line_numbers: Type.Optional(
-    Type.Boolean({
-      description:
-        "Whether to prefix each returned text line with its file line number. Useful when line references matter.",
-    }),
-  ),
-});
+const numberedReadSchema = Type.Object(
+  {
+    path: Type.String({ description: "Path to the file to read (relative or absolute)" }),
+    offset: Type.Optional(
+      Type.Number({ description: "Line number to start reading from (1-indexed)" }),
+    ),
+    limit: Type.Optional(Type.Number({ description: "Maximum number of lines to read" })),
+    show_line_numbers: Type.Optional(
+      Type.Boolean({
+        description:
+          "Whether to prefix each returned text line with its file line number. Useful when line references matter.",
+      }),
+    ),
+  },
+  { additionalProperties: false },
+);
 
 type NumberedReadParams = {
   path: string;

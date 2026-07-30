@@ -15,6 +15,8 @@ import { dirname, join } from "node:path";
 import test, { type TestContext } from "node:test";
 
 import { getTextOutput, normalizeToolResult } from "../../shared/test-helpers.ts";
+import { APPLY_PATCH_LARK_GRAMMAR } from "./grammar.ts";
+import applyPatchExtension from "./index.ts";
 import {
   applyPatchSchema,
   executeApplyPatchTool,
@@ -135,6 +137,33 @@ async function runApplyPatch(
 
 test("tool schema remains a top-level object for Pi registration", () => {
   assert.equal(applyPatchSchema.type, "object");
+});
+
+test("tool exposes OpenAI Lark constrained sampling grammar", () => {
+  let registeredTool: unknown;
+  const registerTool = (tool: unknown): void => {
+    registeredTool = tool;
+  };
+
+  (applyPatchExtension as unknown as (pi: { registerTool: typeof registerTool }) => void)({
+    registerTool,
+  });
+
+  assert.deepEqual((registeredTool as { constrainedSampling?: unknown }).constrainedSampling, {
+    type: "grammar",
+    variants: { openai_lark: APPLY_PATCH_LARK_GRAMMAR },
+  });
+});
+
+test("apply_patch grammar covers local patch envelope variants", () => {
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /start: begin_patch/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /add_hunk:/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /delete_hunk:/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /update_hunk:/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /change_move:/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /eof_line:/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /add_line\*/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /\(\(change_move separator\* change\?\) \| change\)/);
 });
 
 test("prepareArguments accepts raw strings and legacy patch objects", () => {

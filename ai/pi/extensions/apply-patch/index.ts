@@ -11,6 +11,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { Text, truncateToWidth, type Component } from "@earendil-works/pi-tui";
 
+import { APPLY_PATCH_LARK_GRAMMAR } from "./grammar.ts";
 import {
   formatDisplayPath,
   getOperationLabel,
@@ -27,6 +28,11 @@ import {
   type ApplyPatchResult,
   type ApplyPatchToolDetails,
 } from "./tool.ts";
+
+const APPLY_PATCH_CONSTRAINED_SAMPLING = {
+  type: "grammar",
+  variants: { openai_lark: APPLY_PATCH_LARK_GRAMMAR },
+} as const;
 
 type SummaryStatus = "success" | "warning" | "error";
 type ThemeBg = Parameters<Theme["bg"]>[0];
@@ -557,6 +563,7 @@ export default function applyPatchExtension(pi: ExtensionAPI): void {
       "apply_patch accepts relative or absolute file paths in patch headers.",
     ],
     parameters: applyPatchSchema,
+    constrainedSampling: APPLY_PATCH_CONSTRAINED_SAMPLING,
     prepareArguments: prepareApplyPatchArguments,
     renderShell: "self",
     renderCall(args, theme, context) {

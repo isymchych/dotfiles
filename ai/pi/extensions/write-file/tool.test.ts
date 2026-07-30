@@ -48,8 +48,16 @@ function getTextOutput(result: WriteFileToolResult): string {
   return result.content[0].text;
 }
 
+function assertOpenAiStrictRequiredProperties(schema: typeof writeFileSchema): void {
+  assert.deepEqual([...schema.required].sort(), Object.keys(schema.properties).sort());
+}
+
 test("tool schema remains a top-level object for Pi registration", () => {
   assert.equal(writeFileSchema.type, "object");
+});
+
+test("write_file strict schema requires every declared property", () => {
+  assertOpenAiStrictRequiredProperties(writeFileSchema);
 });
 
 test("write_file creates a new file and parent directories", async (t) => {

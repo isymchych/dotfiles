@@ -22,18 +22,21 @@ import {
 import { Text } from "@earendil-works/pi-tui";
 import { Type, type Static } from "typebox";
 
-export const shellToolSchema = Type.Object({
-  command: Type.String({ description: "Bash command to execute" }),
-  timeout: Type.Optional(
-    Type.Number({ description: "Timeout in seconds (optional, no default timeout)" }),
-  ),
-  cwd: Type.Optional(
-    Type.String({
-      description:
-        "Working directory for this command. Relative paths resolve from the session working directory.",
-    }),
-  ),
-});
+export const shellToolSchema = Type.Object(
+  {
+    command: Type.String({ description: "Bash command to execute" }),
+    timeout: Type.Optional(
+      Type.Number({ description: "Timeout in seconds (optional, no default timeout)" }),
+    ),
+    cwd: Type.Optional(
+      Type.String({
+        description:
+          "Working directory for this command. Relative paths resolve from the session working directory.",
+      }),
+    ),
+  },
+  { additionalProperties: false },
+);
 
 type ShellToolParams = Static<typeof shellToolSchema>;
 

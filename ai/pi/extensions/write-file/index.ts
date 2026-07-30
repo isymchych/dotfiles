@@ -20,6 +20,8 @@ import {
   type WriteFileToolDetails,
 } from "./tool.ts";
 
+const STRICT_JSON_SCHEMA_SAMPLING = { type: "json_schema", strict: "prefer" } as const;
+
 function pluralize(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
@@ -104,6 +106,7 @@ export default function writeFileExtension(pi: ExtensionAPI): void {
       "Use apply_patch instead for localized edits, moves, deletes, or multi-file patch-style changes.",
     ],
     parameters: writeFileSchema,
+    constrainedSampling: STRICT_JSON_SCHEMA_SAMPLING,
     renderCall,
     renderResult(result, options, theme, context) {
       const text =
