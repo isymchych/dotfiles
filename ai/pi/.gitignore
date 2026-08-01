@@ -3,5 +3,6 @@ auth.json
 sessions/
 mcp-cache.json
 trust.json
+models-store.json
 
 node_modules/

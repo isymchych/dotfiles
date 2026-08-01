@@ -63,6 +63,22 @@ test("renderWindowLine and renderStatusLines produce the expected layout", () =>
   ]);
 });
 
+test("renderStatusLines omits unavailable usage windows", () => {
+  const lines = renderStatusLines(
+    {
+      planType: "pro",
+      primary: { usedPercent: 20, windowSeconds: 604_800, resetsAt: 3_601_000 },
+      fetchedAt: 1_000,
+    },
+    1_000,
+  );
+
+  assert.deepEqual(lines, [
+    "OpenAI Codex (pro)",
+    "weekly limit: [████████████████    ] 80% left (resets in 1h)",
+  ]);
+});
+
 test("renderUsageSummary produces compact account-list text", () => {
   const summary = renderUsageSummary(
     {

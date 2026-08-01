@@ -161,14 +161,17 @@ export function renderStatusLines(snapshot: StatusSnapshot, now = Date.now()): s
     statusBits.push("limit reached");
   }
 
-  const primaryLabel = describeWindow(snapshot.primary?.windowSeconds);
-  const secondaryLabel = describeWindow(snapshot.secondary?.windowSeconds);
-  const labelWidth = Math.max(primaryLabel.length, secondaryLabel.length);
+  const windows = [snapshot.primary, snapshot.secondary].filter(
+    (window): window is LimitWindow => window !== undefined,
+  );
+  const labels = windows.map((window) => describeWindow(window.windowSeconds));
+  const labelWidth = labels.reduce((width, label) => Math.max(width, label.length), 0);
 
   const lines = [
     header,
-    renderWindowLine(primaryLabel, snapshot.primary, labelWidth, now),
-    renderWindowLine(secondaryLabel, snapshot.secondary, labelWidth, now),
+    ...windows.map((window) =>
+      renderWindowLine(describeWindow(window.windowSeconds), window, labelWidth, now),
+    ),
   ];
 
   const formattedPlan = formatPlan(snapshot.accountPlan ?? snapshot.planType);
