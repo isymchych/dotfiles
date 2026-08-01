@@ -19,6 +19,7 @@
     "./extensions/compact-tool-output/index.ts",
     "./extensions/context/index.ts",
     "./extensions/fuzzy-at-file-autocomplete/index.ts",
+    "./extensions/model-slots/index.ts",
     "./extensions/draft-stash/index.ts",
     "./extensions/openai-codex/index.ts",
     "./extensions/personal-context/index.ts",

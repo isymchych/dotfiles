@@ -1,10 +1,23 @@
 ---
-description: Review code for high-impact risks and actionable fixes
+description: Review a diff, file, or pasted code for high-impact bugs
+argument-hint: "[diff|commit|file|snippet]"
 ---
 
-Review the requested change set: **$ARGUMENTS**.
+Review this code target: **$ARGUMENTS**.
 
-Resolve `$ARGUMENTS` into the exact diff to review. Review only changes in that diff. Do not report pre-existing issues outside it.
+The target may be a git diff, a commit or range, a file path, or pasted code.
+
+First classify the target:
+
+- **Diff target**: git refs, commit ranges, or flags such as `--staged`, `--unstaged`, and `--working-tree`.
+- **File target**: one or more existing file paths.
+- **Snippet target**: pasted code or an instruction containing code.
+
+If the target is ambiguous, prefer an existing file path over a git ref. If it is still ambiguous, ask one concise clarification question before reviewing.
+
+For diff targets, resolve `$ARGUMENTS` into the exact diff to review. Review only changes in that diff. Do not report pre-existing issues outside it.
+
+For file and snippet targets, review only the provided code. Do not assume missing surrounding context. Do not report missing imports, callers, tests, or integration behavior unless the provided code makes the bug clear.
 
 Accepted examples:
 
@@ -16,15 +29,18 @@ Accepted examples:
 - `--unstaged` — unstaged changes only
 - `--working-tree` — all uncommitted changes
 - `<commit>` — one specific commit
+- `src/example.ts` — current file contents
+- pasted function or class — provided code only
 
-Review the patch and report only clear, actionable bugs.
+Review the target and report only clear, actionable bugs.
 
 Prefer more specific instructions over these defaults.
 
 Flag an issue only when it is:
 
 - a real bug with meaningful impact
-- introduced by this patch
+- introduced by this patch when reviewing a diff
+- present in the provided code when reviewing a file or snippet
 - discrete and fixable
 - likely something the author would want to fix
 - supported by a concrete affected case, not speculation
@@ -52,4 +68,4 @@ Priority guide:
 - P2: normal
 - P3: low priority
 
-Consider the patch correct if it introduces no breaking or blocking issues. Ignore nits like style, formatting, typos, and docs in that judgment..
+Consider the target correct if it has no clear breaking or blocking issues under the selected review mode. Ignore nits like style, formatting, typos, and docs in that judgment.
