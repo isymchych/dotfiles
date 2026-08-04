@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# zsh-completion: completions/_mb-no-args
 
 BG_COLOR="073642"
 swaylock -c $BG_COLOR -f -e --font-size 28 --indicator-radius 100 --layout-bg-color $BG_COLOR --show-failed-attempts

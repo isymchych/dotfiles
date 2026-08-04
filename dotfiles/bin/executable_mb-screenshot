@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# zsh-completion: completions/_mb-screenshot
+
 set -euo pipefail
 
 screenshots_dir="$HOME/temp/screenshots"

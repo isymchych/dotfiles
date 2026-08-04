@@ -14,6 +14,8 @@
     "tilth@0.9.0": true
   },
   "scripts": {
+    "check": "npm run check:completions && npm run fmt:check && npm run lint && npm run typecheck && npm test",
+    "check:completions": "node scripts/scripts/check-completions.ts",
     "fmt": "oxfmt ai/pi ai/skills packages/shared scripts",
     "fmt:check": "oxfmt --check ai/pi ai/skills packages/shared scripts",
     "lint": "oxlint ai/pi ai/skills packages/shared scripts",

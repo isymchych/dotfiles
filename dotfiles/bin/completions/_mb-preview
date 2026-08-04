@@ -1,0 +1,11 @@
+#compdef mb-preview
+
+_mb-preview() {
+  _arguments -s \
+    '(-b --open)'{-b,--open}'[open the generated HTML]' \
+    '(-o --out)'{-o,--out}'[write HTML to a file]:output file:_files' \
+    '--title=[set the HTML document title]:title:' \
+    '--base-dir=[resolve relative assets from a directory]:directory:_directories' \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:Markdown input file:_files -g "*.md"'
+}

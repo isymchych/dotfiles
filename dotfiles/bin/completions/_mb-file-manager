@@ -1,0 +1,30 @@
+#compdef mb-file-manager
+
+_mb-file-manager() {
+  local context state state_descr line
+  typeset -A opt_args
+
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:command:->command' \
+    '*::path:->path'
+
+  case $state in
+    command)
+      _values 'mb-file-manager command' \
+        'open[open paths in the file manager]' \
+        'reveal[reveal paths in the file manager]' \
+        'service-filemanager1[run the FileManager1 D-Bus service]' \
+        'help[show help]' \
+        '--help[show help]' \
+        '-h[show help]'
+      ;;
+    path)
+      case ${words[2]} in
+        open|reveal)
+          _path_files
+          ;;
+      esac
+      ;;
+  esac
+}

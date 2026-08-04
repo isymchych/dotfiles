@@ -14,7 +14,7 @@
 - `dotfiles/dot_*` map to dotfiles in `$HOME`; keep the prefix to control target paths.
 - Chezmoi ignores source files whose names already start with `.`; if the target begins with `.`, name the source `dot_<name>` (e.g. `dot_yas-parents`).
 - `dotfiles/dot_config/` mirrors `~/.config`; prefer `.tmpl` variants when values differ per host.
-- `dotfiles/bin/` holds `executable_*` shims that chezmoi installs to `~/.local/bin`.
+- `dotfiles/bin/` maps to `~/bin`; name command shims `executable_<tool>` so chezmoi marks them executable on apply.
 - `run_once_*.sh` and `run_onchange_*.sh.tmpl` in `dotfiles/` provision hosts; guard them with OS checks and make them idempotent.
 
 ## Build, Test, and Development Commands
@@ -83,6 +83,7 @@
 - When runtime helpers are needed by multiple workspaces, put them in an explicit workspace package such as `packages/shared` rather than a root-level `lib/`, so dependency ownership and imports remain clear.
 - For local npm workspace dependencies, use the package's declared version such as `"0.0.0"`; do not use the `workspace:` protocol because npm does not support it.
 - For Pi constrained tool sampling, enable strict JSON-schema sampling only on schemas compatible with provider strict mode; OpenAI strict tools require every declared property to be listed in `required`, so TypeBox optional properties need nullable-normalization or must remain non-strict.
+- Keep Zsh completion functions for `mb-*` commands in `dotfiles/bin/completions/`; `~/bin/completions` was added to `fpath` before `compinit` so ChezMoi installs and Zsh discovers them together.
 
 ## Pi Configuration
 

@@ -81,6 +81,7 @@ bindkey "^[[A" up-line-or-beginning-search   # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
 # Tab completion
+fpath=("$HOME/bin/completions" $fpath)
 autoload -Uz compinit && compinit
 setopt complete_in_word         # cd /ho/sco/tm<TAB> expands to /home/scott/tmp
 setopt auto_menu                # show completion menu on succesive tab presses

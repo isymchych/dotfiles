@@ -1,0 +1,5 @@
+#compdef mb-colorpicker mb-exit mb-lock-screen mb-run-app
+
+_mb-no-args() {
+  _nothing
+}

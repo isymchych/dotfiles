@@ -1,0 +1,72 @@
+#compdef mb-spotify
+
+_mb_spotify_command() {
+  local index=2
+
+  while (( index < CURRENT )); do
+    case ${words[index]} in
+      auth|list|export|export-liked|import)
+        print -r -- "${words[index]}"
+        return
+        ;;
+      --client-id|--playlist|--out|--in)
+        (( index += 2 ))
+        continue
+        ;;
+    esac
+    (( index += 1 ))
+  done
+}
+
+_mb-spotify() {
+  local command context state state_descr line
+  typeset -A opt_args
+
+  command=$(_mb_spotify_command)
+
+  _arguments -C -s \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:command:->command' \
+    '*::argument:->argument'
+
+  case $state in
+    command)
+      _values 'mb-spotify command' \
+        'auth[authorize Spotify access]' \
+        'list[list playlists]' \
+        'export[export a playlist]' \
+        'export-liked[export liked tracks]' \
+        'import[import a playlist file]'
+      ;;
+    argument)
+      case $command in
+        auth)
+          _arguments \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '--client-id=[Spotify application client ID]:client ID:'
+          ;;
+        list)
+          _arguments '(-h --help)'{-h,--help}'[show help]'
+          ;;
+        export)
+          _arguments \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '--playlist=[Spotify playlist ID]:playlist ID:' \
+            '--out=[write playlist JSON to a file]:output file:_files'
+          ;;
+        export-liked)
+          _arguments \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '--out=[write playlist JSON to a file]:output file:_files'
+          ;;
+        import)
+          _arguments \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '--in=[read playlist JSON from a file]:input file:_files' \
+            '--playlist=[import into an existing playlist]:playlist ID:' \
+            '--create[create a new playlist]'
+          ;;
+      esac
+      ;;
+  esac
+}

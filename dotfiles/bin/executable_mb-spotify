@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# zsh-completion: completions/_mb-spotify
+
 set -euo pipefail
 
 : "${ACCEL_OS:?ACCEL_OS must point at repo root}"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# zsh-completion: completions/_mb-no-args
 
 cases="lock screen
 logout

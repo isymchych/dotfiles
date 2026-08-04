@@ -1,0 +1,140 @@
+#compdef mb-worktree
+
+_mb_worktree_repo() {
+  local index=2 word
+
+  while (( index < CURRENT )); do
+    word=${words[index]}
+    case $word in
+      --repo)
+        (( index + 1 < CURRENT )) && print -r -- "${words[index + 1]}"
+        return
+        ;;
+      --repo=*)
+        print -r -- "${word#--repo=}"
+        return
+        ;;
+    esac
+    (( index += 1 ))
+  done
+}
+
+_mb_worktree_refs() {
+  local repo
+  local -a refs
+  repo=$(_mb_worktree_repo)
+  refs=("${(@f)$(git -C "${repo:-.}" for-each-ref --format='%(refname:short)' refs/heads refs/remotes refs/tags 2>/dev/null)}")
+  compadd -a refs
+}
+
+_mb_worktree_targets() {
+  local repo
+  local -a targets
+  repo=$(_mb_worktree_repo)
+  targets=(
+    "${(@f)$(git -C "${repo:-.}" worktree list --porcelain 2>/dev/null | awk '
+      /^worktree / { print substr($0, 10) }
+      /^branch refs\/heads\// { print substr($0, 19) }
+    ')}"
+  )
+  compadd -a targets
+}
+
+_mb_worktree_command() {
+  local index=2
+
+  while (( index < CURRENT )); do
+    case ${words[index]} in
+      list|checkout|new-branch|new-from-main|new-from-pr|remove)
+        print -r -- "${words[index]}"
+        return
+        ;;
+      --repo|--path|--from)
+        (( index += 2 ))
+        continue
+        ;;
+    esac
+    (( index += 1 ))
+  done
+}
+
+_mb-worktree() {
+  local command context state state_descr line
+  typeset -A opt_args
+
+  command=$(_mb_worktree_command)
+
+  _arguments -C -s \
+    '--repo=[target repository]:repository:_directories' \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:command:->command' \
+    '*::argument:->argument'
+
+  case $state in
+    command)
+      _values 'mb-worktree command' \
+        'list[list linked worktrees]' \
+        'checkout[create a worktree from an existing ref]' \
+        'new-branch[create a branch worktree from a ref]' \
+        'new-from-main[create a branch worktree from origin/main]' \
+        'new-from-pr[create a worktree from a pull request]' \
+        'remove[remove a worktree]'
+      ;;
+    argument)
+      case $command in
+        list)
+          _arguments \
+            '--repo=[target repository]:repository:_directories' \
+            '--json[emit JSON]' \
+            '(-h --help)'{-h,--help}'[show help]'
+          ;;
+        checkout)
+          _arguments \
+            '--repo=[target repository]:repository:_directories' \
+            '--path=[target worktree directory]:directory:_directories' \
+            '--dry-run[print resolved actions without changing anything]' \
+            '--no-setup[skip setup-worktree.sh]' \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '1:Git ref:_mb_worktree_refs'
+          ;;
+        new-branch)
+          _arguments \
+            '--repo=[target repository]:repository:_directories' \
+            '--from=[base Git ref]:Git ref:_mb_worktree_refs' \
+            '--path=[target worktree directory]:directory:_directories' \
+            '--dry-run[print resolved actions without changing anything]' \
+            '--no-setup[skip setup-worktree.sh]' \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '1:new branch name:'
+          ;;
+        new-from-main)
+          _arguments \
+            '--repo=[target repository]:repository:_directories' \
+            '--path=[target worktree directory]:directory:_directories' \
+            '--dry-run[print resolved actions without changing anything]' \
+            '--no-setup[skip setup-worktree.sh]' \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '1:new branch name:'
+          ;;
+        new-from-pr)
+          _arguments \
+            '--repo=[target repository]:repository:_directories' \
+            '--path=[target worktree directory]:directory:_directories' \
+            '--dry-run[print resolved actions without changing anything]' \
+            '--no-setup[skip setup-worktree.sh]' \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '1:pull request URL or number:'
+          ;;
+        remove)
+          _arguments \
+            '--repo=[target repository]:repository:_directories' \
+            '--delete-branch[delete the branch after removing its worktree]' \
+            '--dry-run[print resolved actions without changing anything]' \
+            '--force[skip confirmation and force deletion]' \
+            '(-h --help)'{-h,--help}'[show help]' \
+            '1:worktree branch or path:_mb_worktree_targets'
+          ;;
+      esac
+      ;;
+  esac
+}

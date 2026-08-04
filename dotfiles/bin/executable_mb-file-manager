@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# zsh-completion: completions/_mb-file-manager
 
 import subprocess
 import sys
