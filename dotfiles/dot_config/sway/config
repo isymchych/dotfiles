@@ -281,6 +281,7 @@ for_window [app_id="org.mozilla.Thunderbird"] border pixel $border
 for_window [class="^jetbrains-idea"]     border pixel $border
 for_window [class="^jetbrains-webstorm"] border pixel $border
 for_window [class="^jetbrains-studio"]   border pixel $border
+for_window [app_id="^jetbrains-studio"]   border pixel $border
 
 for_window [app_id="liferea"]   border pixel $border
 for_window [app_id="gsimplecal"] border pixel $border

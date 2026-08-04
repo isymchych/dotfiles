@@ -1,5 +1,6 @@
 ---
 description: Safely clone an untrusted Git repository into a temp dir
+argument-hint: "<git project url>"
 ---
 
 Clone **$ARGUMENTS** into a fresh temp directory for later user-directed inspection.

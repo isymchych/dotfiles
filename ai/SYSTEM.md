@@ -209,6 +209,7 @@ Conditions`.
 - I prefer building composable "generic" pieces of code, and use them for
   implementing business logic (like in Clojure)
 - I prefer seeing evidence of verification steps
+- I prefer building around standards and documented protocols
 
 - pursue low coupling and high cohesion
 - Prefer low complexity over time, not small diffs.
