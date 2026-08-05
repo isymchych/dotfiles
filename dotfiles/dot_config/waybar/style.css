@@ -273,6 +273,17 @@ window#waybar {
   padding-bottom: 8px;
 }
 
+#custom-pi-agents {
+  color: @highlight-color;
+  font-size: 1.2em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+#custom-pi-agents.pi-agents--idle {
+  padding: 0;
+}
+
 #custom-run-app {
   font-size: 1.7em;
   padding-top: 8px;

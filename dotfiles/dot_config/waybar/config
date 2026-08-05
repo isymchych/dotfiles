@@ -16,6 +16,7 @@
     // "custom/pomodoro"
   ],
   "modules-right": [
+    "custom/pi-agents",
     "systemd-failed-units",
     "cpu",
     "memory",
@@ -163,6 +164,12 @@
   "systemd-failed-units": {
     "format": "✗ {nr_failed}",
     "format-ok": "✓"
+  },
+  "custom/pi-agents": {
+    "exec": "~/.config/waybar/pi_agents.sh",
+    "interval": 3,
+    "return-type": "json",
+    "format": "{text}"
   },
   "custom/run-app": {
     "format": "󰍜",

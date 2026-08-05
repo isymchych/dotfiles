@@ -4,7 +4,7 @@
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "medium",
   "autocompleteMaxVisible": 16,
   "skills": [
@@ -25,6 +25,7 @@
     "./extensions/personal-context/index.ts",
     "./extensions/preview/index.ts",
     "./extensions/response-status/index.ts",
+    "./extensions/waybar-agent-status/index.ts",
     "./extensions/shell-tool/index.ts",
     "./extensions/tilth-cli/index.ts",
     "./extensions/handoff-summary/index.ts",

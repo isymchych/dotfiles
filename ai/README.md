@@ -27,6 +27,7 @@ add to sysprompt:
 
 - commit skill script should have an option to bypass hooks
 - local db skill should allow query on stdin
+- read tool should work with folders (list folder with details, maybe recursively,)
 
 - based on https://github.com/can1357/oh-my-pi
 - AST tools: ast_grep and ast_edit for syntax-aware code search and codemods via ast-grep https://github.com/code-yeongyu/pi-ast-grep/tree/main

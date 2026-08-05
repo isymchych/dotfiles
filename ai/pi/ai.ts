@@ -216,12 +216,10 @@ const fetchAccountUsageSummaries = async (
   accounts: readonly AccountInfo[],
 ): Promise<Map<string, string>> => {
   const entries = await Promise.all(
-    accounts.map(
-      async (account): Promise<readonly [string, string]> => [
-        account.id,
-        await fetchAccountUsageSummary(account),
-      ],
-    ),
+    accounts.map(async (account): Promise<readonly [string, string]> => [
+      account.id,
+      await fetchAccountUsageSummary(account),
+    ]),
   );
   return new Map(entries);
 };
