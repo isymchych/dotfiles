@@ -9,9 +9,15 @@ short kebab-case topic.
 Focus on serializing the current agent state: important context, nuances,
 decisions, assumptions, unresolved questions, plans, risks, and references needed
 to continue the work without prior chat history.
+If the user provided a topic or next-session focus, tailor the handoff around
+that focus while preserving relevant current state.
 
 Do not redo broad discovery. Only inspect files or git state when needed to
 confirm exact paths, names, current changes, or validation results.
+Do not duplicate content already captured in durable artifacts such as specs,
+plans, ADRs, issues, commits, or diffs; reference them by path or URL instead.
+Redact sensitive information such as API keys, tokens, passwords, secrets, and
+personally identifiable information.
 
 Include:
 

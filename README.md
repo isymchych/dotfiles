@@ -21,6 +21,7 @@ just bootstrap
 - `wget` — HTTP(S) downloads
 - `htop` — system monitor
 - `lazygit` — TUI for git
+- `git-spr` — stacked pull-request workflow
 - `delta` — git diff viewer
 - `difftastic` — syntax-aware diffs
 - `mergiraf` — semantic merge driver
@@ -31,6 +32,10 @@ just bootstrap
 ## Optional CLI tools
 
 - `ast-grep` — structural code search/rewrite
+
+## Git workflow
+
+- [Retarget a Git SPR stack](docs/git-spr-retargeting.md)
 
 ## Zsh setup
 

@@ -77,6 +77,7 @@ const HANDOFF_RULES = `Include:
 - Critical commands, examples, references, or risks needed to continue
 - Validation performed or still needed
 - The next concrete action or command, when known
+- Durable artifacts by path or URL when they already capture detailed context
 
 Preserve:
 - Current state of the work
@@ -90,6 +91,8 @@ Discard:
 - Context from unrelated previous tasks
 
 Be concise, structured, and focused on helping another LLM continue without duplicating work.
+Do not duplicate content already captured in specs, plans, ADRs, issues, commits, or diffs; reference those artifacts instead.
+Redact sensitive information such as API keys, tokens, passwords, secrets, and personally identifiable information.
 Preserve exact file paths, function names, commands, and error messages. Mark unknowns explicitly.
 Separate observed facts, inferences, and assumptions when ambiguity matters.`;
 

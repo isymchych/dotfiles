@@ -134,6 +134,7 @@ Makes targeted fixes based on evidence
 - setup project constitution (standards, principles) in AGENTS.md - check/use Github speckit
 - Keep lots of small proof-of-concept repos (often “just enough code” to demonstrate a technique). With agents that can search and fetch code, you can point them at your own repos/examples (or even have them clone them) and say “build X using patterns from Y,” meaning you only need to figure out a trick once—then reuse it forever.
 - Put the rationale where the agent can read it, especially for decisions that would be expensive to get wrong.
+- prompts/skills/docs shouldn't be unnecessarily rigid; avoid forced limitations (i.e. 'provide 2-3 options')
 
 # USEFUL QUESTIONS
 
@@ -199,19 +200,6 @@ Makes targeted fixes based on evidence
 
 ## Docs
 
-- [Agent Memory Formulation](docs/agent_memory_formulation.md)
-- [Principles](docs/principles.md)
-- [Root Cause Analysis](docs/root_cause_analysis.md)
-
-- [Architecture Guidelines](docs/architecture_guidelines.md)
-- [Code Cleanup Guidelines](docs/code_cleanup_guidelines.md)
-- [Code Review Guidelines](docs/code_review_guidelines.md)
-- [Coding Style Guidelines](docs/coding_style_guidelines.md)
-- [Coding Workflow Principles](docs/coding_workflow_principles.md)
-
-- [Git SPR](docs/git-spr.md)
-- [OpenAI Prompt Guidelines](docs/openai_prompt_guidelines.md)
-- [Plan Mode Requirements](docs/plan_mode_requirements.md)
-- [Plan Mode Best Practices](docs/plan_mode_best_practices.md)
-- [Plan Mode Spec](docs/plan_mode_spec.md)
-- [Explore Mode Spec](docs/explore_mode_spec.md)
+- [Agent Operating Model](docs/agent_operating_model.md)
+- [Engineering Guidelines](docs/engineering_guidelines.md)
+- [Prompting and Memory](docs/prompting_and_memory.md)
