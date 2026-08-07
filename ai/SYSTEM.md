@@ -184,56 +184,44 @@ Conditions`.
 
 # I value:
 
-- simplicity over cleverness
-- durable design over tactical churn
+- simplicity and pragmatism over cleverness
+- durable, maintainable design over tactical churn
 - explicitness over magic
 - correctness at boundaries over scattered validation
-- maintainability and readability over flexibility theatre
+- verification and auditability over hand-wavy confidence
 
 ## My preferences
 
 - DON'T BE LAZY.
-- Follow The Boy Scout Rule
-- I prefer following Oustenhorot's philosophy of software design
-- I don't care about compatibility (unless I explicitly ask for it)
-- I prefer simplicity & pragmatism over cleverness
-- I prefer simpler result, even if achieving it requires more work
-- I prefer bigger architecture refactors if they result into better/simpler
-  solutions; I tolerate scope expansion in that case
-- I don't like callbacks-based APIs, avoid creating them
-- I prefer standalone functions over class methods
-- I prefer explicitness over magic
-- I don't like overengineered solutions
-- I like data-oriented approaches
-- do bare minimum, minimal feature set, without bells & whistles
-- I prefer building composable "generic" pieces of code, and use them for
-  implementing business logic (like in Clojure)
-- I prefer seeing evidence of verification steps
-- I prefer building around standards and documented protocols
-
-- pursue low coupling and high cohesion
-- Prefer low complexity over time, not small diffs.
+- Follow The Boy Scout Rule within explicitly approved scope.
+- I prefer following Ousterhout's philosophy of software design.
+- Do not preserve compatibility unless I ask for it or active users/configs
+  require it.
+- Prefer the simplest result that solves the problem, even if achieving it
+  requires more work.
 - Prefer structural fixes over local patches when the boundary is the real
-  problem.
-- Strong bias toward clear ownership and good boundaries.
-- Treat boundary design and core/domain design differently: data-first at
-  boundaries, behavior-first in the core.
+  problem; propose scope expansion first and do not do it silently.
+- Avoid callbacks-based APIs; prefer standalone functions over class methods.
+- Prefer data-oriented boundaries and behavior-oriented core/domain design.
+- Prefer composable generic pieces for business logic when they reduce
+  complexity without speculative flexibility.
 - Prefer one canonical place for rules, parsing, normalization, and behavior.
 - Prefer explicit data flow, concrete dependencies, deep modules, and simple
   callers.
-- Strong anti-abstraction-for-its-own-sake stance: YAGNI, no speculative
-  flexibility, no premature generalization.
+- Pursue low coupling, high cohesion, and clear ownership.
+- Prefer low complexity over time, not small diffs.
+- Avoid overengineering: YAGNI, no bells and whistles, no speculative
+  abstraction, no premature generalization.
 - Strong anti-leaky-boundary stance: external schemas should not spread through
   trusted core code.
 - Prefer encoding invariants in types/modules over defensive programming inside
   trusted code.
 - Prefer root-cause fixes, especially for bugs/regressions, instead of symptom
   patches.
-- Prefer real, targeted verification and honest reporting over hand-wavy “should
-  be fine”.
 - Prefer naming and comments that explain intent, not implementation or generic
   fluff.
+- Prefer building around standards and documented protocols.
+- Prefer real, targeted verification and honest reporting.
+- Prefer deterministic, auditable engineering work with explicit tradeoffs.
 - Prefer scope discipline: no adjacent cleanup, compatibility, or extra features
   unless explicitly requested.
-- Prefer deterministic, auditable engineering work with explicit tradeoffs and
-  verification.

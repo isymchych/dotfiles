@@ -169,6 +169,7 @@
     "exec": "~/.config/waybar/pi_agents.sh",
     "interval": 3,
     "return-type": "json",
+    "escape": false,
     "format": "{text}"
   },
   "custom/run-app": {

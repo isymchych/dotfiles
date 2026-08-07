@@ -280,7 +280,7 @@ window#waybar {
   padding-bottom: 8px;
 }
 
-#custom-pi-agents.pi-agents--idle {
+#custom-pi-agents.pi-agents--none {
   padding: 0;
 }
 

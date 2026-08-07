@@ -1,9 +1,5 @@
 # TODO
 
-- plan execution - stop and ask instead of making assumptions; plan should be unambiguous
-- switch thinking modes with alt-1-2-3-4-5
-- add grill-me prompt; grill-with-docs
-
 - review from DDD point of view
 - Pipeline / Workflow tool / Chain of subagent calls - Directed Acyclic Graph, human in the loop confirmation
   - https://github.com/nicobailon/pi-subagents
@@ -46,15 +42,11 @@ add to sysprompt:
 
 > I’m grabbing the final line references for the changed renderer so the report points to exact locations.
 
-DESIGN/BRAINSTORM (build PRD/SPEC/roadmap) -> PLAN -> EXECUTE
-
-- decisions must be documented - ADR
-- iterate on high-level plan first, before generating comprehensive plan file
+DESIGN/BRAINSTORM (build PRD/SPEC/roadmap) -> ARCHITECTURE -> PROGRAM DESIGN -> PLAN -> EXECUTE
 
 - codemods
 - common failure mode: “helpful overreach.”
 
-automatically ask - do you have any questions?
 don't go to the next step without confirmation
 
 # AI
@@ -107,12 +99,13 @@ Makes targeted fixes based on evidence
 # USEFUL PATTERNS / IDEAS
 
 - "distill"/"compress"/"high signal"
-- chain-of-thought reasoning
 - ~~human-in-the-loop~~ **better?** agent-in-the-loop
 - Critic(/Verifier) pass; argue against itself
 - **build pipelines** even if the end result is an AGENTS.md or SKILL.md - keep "source doc" -> ask agent to build a skill based on it -> improve/compress/"distill"
 - (self)-checklists; approval gates
 - scoring rubrics
+- iterate on high-level plan first, before generating comprehensive plan file
+- decisions must be documented - ADR
 - error log
 - red/green TDD
 - require evidence
@@ -135,6 +128,7 @@ Makes targeted fixes based on evidence
 - Keep lots of small proof-of-concept repos (often “just enough code” to demonstrate a technique). With agents that can search and fetch code, you can point them at your own repos/examples (or even have them clone them) and say “build X using patterns from Y,” meaning you only need to figure out a trick once—then reuse it forever.
 - Put the rationale where the agent can read it, especially for decisions that would be expensive to get wrong.
 - prompts/skills/docs shouldn't be unnecessarily rigid; avoid forced limitations (i.e. 'provide 2-3 options')
+- > The most effective AI-assisted learning relies on established learning science: retrieval practice, spaced repetition, testing, desirable difficulty, Socratic questioning, and teaching concepts back in your own words. AI’s advantage is that it can personalize these techniques cheaply and continuously for an individual learner.
 
 # USEFUL QUESTIONS
 

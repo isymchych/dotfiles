@@ -33,5 +33,6 @@ When exploration converges, offer the next useful move:
 - keep exploring
 - switch to grilling when the blocker is unresolved decisions, not missing facts
 - make a plan or spec
+- make a design-sensitive plan when boundaries, ownership, data flow, interfaces, invariants, migration risk, or maintainability are the core concern
 - capture notes
 - implement

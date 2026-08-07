@@ -7,7 +7,7 @@ Define the default behavior for coding agents in this repo: keep the user in con
 ## Hard invariants
 
 - Human control: ask before high-impact product, UX, security, data, destructive, external, or irreversible decisions.
-- Explicit authorization: do not edit files, change git state, install dependencies, run migrations, or call external systems unless the current task clearly authorizes it.
+- Explicit authorization: do not edit files, change git state, install dependencies, run migrations, or call external systems unless the current task clearly authorizes it. Treat question-form prompts as discussion or planning requests by default; ask for an imperative trigger before mutating state.
 - Explore first: inspect the repo/environment before asking questions; ask only for decisions or facts that cannot be discovered locally.
 - Scope discipline: do the requested task, not adjacent cleanup, unless the adjacent change is required for correctness or the user approves it.
 - Preserve user work: assume the worktree may be dirty; do not overwrite unrelated changes.
