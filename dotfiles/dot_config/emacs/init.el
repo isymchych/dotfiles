@@ -41,7 +41,7 @@
 
 
 (if (native-comp-available-p)
-    (message "Native compilation enabled!")
+  (message "Native compilation enabled!")
   (warn "Native compilation not enabled!"))
 
 
@@ -49,7 +49,7 @@
 
 ;; this is needed to install use-package
 (add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/") t)
+  '("melpa" . "https://melpa.org/packages/") t)
 
 (setq package-enable-at-startup nil)
 (setq package-install-upgrade-built-in t)
@@ -84,9 +84,9 @@
 
 ;; keep menu bar enabled only on mac since it doesn't take vertical space
 (if (and
-     (fboundp 'menu-bar-mode)
-     mb-is-mac-os)
-    (menu-bar-mode t))
+      (fboundp 'menu-bar-mode)
+      mb-is-mac-os)
+  (menu-bar-mode t))
 
 ;; Terminal mouse support
 (unless window-system
@@ -95,67 +95,67 @@
   (defun track-mouse (e)))
 
 (setq-default
- ;; scroll one line at a time (less "jumpy" than defaults)
- mouse-wheel-scroll-amount '(2 ((shift) . 2))
- ;; don't accelerate scrolling
- mouse-wheel-progressive-speed nil
- ;; scroll window under mouse
- mouse-wheel-follow-mouse 't)
+  ;; scroll one line at a time (less "jumpy" than defaults)
+  mouse-wheel-scroll-amount '(2 ((shift) . 2))
+  ;; don't accelerate scrolling
+  mouse-wheel-progressive-speed nil
+  ;; scroll window under mouse
+  mouse-wheel-follow-mouse 't)
 
 
 (setq-default
- frame-title-format '(buffer-file-name "%f" ("%b"))
+  frame-title-format '(buffer-file-name "%f" ("%b"))
 
- ;; avoid some initial frame resizing to speed up startup
- frame-inhibit-implied-resize t
+  ;; avoid some initial frame resizing to speed up startup
+  frame-inhibit-implied-resize t
 
- ;; Don’t compact font caches during GC.
- inhibit-compacting-font-caches t
+  ;; Don’t compact font caches during GC.
+  inhibit-compacting-font-caches t
 
- ;; no beep and blinking
- visible-bell       nil
- ring-bell-function 'ignore
+  ;; no beep and blinking
+  visible-bell       nil
+  ring-bell-function 'ignore
 
- ;; keyboard scroll one line at a time
- scroll-step 1
+  ;; keyboard scroll one line at a time
+  scroll-step 1
 
- ;; display column numbers in status line
- column-number-mode t
- ;; display line numbers in status line
- line-number-mode t
- ;; max line number to show
- line-number-display-limit 999999
- ;; max line width after which you will see ??? instead of line number
- line-number-display-limit-width 999999
+  ;; display column numbers in status line
+  column-number-mode t
+  ;; display line numbers in status line
+  line-number-mode t
+  ;; max line number to show
+  line-number-display-limit 999999
+  ;; max line width after which you will see ??? instead of line number
+  line-number-display-limit-width 999999
 
- ;; draw underline lower
- x-underline-at-descent-line t
+  ;; draw underline lower
+  x-underline-at-descent-line t
 
- ;; Show keystrokes in progress
- echo-keystrokes 0.1
+  ;; Show keystrokes in progress
+  echo-keystrokes 0.1
 
- ;; hide empty lines after buffer end
- indicate-empty-lines nil
+  ;; hide empty lines after buffer end
+  indicate-empty-lines nil
 
- font-lock-maximum-decoration t
- color-theme-is-global t
+  font-lock-maximum-decoration t
+  color-theme-is-global t
 
- ;; Don't defer screen updates when performing operations.
- redisplay-dont-pause t
+  ;; Don't defer screen updates when performing operations.
+  redisplay-dont-pause t
 
- ;; skip duplicates from the kill-ring to simplify yanking
- kill-do-not-save-duplicates t
+  ;; skip duplicates from the kill-ring to simplify yanking
+  kill-do-not-save-duplicates t
 
- ;; Don't prompt for confirmation when we create a new file or buffer (assume the
- ;; user knows what they're doing).
- confirm-nonexistent-file-or-buffer nil
+  ;; Don't prompt for confirmation when we create a new file or buffer (assume the
+  ;; user knows what they're doing).
+  confirm-nonexistent-file-or-buffer nil
 
- ;; middle-click paste at point, not at click
- mouse-yank-at-point t
+  ;; middle-click paste at point, not at click
+  mouse-yank-at-point t
 
- ;; do not break line even if its too long
- truncate-lines t
- truncate-partial-width-windows t)
+  ;; do not break line even if its too long
+  truncate-lines t
+  truncate-partial-width-windows t)
 
 ;; use keyboard dialogs instead of popups
 (setq use-dialog-box nil)
@@ -192,30 +192,30 @@
 (put 'narrow-to-region          'disabled nil)
 
 (setq-default
- ;; start scratch in text mode (usefull to get a faster Emacs load time
- ;; because it avoids autoloads of elisp modes)
- initial-major-mode 'text-mode
+  ;; start scratch in text mode (usefull to get a faster Emacs load time
+  ;; because it avoids autoloads of elisp modes)
+  initial-major-mode 'text-mode
 
- ;; prevent creating backup files
- make-backup-files nil
- ;; prevent creating .save files
- auto-save-list-file-name nil
- ;; prevent auto saving
- auto-save-default nil
- create-lockfiles nil
+  ;; prevent creating backup files
+  make-backup-files nil
+  ;; prevent creating .save files
+  auto-save-list-file-name nil
+  ;; prevent auto saving
+  auto-save-default nil
+  create-lockfiles nil
 
- ;; Always rescan buffer for imenu
- imenu-auto-rescan t
- imenu-flatten t
+  ;; Always rescan buffer for imenu
+  imenu-auto-rescan t
+  imenu-flatten t
 
- ;; Add ukrainian input method
- default-input-method "ukrainian-computer"
+  ;; Add ukrainian input method
+  default-input-method "ukrainian-computer"
 
- ;; set default mode for unknown files
- major-mode 'text-mode
+  ;; set default mode for unknown files
+  major-mode 'text-mode
 
- ;; move files to trash when deleting
- delete-by-moving-to-trash t)
+  ;; move files to trash when deleting
+  delete-by-moving-to-trash t)
 
 ;; Encoding
 (set-language-environment     'utf-8)
@@ -238,26 +238,26 @@
 
 ;; Tabs: use only spaces for indent
 (setq-default
- indent-tabs-mode  nil
- tab-always-indent nil
+  indent-tabs-mode  nil
+  tab-always-indent nil
 
- tab-width          mb-tab-size
- c-basic-offset     mb-tab-size
- py-indent-offset   mb-tab-size)
+  tab-width          mb-tab-size
+  c-basic-offset     mb-tab-size
+  py-indent-offset   mb-tab-size)
 
 (setq-default
- ;; Sentences do not need double spaces to end
- sentence-end-double-space nil
+  ;; Sentences do not need double spaces to end
+  sentence-end-double-space nil
 
- ;; lines should be 80 characters wide, not 72
- fill-column 80)
+  ;; lines should be 80 characters wide, not 72
+  fill-column 80)
 
 
 ;; display margins in terminal emacs
 (unless (display-graphic-p)
   (setq-default
-   right-margin-width 1
-   left-margin-width 1))
+    right-margin-width 1
+    left-margin-width 1))
 
 
 ;; make sure emacs will try to split windows horizontally by default
@@ -307,8 +307,8 @@
 ;; Use rg for grep-find-command
 (with-eval-after-load 'grep
   (grep-apply-setting
-   'grep-find-command
-   '("rg -n -H --no-heading -e '' $(git rev-parse --show-toplevel || pwd)" . 27)))
+    'grep-find-command
+    '("rg -n -H --no-heading -e '' $(git rev-parse --show-toplevel || pwd)" . 27)))
 
 
 
@@ -321,11 +321,11 @@
   "Switch back and forth between current and last buffer in the WINDOW."
   (interactive)
   (cl-destructuring-bind (buf start pos)
-      (or (cl-find (window-buffer window) (window-prev-buffers)
-                   :key #'car :test-not #'eq)
-          (list (other-buffer) nil nil))
+    (or (cl-find (window-buffer window) (window-prev-buffers)
+          :key #'car :test-not #'eq)
+      (list (other-buffer) nil nil))
     (if (not buf)
-        (message "Last buffer not found.")
+      (message "Last buffer not found.")
       (set-window-buffer-start-and-point window buf start pos))))
 
 
@@ -353,25 +353,25 @@
   (interactive)
   (let ((filename (buffer-file-name)))
     (if (not (and filename (file-exists-p filename)))
-        (message "mb: Buffer is not visiting a file!")
+      (message "mb: Buffer is not visiting a file!")
       (let ((new-name (read-file-name "New name: "
-                                      (file-name-directory filename)
-                                      nil
-                                      nil
-                                      (file-name-nondirectory filename))))
+                        (file-name-directory filename)
+                        nil
+                        nil
+                        (file-name-nondirectory filename))))
         (cond
-         ((vc-backend filename) (vc-rename-file filename new-name))
-         (t
-          (rename-file filename new-name t)
-          (set-visited-file-name new-name t t)))))))
+          ((vc-backend filename) (vc-rename-file filename new-name))
+          (t
+            (rename-file filename new-name t)
+            (set-visited-file-name new-name t t)))))))
 
 (defun mb/delete-current-buffer-file ()
   "Remove file connected to current buffer and kill buffer."
   (interactive)
   (let ((filename (buffer-file-name))
-        (buffer (current-buffer)))
+         (buffer (current-buffer)))
     (if (not (and filename (file-exists-p filename)))
-        (ido-kill-buffer)
+      (ido-kill-buffer)
       (when (yes-or-no-p "Are you sure you want to remove this file? ")
         (delete-file filename)
         (kill-buffer buffer)
@@ -394,10 +394,10 @@ narrowed."
   (interactive "P")
   (declare (interactive-only))
   (cond ((and (buffer-narrowed-p) (not p)) (widen))
-        ((region-active-p)
-         (narrow-to-region (region-beginning) (region-end)))
-        ((derived-mode-p 'org-mode) (org-narrow-to-subtree))
-        (t (narrow-to-defun))))
+    ((region-active-p)
+      (narrow-to-region (region-beginning) (region-end)))
+    ((derived-mode-p 'org-mode) (org-narrow-to-subtree))
+    (t (narrow-to-defun))))
 
 (defun mb/display-ansi-colors ()
   "Replace ANSI escape chars with real colors in current buffer."
@@ -415,13 +415,49 @@ narrowed."
   (revert-buffer t t))
 
 
+(defun mb/preview-markdown-buffer ()
+  "Preview the current buffer as Markdown with `mb-preview'."
+  (interactive)
+  (unless (executable-find "mb-preview")
+    (user-error "mb-preview not found in PATH"))
+  (let* ((source-name (or buffer-file-name (buffer-name)))
+          (title (file-name-nondirectory source-name))
+          (base-dir (file-name-as-directory
+                      (expand-file-name
+                        (file-name-directory (or buffer-file-name default-directory)))))
+          (output-buffer (get-buffer-create "*mb-preview*")))
+    (when (file-remote-p base-dir)
+      (user-error "mb-preview: remote directories are not supported: %s" base-dir))
+    (with-current-buffer output-buffer
+      (erase-buffer))
+    (let ((process
+            (make-process
+              :name "mb-preview"
+              :buffer output-buffer
+              :command (list "mb-preview"
+                         "--open"
+                         "--title" title
+                         "--base-dir" base-dir)
+              :connection-type 'pipe
+              :sentinel
+              (lambda (process event)
+                (unless (process-live-p process)
+                  (if (= 0 (process-exit-status process))
+                    (message "mb-preview: opened preview")
+                    (display-buffer (process-buffer process))
+                    (message "mb-preview failed: %s"
+                      (replace-regexp-in-string "[\n\r]+\\'" "" event))))))))
+      (process-send-region process (point-min) (point-max))
+      (process-send-eof process))))
+
+
 ;; spacemax implementation of kill-this-buffer
 ;; @see https://github.com/syl20bnr/spacemacs/pull/6225
 (defun mb/kill-this-buffer ()
   "Kill the current buffer."
   (interactive)
   (if (window-minibuffer-p)
-      (abort-recursive-edit)
+    (abort-recursive-edit)
     (kill-buffer (current-buffer))))
 
 
@@ -429,14 +465,14 @@ narrowed."
   "Close the current window or quit Emacs if it's the last window."
   (interactive)
   (if (one-window-p)
-      (save-buffers-kill-emacs)
+    (save-buffers-kill-emacs)
     (delete-window)))
 
 
 (defun mb/get-selected-text ()
   "Return the currently selected text in the current buffer."
   (if (region-active-p)
-      (buffer-substring (region-beginning) (region-end))
+    (buffer-substring (region-beginning) (region-end))
     ""))
 
 
@@ -459,16 +495,16 @@ narrowed."
   (interactive)
   ;; run in a timer so that M-x interface have time to close before font picker is visible
   (run-with-timer
-   0.15
-   nil
-   (lambda ()
-     (when-let ((new-font (if (fboundp 'x-select-font)
-                              (x-select-font)
-                            (mouse-select-font)))
-                (new-font-name (font-xlfd-name new-font)))
-       (message "MB selected font: %s" new-font-name)
-       (set-frame-font new-font-name nil t)
-       (customize-save-variable 'mb-font new-font-name)))))
+    0.15
+    nil
+    (lambda ()
+      (when-let ((new-font (if (fboundp 'x-select-font)
+                             (x-select-font)
+                             (mouse-select-font)))
+                  (new-font-name (font-xlfd-name new-font)))
+        (message "MB selected font: %s" new-font-name)
+        (set-frame-font new-font-name nil t)
+        (customize-save-variable 'mb-font new-font-name)))))
 
 
 ;; https://emacs.stackexchange.com/a/2471
@@ -493,7 +529,7 @@ narrowed."
   "Confirm minibuffer input, otherwise open xterm in current directory."
   (interactive)
   (if (active-minibuffer-window)
-      (exit-minibuffer)
+    (exit-minibuffer)
     (mb/open-xterm-here)))
 
 
@@ -545,13 +581,13 @@ narrowed."
   :ensure nil
   :config
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                           try-expand-dabbrev-all-buffers
-                                           try-expand-dabbrev-from-kill
-                                           try-complete-file-name-partially
-                                           try-complete-file-name
-                                           try-expand-all-abbrevs
-                                           try-expand-list
-                                           try-expand-line))
+                                            try-expand-dabbrev-all-buffers
+                                            try-expand-dabbrev-from-kill
+                                            try-complete-file-name-partially
+                                            try-complete-file-name
+                                            try-expand-all-abbrevs
+                                            try-expand-list
+                                            try-expand-line))
 
   (global-set-key [remap dabbrev-expand] 'hippie-expand))
 
@@ -596,8 +632,8 @@ narrowed."
     (setq ispell-program-name "aspell") ; use aspell instead of ispell
     (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" no-littering-var-directory))
     (setq-default ispell-extra-args '("--sug-mode=ultra"
-                                      "--lang=en_GB"
-                                      "--camel-case")))
+                                       "--lang=en_GB"
+                                       "--camel-case")))
 
   (add-hook 'text-mode-hook 'flyspell-mode)
   (add-hook 'prog-mode-hook (lambda ()
@@ -620,11 +656,11 @@ narrowed."
   :ensure nil
   :config
   (setq uniquify-buffer-name-style 'forward
-        uniquify-separator "/"
-        ;; rename after killing uniquified
-        uniquify-after-kill-buffer-p t
-        ;; don't muck with special buffers
-        uniquify-ignore-buffers-re "^\\*"))
+    uniquify-separator "/"
+    ;; rename after killing uniquified
+    uniquify-after-kill-buffer-p t
+    ;; don't muck with special buffers
+    uniquify-ignore-buffers-re "^\\*"))
 
 
 
@@ -633,16 +669,16 @@ narrowed."
   :ensure nil
   :config
   (setq recentf-max-menu-items 25
-        recentf-max-saved-items 1000
-        ;; cleanup non-existing files on startup
-        ;; may have problems with remote files
-        recentf-auto-cleanup 'mode)
+    recentf-max-saved-items 1000
+    ;; cleanup non-existing files on startup
+    ;; may have problems with remote files
+    recentf-auto-cleanup 'mode)
 
   ;; Ignore no-littering files
   (add-to-list 'recentf-exclude
-               (recentf-expand-file-name no-littering-var-directory))
+    (recentf-expand-file-name no-littering-var-directory))
   (add-to-list 'recentf-exclude
-               (recentf-expand-file-name no-littering-etc-directory))
+    (recentf-expand-file-name no-littering-etc-directory))
 
   ;; Ignore ephemeral git commit message files
   (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
@@ -666,11 +702,11 @@ narrowed."
   :ensure nil
   :config
   (setq savehist-save-minibuffer-history t
-        savehist-autosave-interval nil ; save on kill only
-        savehist-additional-variables
-        '(
-          mark-ring global-mark-ring       ; persist marks
-          search-ring regexp-search-ring)) ; persist searches
+    savehist-autosave-interval nil ; save on kill only
+    savehist-additional-variables
+    '(
+       mark-ring global-mark-ring       ; persist marks
+       search-ring regexp-search-ring)) ; persist searches
 
   (savehist-mode t))
 
@@ -690,12 +726,12 @@ narrowed."
   :diminish auto-revert-mode
   :config
   (setq auto-revert-verbose t ; let us know when it happens
-        auto-revert-use-notify nil
-        auto-revert-stop-on-user-input nil
-        ;; Revert Dired and other buffers
-        global-auto-revert-non-file-buffers t
-        ;; Only prompts for confirmation when buffer is unsaved.
-        revert-without-query (list "."))
+    auto-revert-use-notify nil
+    auto-revert-stop-on-user-input nil
+    ;; Revert Dired and other buffers
+    global-auto-revert-non-file-buffers t
+    ;; Only prompts for confirmation when buffer is unsaved.
+    revert-without-query (list "."))
   (global-auto-revert-mode t))
 
 
@@ -732,15 +768,15 @@ narrowed."
   :ensure nil
   :config
   (setq show-paren-delay 0
-        ;; decrease overlay priority because
-        ;; it's higher than selection
-        show-paren-priority 10
-        ;; highlight everything inside parens
-        show-paren-style 'expression
+    ;; decrease overlay priority because
+    ;; it's higher than selection
+    show-paren-priority 10
+    ;; highlight everything inside parens
+    show-paren-style 'expression
 
-        show-paren-highlight-openparen t
-        show-paren-when-point-inside-paren t
-        show-paren-when-point-in-periphery t)
+    show-paren-highlight-openparen t
+    show-paren-when-point-inside-paren t
+    show-paren-when-point-in-periphery t)
   (show-paren-mode 1))
 
 
@@ -789,7 +825,7 @@ narrowed."
     (interactive)
     (let ((file (dired-get-file-for-visit)))
       (if (file-directory-p file)
-          (dired-find-alternate-file)
+        (dired-find-alternate-file)
         (dired-find-file))))
 
   (define-key dired-mode-map (kbd "h")                  'mb/dired-up-directory)
@@ -820,8 +856,8 @@ narrowed."
   :no-require
   :init
   (setq ansi-color-for-comint-mode t
-        comint-prompt-read-only t
-        comint-buffer-maximum-size 2048))
+    comint-prompt-read-only t
+    comint-buffer-maximum-size 2048))
 
 
 
@@ -831,9 +867,9 @@ narrowed."
   :no-require
   :init
   (setq compilation-always-kill t       ; kill compilation process before starting another
-        compilation-ask-about-save nil  ; save all buffers on `compile'
-        compilation-save-buffers-predicate (lambda () nil)
-        compilation-scroll-output 'first-error)
+    compilation-ask-about-save nil  ; save all buffers on `compile'
+    compilation-save-buffers-predicate (lambda () nil)
+    compilation-scroll-output 'first-error)
 
   (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
 
@@ -851,8 +887,8 @@ narrowed."
   :defer t
   :init
   (setq ediff-diff-options "-w" ; turn off whitespace checking
-        ediff-split-window-function #'split-window-horizontally
-        ediff-window-setup-function #'ediff-setup-windows-plain))
+    ediff-split-window-function #'split-window-horizontally
+    ediff-window-setup-function #'ediff-setup-windows-plain))
 
 
 
@@ -864,7 +900,7 @@ narrowed."
   (defun mb/use-tabs ()
     "Use tabs."
     (setq tab-width        8
-          indent-tabs-mode 1))
+      indent-tabs-mode 1))
 
   (add-hook 'makefile-mode-hook 'mb/use-tabs)
   (add-hook 'makefile-bsdmake-mode-hook 'mb/use-tabs))
@@ -878,7 +914,7 @@ narrowed."
   :init
   ;; fix mode breaking due to missing flymake variables
   (setq flymake-allowed-file-name-masks nil
-        flymake-err-line-patterns nil)
+    flymake-err-line-patterns nil)
   :config
   (setq scss-compile-at-save nil)
   (message "mb: SCSS MODE"))
@@ -905,8 +941,8 @@ narrowed."
   ;; Set the default formatting styles for various C based modes.
   ;; Particularly, change the default style from GNU to Java.
   (setq c-default-style
-        '((awk-mode . "awk")
-          (other . "java")))
+    '((awk-mode . "awk")
+       (other . "java")))
 
   (add-hook 'java-mode-hook (lambda ()
                               ;; disable auto-indent
@@ -934,10 +970,10 @@ narrowed."
   :ensure nil
   :init
   (add-hook 'emacs-lisp-mode-hook
-            (lambda()
-              (setq mode-name "ELisp")))
+    (lambda()
+      (setq mode-name "ELisp")))
   (add-hook 'lisp-interaction-mode-hook
-            (lambda() (setq mode-name "λ"))))
+    (lambda() (setq mode-name "λ"))))
 
 
 
@@ -948,12 +984,12 @@ narrowed."
   :init
   ;; Use sh-mode when opening `.zsh' files, and when opening Prezto runcoms.
   (dolist (pattern '("\\.zsh\\'"
-                     "zlogin\\'"
-                     "zlogout\\'"
-                     "zpreztorc\\'"
-                     "zprofile\\'"
-                     "zshenv\\'"
-                     "zshrc\\'"))
+                      "zlogin\\'"
+                      "zlogout\\'"
+                      "zpreztorc\\'"
+                      "zprofile\\'"
+                      "zshenv\\'"
+                      "zshrc\\'"))
     (add-to-list 'auto-mode-alist (cons pattern 'sh-mode)))
   :config
   (message "mb: SH MODE"))
@@ -982,18 +1018,18 @@ narrowed."
   :disabled
   :config
   (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil)
+    modus-themes-bold-constructs nil)
 
   (setq modus-themes-common-palette-overrides
-        (append
-         ;; Keep the border but make it the same color as the background of the
-         ;; mode line (thus appearing borderless).  The difference with the
-         ;; above is that this version is a bit thicker because the border are
-         ;; still there.
-         '((border-mode-line-active bg-mode-line-active)
-           (border-mode-line-inactive bg-mode-line-inactive))
+    (append
+      ;; Keep the border but make it the same color as the background of the
+      ;; mode line (thus appearing borderless).  The difference with the
+      ;; above is that this version is a bit thicker because the border are
+      ;; still there.
+      '((border-mode-line-active bg-mode-line-active)
+         (border-mode-line-inactive bg-mode-line-inactive))
 
-         modus-themes-preset-overrides-faint)))
+      modus-themes-preset-overrides-faint)))
 
 
 
@@ -1004,10 +1040,10 @@ narrowed."
   :config
   (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
   (if (getenv "DBUS_SESSION_BUS_ADDRESS")
-      (condition-case err
-          (darkman-mode)
-        (dbus-error
-         (message "Skipping darkman-mode: %s" (error-message-string err))))
+    (condition-case err
+      (darkman-mode)
+      (dbus-error
+        (message "Skipping darkman-mode: %s" (error-message-string err))))
     (message "Skipping darkman-mode: DBUS_SESSION_BUS_ADDRESS is unset")))
 
 
@@ -1022,9 +1058,9 @@ narrowed."
     (fmakunbound 'ns-do-applescript))
   :config
   (setq
-   auto-dark-allow-osascript t
-   auto-dark-dark-theme mb-dark-theme
-   auto-dark-light-theme mb-light-theme)
+    auto-dark-allow-osascript t
+    auto-dark-dark-theme mb-dark-theme
+    auto-dark-light-theme mb-light-theme)
 
   (auto-dark-mode t))
 
@@ -1056,10 +1092,10 @@ narrowed."
 (use-package doom-modeline
   :config
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project
-        doom-modeline-minor-modes t
-        doom-modeline-hud nil
-        doom-modeline-buffer-encoding nil
-        doom-modeline-env-version nil)
+    doom-modeline-minor-modes t
+    doom-modeline-hud nil
+    doom-modeline-buffer-encoding nil
+    doom-modeline-env-version nil)
 
   (doom-modeline-mode 1))
 
@@ -1126,7 +1162,7 @@ narrowed."
   :after undo-fu
   :config
   (setq undo-fu-session-compression 'zst
-        undo-fu-session-incompatible-files '("\\.gpg$" "/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+    undo-fu-session-incompatible-files '("\\.gpg$" "/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
 
   (global-undo-fu-session-mode))
 
@@ -1160,7 +1196,7 @@ narrowed."
 (use-package goto-chg
   :bind
   (("C-," . goto-last-change)
-   ("C-." . goto-last-change-reverse)))
+    ("C-." . goto-last-change-reverse)))
 
 
 
@@ -1177,7 +1213,7 @@ narrowed."
   :commands (comment-dwim-2)
   :bind
   (([remap comment-line] . 'comment-dwim-2)
-   ([remap comment-dwim] . 'comment-dwim-2)))
+    ([remap comment-dwim] . 'comment-dwim-2)))
 
 
 
@@ -1187,10 +1223,10 @@ narrowed."
   (vertico-mode)
 
   (setq
-   ;; Show more candidates
-   vertico-count 20
-   ;; enable cycling for `vertico-next' and `vertico-previous'.
-   vertico-cycle t)
+    ;; Show more candidates
+    vertico-count 20
+    ;; enable cycling for `vertico-next' and `vertico-previous'.
+    vertico-cycle t)
 
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
@@ -1206,16 +1242,16 @@ narrowed."
   :init
   (defun without-if-bang (pattern _index _total)
     (cond
-     ((equal "!" pattern)
-      '(orderless-literal . ""))
-     ((string-prefix-p "!" pattern)
-      `(orderless-without-literal . ,(substring pattern 1)))))
+      ((equal "!" pattern)
+        '(orderless-literal . ""))
+      ((string-prefix-p "!" pattern)
+        `(orderless-without-literal . ,(substring pattern 1)))))
 
   (setq completion-styles '(basic orderless)
-        ;; orderless-matching-styles '(orderless-regexp)
-        orderless-style-dispatchers '(without-if-bang)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+    ;; orderless-matching-styles '(orderless-regexp)
+    orderless-style-dispatchers '(without-if-bang)
+    completion-category-defaults nil
+    completion-category-overrides '((file (styles partial-completion)))))
 
 
 
@@ -1230,25 +1266,25 @@ narrowed."
 (use-package consult
   :init
   (setq
-   consult-preview-key (list :debounce 1 'any)
-   register-preview-delay 0.5
-   register-preview-function #'consult-register-format)
+    consult-preview-key (list :debounce 1 'any)
+    register-preview-delay 0.5
+    register-preview-function #'consult-register-format)
 
   ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
 
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
+    xref-show-definitions-function #'consult-xref)
 
   :config
   (setq
-   consult-line-numbers-widen t
-   consult-async-min-input 2
-   consult-async-refresh-delay  0.15
-   consult-async-input-throttle 0.2
-   consult-async-input-debounce 0.1
-   consult-narrow-key "C-+")
+    consult-line-numbers-widen t
+    consult-async-min-input 2
+    consult-async-refresh-delay  0.15
+    consult-async-input-throttle 0.2
+    consult-async-input-debounce 0.1
+    consult-narrow-key "C-+")
 
   ;; use consult instead of the standard *Completions* buffer
   (setq completion-in-region-function #'consult-completion-in-region)
@@ -1257,7 +1293,7 @@ narrowed."
   (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
   (advice-add #'ffap-menu-ask :around (lambda (&rest args)
                                         (cl-letf (((symbol-function #'minibuffer-completion-help)
-                                                   #'ignore))
+                                                    #'ignore))
                                           (apply args))))
 
 
@@ -1273,7 +1309,7 @@ narrowed."
   (defun mb/consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
     (consult-ripgrep dir (if (region-active-p)
-                             (mb/get-selected-text)
+                           (mb/get-selected-text)
                            (thing-at-point 'symbol))))
 
   (defun mb/consult-ripgrep-in-current-dir ()
@@ -1283,7 +1319,7 @@ narrowed."
   (defun mb/consult-fd-thing-at-point (&optional dir)
     (interactive)
     (consult-fd dir (if (region-active-p)
-                        (mb/get-selected-text)
+                      (mb/get-selected-text)
                       (thing-at-point 'filename))))
 
   (defun mb/consult-fd-in-current-dir ()
@@ -1346,7 +1382,7 @@ narrowed."
   :commands (embark-act)
   :bind
   (("C-h B" . 'embark-bindings-at-point)
-   ("M-." .  'embark-act))
+    ("M-." .  'embark-act))
 
   :config
   ;; Optionally replace the key help with a completing-read interface
@@ -1354,9 +1390,9 @@ narrowed."
 
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
+    '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+       nil
+       (window-parameters (mode-line-format . none)))))
 
 
 
@@ -1382,36 +1418,36 @@ current target followed by an ellipsis if there are further
 targets."
     (lambda (&optional keymap targets prefix)
       (if (null keymap)
-          (which-key--hide-popup-ignore-command)
+        (which-key--hide-popup-ignore-command)
         (which-key--show-keymap
-         (if (eq (plist-get (car targets) :type) 'embark-become)
-             "Become"
-           (format "Act on %s '%s'%s"
-                   (plist-get (car targets) :type)
-                   (embark--truncate-target (plist-get (car targets) :target))
-                   (if (cdr targets) "…" "")))
-         (if prefix
-             (pcase (lookup-key keymap prefix 'accept-default)
-               ((and (pred keymapp) km) km)
-               (_ (key-binding prefix 'accept-default)))
-           keymap)
-         nil nil t (lambda (binding)
-                     (not (string-suffix-p "-argument" (cdr binding))))))))
+          (if (eq (plist-get (car targets) :type) 'embark-become)
+            "Become"
+            (format "Act on %s '%s'%s"
+              (plist-get (car targets) :type)
+              (embark--truncate-target (plist-get (car targets) :target))
+              (if (cdr targets) "…" "")))
+          (if prefix
+            (pcase (lookup-key keymap prefix 'accept-default)
+              ((and (pred keymapp) km) km)
+              (_ (key-binding prefix 'accept-default)))
+            keymap)
+          nil nil t (lambda (binding)
+                      (not (string-suffix-p "-argument" (cdr binding))))))))
 
   (setq embark-indicators
-        '(embark-which-key-indicator
-          embark-highlight-indicator
-          embark-isearch-highlight-indicator))
+    '(embark-which-key-indicator
+       embark-highlight-indicator
+       embark-isearch-highlight-indicator))
 
   (defun embark-hide-which-key-indicator (fn &rest args)
     "Hide the which-key indicator immediately when using the completing-read prompter."
     (which-key--hide-popup-ignore-command)
     (let ((embark-indicators
-           (remq #'embark-which-key-indicator embark-indicators)))
+            (remq #'embark-which-key-indicator embark-indicators)))
       (apply fn args)))
 
   (advice-add #'embark-completing-read-prompter
-              :around #'embark-hide-which-key-indicator))
+    :around #'embark-hide-which-key-indicator))
 
 
 ;; Rg: search using ripgrep
@@ -1448,27 +1484,27 @@ targets."
   :diminish company-mode
   :config
   (setq
-   company-idle-delay                0.15
-   company-tooltip-limit             20
-   company-tooltip-align-annotations t
-   company-minimum-prefix-length     1
-   company-echo-delay                0
-   company-selection-wrap-around     t
+    company-idle-delay                0.15
+    company-tooltip-limit             20
+    company-tooltip-align-annotations t
+    company-minimum-prefix-length     1
+    company-echo-delay                0
+    company-selection-wrap-around     t
 
-   company-insertion-triggers        nil
+    company-insertion-triggers        nil
 
-   company-dabbrev-ignore-case       nil
-   company-dabbrev-downcase          nil
+    company-dabbrev-ignore-case       nil
+    company-dabbrev-downcase          nil
 
-   company-require-match             nil
-   company-show-quick-access        'left
-   company-transformers             '(delete-dups)
+    company-require-match             nil
+    company-show-quick-access        'left
+    company-transformers             '(delete-dups)
 
-   company-backends '((company-files
-                       company-keywords
-                       company-capf
-                       company-dabbrev-code
-                       company-dabbrev)))
+    company-backends '((company-files
+                         company-keywords
+                         company-capf
+                         company-dabbrev-code
+                         company-dabbrev)))
 
   (defun mb/use-custom-matching-style (fn &rest args)
     "Use custom completion style specifically for the company-capf."
@@ -1479,9 +1515,9 @@ targets."
 
   (eval-after-load 'eldoc
     (eldoc-add-command 'company-complete-selection
-                       'company-complete-common
-                       'company-capf
-                       'company-abort))
+      'company-complete-common
+      'company-capf
+      'company-abort))
 
   (global-company-mode 1)
 
@@ -1550,14 +1586,14 @@ targets."
   :if mb-use-corfu
   :config
   (setq corfu-cycle t
-        corfu-auto t
-        corfu-auto-delay 0.1
-        corfu-auto-prefix 1
-        corfu-scroll-margin 5
-        corfu-indexed-start 1
-        corfu-count 16
-        corfu-max-width 120
-        corfu-on-exact-match nil)
+    corfu-auto t
+    corfu-auto-delay 0.1
+    corfu-auto-prefix 1
+    corfu-scroll-margin 5
+    corfu-indexed-start 1
+    corfu-count 16
+    corfu-max-width 120
+    corfu-on-exact-match nil)
   (global-corfu-mode)
   (corfu-indexed-mode)
   (corfu-popupinfo-mode)
@@ -1567,17 +1603,17 @@ targets."
 
   ;; https://github.com/minad/corfu#completing-in-the-eshell-or-shell
   (add-hook 'eshell-mode-hook
-            (lambda ()
-              (setq-local corfu-auto nil)
-              (corfu-mode)))
+    (lambda ()
+      (setq-local corfu-auto nil)
+      (corfu-mode)))
 
   (defun corfu-send-shell (&rest _)
     "Send completion candidate when inside comint/eshell."
     (cond
-     ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
-      (eshell-send-input))
-     ((and (derived-mode-p 'comint-mode)  (fboundp 'comint-send-input))
-      (comint-send-input))))
+      ((and (derived-mode-p 'eshell-mode) (fboundp 'eshell-send-input))
+        (eshell-send-input))
+      ((and (derived-mode-p 'comint-mode)  (fboundp 'comint-send-input))
+        (comint-send-input))))
 
   (advice-add #'corfu-insert :after #'corfu-send-shell)
 
@@ -1605,8 +1641,8 @@ targets."
 
   :config
   (setq
-   yas-verbosity          2
-   yas-wrap-around-region t)
+    yas-verbosity          2
+    yas-wrap-around-region t)
 
   ;; Remove GUI dropdown prompt (prefer ivy/helm)
   (delq 'yas-dropdown-prompt yas-prompt-functions)
@@ -1653,12 +1689,12 @@ targets."
 (use-package which-key
   :diminish which-key-mode
   :bind (("C-h w"            . 'which-key-show-major-mode)
-         ("C-h W"            . 'which-key-show-top-level))
+          ("C-h W"            . 'which-key-show-top-level))
   :init
   (setq
-   which-key-compute-remaps t
-   which-key-allow-multiple-replacements t
-   which-key-sort-order 'which-key-key-order-alpha)
+    which-key-compute-remaps t
+    which-key-allow-multiple-replacements t
+    which-key-sort-order 'which-key-key-order-alpha)
 
   (which-key-mode)
 
@@ -1708,7 +1744,7 @@ targets."
   :bind (("C-c w" . er/expand-region))
   :init
   (setq expand-region-contract-fast-key "W"
-        expand-region-reset-fast-key    "r"))
+    expand-region-reset-fast-key    "r"))
 
 
 
@@ -1716,9 +1752,9 @@ targets."
 (use-package rainbow-mode
   :defer t
   :hook ((web-mode . rainbow-mode)
-         (css-mode . rainbow-mode)
-         (scss-mode . rainbow-mode)
-         (js-mode . rainbow-mode))
+          (css-mode . rainbow-mode)
+          (scss-mode . rainbow-mode)
+          (js-mode . rainbow-mode))
   :diminish rainbow-mode)
 
 
@@ -1736,23 +1772,23 @@ targets."
   :hook ((yaml-mode yaml-ts-mode prog-mode html-ts-mode) . indent-bars-mode)
   :init
   (if (not (package-installed-p 'indent-bars))
-      (package-vc-install "https://github.com/jdtsmith/indent-bars"))
+    (package-vc-install "https://github.com/jdtsmith/indent-bars"))
   :config
   ;; NOTE: emacs-plus on mac doens't support :stipple face https://github.com/d12frosted/homebrew-emacs-plus/issues/622
   ;; NOTE: emacs@29 with PGTK doens't display :stipples correctly (fixed in 30) https://github.com/jdtsmith/indent-bars/issues/3
   (setq indent-bars-prefer-character
-        (or mb-is-mac-os
-            (and mb-is-linux (< emacs-major-version 30))))
+    (or mb-is-mac-os
+      (and mb-is-linux (< emacs-major-version 30))))
 
   (setq
-   indent-bars-color '(highlight :face-bg t :blend 0.2)
-   indent-bars-pattern "."
-   indent-bars-width-frac 0.1
-   indent-bars-pad-frac 0.1
-   indent-bars-zigzag nil
-   indent-bars-color-by-depth nil
-   indent-bars-highlight-current-depth nil
-   indent-bars-display-on-blank-lines nil))
+    indent-bars-color '(highlight :face-bg t :blend 0.2)
+    indent-bars-pattern "."
+    indent-bars-width-frac 0.1
+    indent-bars-pad-frac 0.1
+    indent-bars-zigzag nil
+    indent-bars-color-by-depth nil
+    indent-bars-highlight-current-depth nil
+    indent-bars-display-on-blank-lines nil))
 
 
 
@@ -1761,8 +1797,8 @@ targets."
   :commands (visual-fill-column-mode)
   :init
   (setq-default
-   visual-fill-column-center-text t
-   visual-fill-column-enable-sensible-window-split t)
+    visual-fill-column-center-text t
+    visual-fill-column-enable-sensible-window-split t)
 
   (defvar-local mb-visual-fill-mode nil)
   (defun mb/toggle-visual-fill-mode ()
@@ -1803,36 +1839,36 @@ targets."
   :config
   (setq vc-follow-symlinks nil
 
-        ;; ask me if I want to include a revision when rewriting
-        magit-rewrite-inclusive 'ask
-        ;; ask me to save buffers
-        magit-save-some-buffers t
-        ;; pop the process buffer if we're taking a while to complete
-        magit-process-popup-time 10
-        ;; don't show " MRev" in modeline
-        magit-auto-revert-mode-lighter ""
-        magit-push-always-verify nil
+    ;; ask me if I want to include a revision when rewriting
+    magit-rewrite-inclusive 'ask
+    ;; ask me to save buffers
+    magit-save-some-buffers t
+    ;; pop the process buffer if we're taking a while to complete
+    magit-process-popup-time 10
+    ;; don't show " MRev" in modeline
+    magit-auto-revert-mode-lighter ""
+    magit-push-always-verify nil
 
-        ;; max length of first line of commit message
-        git-commit-summary-max-length 72
+    ;; max length of first line of commit message
+    git-commit-summary-max-length 72
 
-        ;; ask me if I want a tracking upstream
-        magit-set-upstream-on-push 'askifnotset
+    ;; ask me if I want a tracking upstream
+    magit-set-upstream-on-push 'askifnotset
 
-        transient-default-level 5
-        transient-display-buffer-action '(display-buffer-below-selected)
+    transient-default-level 5
+    transient-display-buffer-action '(display-buffer-below-selected)
 
-        magit-bury-buffer-function #'magit-restore-window-configuration
+    magit-bury-buffer-function #'magit-restore-window-configuration
 
-        magit-diff-refine-hunk t ; show granular diffs in selected hunk
-        ;; Don't display parent/related refs in commit buffers; they are rarely
-        ;; helpful and only add to runtime costs.
-        magit-revision-insert-related-refs nil)
+    magit-diff-refine-hunk t ; show granular diffs in selected hunk
+    ;; Don't display parent/related refs in commit buffers; they are rarely
+    ;; helpful and only add to runtime costs.
+    magit-revision-insert-related-refs nil)
 
   (add-hook 'git-commit-mode-hook
-            (lambda ()
-              (setq-local fill-column git-commit-summary-max-length)
-              (mb/toggle-auto-fill-mode)))
+    (lambda ()
+      (setq-local fill-column git-commit-summary-max-length)
+      (mb/toggle-auto-fill-mode)))
 
   (add-hook 'magit-process-mode-hook #'goto-address-mode)
 
@@ -1927,23 +1963,25 @@ targets."
   :defer t
   :init
   (setq lsp-keymap-prefix "C-c C-l"
-        lsp-idle-delay 0.6
-        lsp-keep-workspace-alive nil
-        lsp-disabled-clients '(tailwindcss)
-        lsp-enable-suggest-server-download nil
-        lsp-auto-execute-action nil
+    lsp-idle-delay 0.6
+    lsp-keep-workspace-alive nil
+    lsp-disabled-clients '(tailwindcss)
+    lsp-enable-suggest-server-download nil
+    lsp-auto-execute-action nil
 
-        lsp-diagnostics-provider :flycheck
-        lsp-lens-enable nil
+    lsp-diagnostics-provider :flycheck
+    lsp-lens-enable nil
+    ;; Keep editor diagnostics aligned with this repository's Rust check.
+    lsp-rust-analyzer-cargo-watch-command "clippy"
 
-        lsp-completion-default-behaviour :insert
-        lsp-completion-provider (if mb-use-company :capf :none)
-        lsp-completion-show-detail t
-        lsp-completion-show-kind t
+    lsp-completion-default-behaviour :insert
+    lsp-completion-provider (if mb-use-company :capf :none)
+    lsp-completion-show-detail t
+    lsp-completion-show-kind t
 
-        lsp-modeline-code-actions-segments '(count name)
+    lsp-modeline-code-actions-segments '(count name)
 
-        lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
+    lsp-eslint-server-command '("vscode-eslint-language-server" "--stdio")) ;; https://github.com/hrsh7th/vscode-langservers-extracted
 
   (setq lsp-volar-take-over-mode nil)
   (setq lsp-volar-hybrid-mode t)
@@ -1955,19 +1993,19 @@ targets."
   (defun mb/lsp-fix-inline-completion-capability (capabilities)
     "Encode inline completion client capability as an empty JSON object."
     (when-let* ((text-document-capabilities (alist-get 'textDocument capabilities))
-                (inline-completion-entry (assq 'inlineCompletion text-document-capabilities)))
+                 (inline-completion-entry (assq 'inlineCompletion text-document-capabilities)))
       (setcdr inline-completion-entry (make-hash-table :test 'equal)))
     capabilities)
 
   (advice-add 'lsp--client-capabilities
-              :filter-return #'mb/lsp-fix-inline-completion-capability)
+    :filter-return #'mb/lsp-fix-inline-completion-capability)
 
   (defun mb/project-local-tsgo-command ()
     "Return the project-local TypeScript native LSP command."
     (unless mb-use-local-tsgo
       (user-error "Set mb-use-local-tsgo in .dir-locals.el to use project-local tsgo"))
     (let* ((tsc-relative-path "node_modules/.bin/tsc")
-           (root (locate-dominating-file default-directory tsc-relative-path)))
+            (root (locate-dominating-file default-directory tsc-relative-path)))
       (unless root
         (user-error "Could not find %s from %s" tsc-relative-path default-directory))
       `(,(expand-file-name tsc-relative-path root) ,@lsp-clients-tsgo-args)))
@@ -1975,7 +2013,7 @@ targets."
   (defun mb/lsp-package-path (orig-fn dependency)
     "Use project-local TypeScript for lsp-mode's tsgo client when enabled."
     (if (and mb-use-local-tsgo (eq dependency 'tsgo))
-        (car (mb/project-local-tsgo-command))
+      (car (mb/project-local-tsgo-command))
       (funcall orig-fn dependency)))
 
   (advice-add 'lsp-package-path :around #'mb/lsp-package-path)
@@ -1983,11 +2021,21 @@ targets."
   (when mb-use-company
     (defun mb/lsp-mode-setup-completion ()
       (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-            '(orderless)))
+        '(orderless)))
     (add-hook 'lsp-completion-mode  'mb/lsp-mode-setup-completion))
 
   (which-key-add-key-based-replacements "SPC l" "LSP")
   (add-hook 'lsp-mode-hook 'lsp-enable-which-key-integration)
+
+  (defun mb/lsp-rust-analyzer-run-flycheck ()
+    "Request fresh Clippy diagnostics when Rust Analyzer initializes a buffer."
+    (when-let ((workspace (car (lsp-workspaces))))
+      (when (and (derived-mode-p 'rust-ts-mode)
+                 (eq (lsp--workspace-server-id workspace) 'rust-analyzer))
+        (lsp-notify "rust-analyzer/runFlycheck"
+                    `(:textDocument ,(lsp--text-document-identifier))))))
+
+  (add-hook 'lsp-managed-mode-hook #'mb/lsp-rust-analyzer-run-flycheck t)
 
   (add-hook 'lsp-mode-hook (lambda ()
                              (local-set-key [remap xref-find-references] 'lsp-find-references)
@@ -2002,12 +2050,12 @@ targets."
   (defun mb/lsp-xref-read-files-decoded (orig-fn locations)
     "Force decoded reads in lsp xref temp buffers."
     (cl-letf (((symbol-function 'insert-file-contents-literally)
-               (lambda (filename &optional visit beg end replace)
-                 (let ((coding-system-for-read 'undecided))
-                   (insert-file-contents filename visit beg end replace)))))
+                (lambda (filename &optional visit beg end replace)
+                  (let ((coding-system-for-read 'undecided))
+                    (insert-file-contents filename visit beg end replace)))))
       (funcall orig-fn locations)))
   (advice-add 'lsp--locations-to-xref-items
-              :around #'mb/lsp-xref-read-files-decoded))
+    :around #'mb/lsp-xref-read-files-decoded))
 
 
 
@@ -2018,15 +2066,15 @@ targets."
   :init (global-flycheck-mode)
   :config
   (setq
-   flycheck-check-syntax-automatically '(mode-enabled save)
+    flycheck-check-syntax-automatically '(mode-enabled save)
 
-   ;; Display errors a little quicker (default is 0.9s)
-   flycheck-display-errors-delay 0.25
+    ;; Display errors a little quicker (default is 0.9s)
+    flycheck-display-errors-delay 0.25
 
-   flycheck-temp-prefix "FLYCHECK_XXY")
+    flycheck-temp-prefix "FLYCHECK_XXY")
 
   (if (display-graphic-p)
-      (setq flycheck-indication-mode 'right-fringe)
+    (setq flycheck-indication-mode 'right-fringe)
     (progn
       (setq flycheck-indication-mode 'right-margin)))
 
@@ -2036,19 +2084,19 @@ targets."
   (defun mb/flycheck-javascript-oxlint-working-directory (_checker)
     "Run oxlint from the nearest directory that owns `.oxlintrc.json`."
     (or (and buffer-file-name
-             (locate-dominating-file buffer-file-name ".oxlintrc.json"))
-        default-directory))
+          (locate-dominating-file buffer-file-name ".oxlintrc.json"))
+      default-directory))
 
   (put 'javascript-oxlint
-       'flycheck-working-directory
-       #'mb/flycheck-javascript-oxlint-working-directory)
+    'flycheck-working-directory
+    #'mb/flycheck-javascript-oxlint-working-directory)
 
   ;; from Spacemacs
   (defun mb/toggle-flyckeck-errors-list ()
     "Toggle flycheck's error list window."
     (interactive)
     (-if-let (window (flycheck-get-error-list-window))
-        (quit-window nil window)
+      (quit-window nil window)
       (flycheck-list-errors))))
 
 
@@ -2057,7 +2105,7 @@ targets."
   :after flycheck
   :config
   (setq flycheck-posframe-border-width 2
-        flycheck-posframe-position 'window-bottom-left-corner)
+    flycheck-posframe-position 'window-bottom-left-corner)
 
   ;; Don't display popups if company is open
   (when mb-use-company
@@ -2084,8 +2132,8 @@ targets."
   :config
   (defun mb-apheleia-disallowed-buffer-p ()
     (and buffer-file-name
-         (or (string-match-p "\\.component\\.html\\'" buffer-file-name)
-             (string-equal (file-name-nondirectory buffer-file-name) "package.json"))))
+      (or (string-match-p "\\.component\\.html\\'" buffer-file-name)
+        (string-equal (file-name-nondirectory buffer-file-name) "package.json"))))
   (add-to-list 'apheleia-inhibit-functions #'mb-apheleia-disallowed-buffer-p)
   (add-hook 'apheleia-post-format-hook 'flycheck-buffer)
   )
@@ -2098,8 +2146,8 @@ targets."
   :if mb-openai-api-key
   :custom
   ((gptel-api-key mb-openai-api-key)
-   (gptel-max-tokens 2500)
-   (gptel-model "gpt-4o"))
+    (gptel-max-tokens 2500)
+    (gptel-model "gpt-4o"))
   :bind ("C-x C-a" . 'gptel-send)
   :config
   (define-key gptel-mode-map (kbd "C-c l m")      'gptel-menu)
@@ -2115,11 +2163,11 @@ targets."
   :disabled
   :init
   (if (not (package-installed-p 'codeium))
-      (package-vc-install "https://github.com/Exafunction/codeium.el"))
+    (package-vc-install "https://github.com/Exafunction/codeium.el"))
   :config
   ;; get codeium status in the modeline
   (setq codeium-mode-line-enable
-        (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
+    (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
   (add-to-list 'mode-line-misc-info '(:eval (car-safe codeium-mode-line)) t)
   )
 
@@ -2133,11 +2181,11 @@ targets."
 (use-package justl
   :defer t
   :bind (
-         :map project-prefix-map
-         ("j" . justl)
+          :map project-prefix-map
+          ("j" . justl)
 
-         :map justl-mode-map
-         ("?" . justl-help-popup)))
+          :map justl-mode-map
+          ("?" . justl-help-popup)))
 
 
 ;; Markdown
@@ -2207,14 +2255,14 @@ targets."
 
 
 (if (window-system)
-    (progn
-      ;; zoom in / zoom out in editor
-      (global-set-key [C-mouse-4] 'text-scale-increase)
-      (global-set-key [C-mouse-5] 'text-scale-decrease)
+  (progn
+    ;; zoom in / zoom out in editor
+    (global-set-key [C-mouse-4] 'text-scale-increase)
+    (global-set-key [C-mouse-5] 'text-scale-decrease)
 
-      (when mb-is-mac-os
-        (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
-        (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
+    (when mb-is-mac-os
+      (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
+      (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
 
   (progn
     ;; activate mouse-based scrolling

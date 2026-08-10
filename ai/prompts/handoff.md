@@ -18,6 +18,10 @@ Do not duplicate content already captured in durable artifacts such as specs,
 plans, ADRs, issues, commits, or diffs; reference them by path or URL instead.
 Redact sensitive information such as API keys, tokens, passwords, secrets, and
 personally identifiable information.
+Prioritize current state over chronology: preserve active requirements, accepted
+decisions, current file status, unresolved work, and next actions. Omit stale
+drafts, superseded plans, irrelevant previous-task context, and exploratory dead
+ends unless they explain a still-active constraint or rejected approach.
 
 Include:
 
@@ -28,11 +32,14 @@ Include:
 - Decisions made and rationale
 - Assumptions and uncertainties
 - Relevant files, symbols, docs, or commands
-- Work completed so far
+- Changed files and their current status
+- Recap of work completed so far
 - Remaining tasks / recommended next steps
 - The next concrete action or command for the fresh agent
 - Validation performed or still needed
+- Unresolved errors, failing commands, or broken tests
 - Known risks, blockers, or edge cases
+- Open loops / decisions still needed
 
 Avoid irrelevant history, generic repo summaries, and exhaustive dumps.
 Do not invent missing context; mark unknowns explicitly.

@@ -110,9 +110,7 @@ Makes targeted fixes based on evidence
 - red/green TDD
 - require evidence
 - Spec-driven development
-- AI-first company - markdown spec graph; crypto contracts
-  - describe one's company clearly—including its goals, workflows, operations, decisions, teams, and spending—in a clear and consumable fashion.
-  - https://danielmiessler.com/blog/most-companies-arent-ready-for-ai
+- AI-first company
 - Folding context - is an iterative diverge→converge workflow where you run parallel LLM explorations, compress each into durable notes, then clear and re-inject those summaries to synthesize higher-quality reasoning and decisions. "progressive disclosure"
 - refactor: Pilot change + rollout
 - avoid negative framing
@@ -149,12 +147,6 @@ Makes targeted fixes based on evidence
 
 - subagent to run build/tests/lints/typechecks and analyze failures (RCA?) and provide summary back
 
-# SUMMARIZATION / COMPACTION
-
-- > the goal, changed files, unresolved errors, decisions, constraints, and open loops
-- > Команда /compact віддає це рішення людині: можна прямо вказати, що зберегти (поточний стан, активні вимоги, ухвалені рішення) і що викинути (ранні чернетки, відкинуті ідеї, контекст від попередніх задач).
-- "recap" what was done
-
 # RESEARCH AREAS
 
 - common failure mode: “helpful overreach.”
@@ -184,6 +176,8 @@ Makes targeted fixes based on evidence
 - > In a system where agent throughput far exceeds human attention, corrections are cheap, and waiting is expensive.
 - > Codex replicates patterns that already exist in the repository—even uneven or suboptimal ones -> regular "garbage collection" / code cleanup tasks by codex, based on "golden rules"
 - > Our most difficult challenges now center on **designing environments, feedback loops, and control systems** that help agents accomplish our goal: build and maintain complex, reliable software at scale.
+- > The further away a topic is from your expertise, the smarter an AI will sound
+- > agents optimize code for surface plausibility, not semantic correctness
 
 ## MCPs
 

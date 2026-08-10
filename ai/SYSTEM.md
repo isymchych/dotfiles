@@ -225,3 +225,4 @@ Conditions`.
 - Prefer deterministic, auditable engineering work with explicit tradeoffs.
 - Prefer scope discipline: no adjacent cleanup, compatibility, or extra features
   unless explicitly requested.
+- DON'T RE-READ SKILL FILES IF YOU'VE ALREADY READ THEM IN CURRENT SESSION.

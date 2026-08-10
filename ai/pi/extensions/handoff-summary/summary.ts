@@ -10,6 +10,7 @@ import {
   completeSimple,
   type Api,
   type Model,
+  type ProviderHeaders,
   type SimpleStreamOptions,
 } from "@earendil-works/pi-ai/compat";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
@@ -39,7 +40,7 @@ export interface SummaryTokenBudgets {
 
 export interface SummaryAuth {
   apiKey?: string;
-  headers?: Record<string, string>;
+  headers?: ProviderHeaders;
   env?: Record<string, string>;
 }
 
@@ -71,23 +72,29 @@ Do NOT continue the conversation. Do NOT respond to any questions in the convers
 const HANDOFF_RULES = `Include:
 - The goal, progress, and key decisions made
 - Current understanding, assumptions, and uncertainties
-- Changed files and important symbols
+- Changed files, their current status, and important symbols
 - Active requirements, constraints, and user preferences
+- User-stated rejected approaches when they remain active constraints
 - Unresolved errors, blockers, and open loops
 - Critical commands, examples, references, or risks needed to continue
 - Validation performed or still needed
 - The next concrete action or command, when known
 - Durable artifacts by path or URL when they already capture detailed context
 
+Prioritize current state over chronology.
+
 Preserve:
 - Current state of the work
+- Current file status
 - Active requirements, constraints, and user preferences
 - Accepted decisions and their rationale
+- Unresolved work and next actions
 - Unresolved errors, blockers, and open loops
 
 Discard:
 - Early drafts and superseded attempts
-- Rejected ideas unless the rejection matters later
+- Stale drafts, superseded plans, and exploratory dead ends
+- Rejected ideas unless the rejection explains a still-active constraint or rejected approach
 - Context from unrelated previous tasks
 
 Be concise, structured, and focused on helping another LLM continue without duplicating work.
@@ -111,11 +118,14 @@ const BRANCH_SUMMARY_STRUCTURE = `Use this structure. Keep the headings, but omi
 ### Blocked / Unresolved Errors
 - [Branch-specific issues preventing progress, unresolved errors, or "(none)"]
 
-## Key Decisions, Constraints, and Assumptions
-- **[Decision/constraint/assumption]**: [Brief rationale or uncertainty]
+## Key Decisions, Constraints, Rejected Approaches, and Assumptions
+- **[Decision/constraint/rejected approach/assumption]**: [Brief rationale or uncertainty]
 
 ## Shared Context Used
 - [Only prior facts needed to interpret this branch, or "(none)"]
+
+## Changed / Relevant Files, Symbols, and Commands
+- [Changed files with current status, important symbols, commands, docs, or references needed to continue]
 
 ## Validation
 - [Checks run and results, or validation still needed]
@@ -145,11 +155,11 @@ const COMPACTION_SUMMARY_STRUCTURE = `Use this structure. Keep the headings, but
 ## Active Requirements, Constraints, and Preferences
 - [Active requirements, constraints, user preferences, or "(none)"]
 
-## Key Decisions and Assumptions
-- **[Decision/assumption]**: [Brief rationale or uncertainty]
+## Key Decisions, Rejected Approaches, and Assumptions
+- **[Decision/rejected approach/assumption]**: [Brief rationale or uncertainty]
 
-## Relevant Files, Symbols, and Commands
-- [Files, functions, commands, docs, or references needed to continue]
+## Changed / Relevant Files, Symbols, and Commands
+- [Changed files with current status, important symbols, commands, docs, or references needed to continue]
 
 ## Validation
 - [Checks run and results, or validation still needed]
