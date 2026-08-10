@@ -16,6 +16,7 @@
   "extensions": [
     "./extensions/apply-patch/index.ts",
     "./extensions/collapse-tool-calls/index.ts",
+    "./extensions/read-tool/index.ts",
     "./extensions/compact-tool-output/index.ts",
     "./extensions/context/index.ts",
     "./extensions/fuzzy-at-file-autocomplete/index.ts",

@@ -24,6 +24,9 @@
 - `chezmoi apply` — sync confirmed updates; pair with `--include`/`--exclude` to scope risky runs.
 - `chezmoi doctor` — verify environment readiness after dependency changes.
 - `chezmoi data` — inspect template inputs before editing `.tmpl` files.
+- `npm run lint` — lint the project after code changes.
+- `npm test` — run the project test suite after code changes.
+- `npm run typecheck` — type-check the project after code changes.
 - `npm run typecheck --workspace scripts` — verify buildless Node TypeScript scripts before changing wrappers.
 - `npm test --workspace scripts` — run script tests.
 
