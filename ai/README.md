@@ -21,9 +21,8 @@ add to sysprompt:
 
 > For all coding tasks use your judgement to decide an appropriate lower power model and run that in a subagent
 
-- commit skill script should have an option to bypass hooks
 - local db skill should allow query on stdin
-- read tool should work with folders (list folder with details, maybe recursively,)
+- read and write tools should expose (short) hash of files, to optimize re-read
 
 - based on https://github.com/can1357/oh-my-pi
 - AST tools: ast_grep and ast_edit for syntax-aware code search and codemods via ast-grep https://github.com/code-yeongyu/pi-ast-grep/tree/main

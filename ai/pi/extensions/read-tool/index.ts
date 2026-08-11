@@ -138,10 +138,14 @@ export default function readToolExtension(pi: ExtensionAPI): void {
       "Read one or more files or directories. Text files support per-target offset/limit and optional " +
       "line numbers. Images are returned as attachments. Directories include entry type, size, and " +
       "symlink target, and can optionally be listed recursively without following directory symlinks. " +
-      "The complete call is limited to 2000 lines or 50KB, divided fairly across targets.",
+      "The complete call is limited to 2000 lines or 50KB, divided fairly across targets. Input shape: " +
+      "{ targets: [{ path, offset?, limit? }], recursive?, max_depth?, show_line_numbers? }. Put offset " +
+      "and limit inside each target, never at the root; for example: { targets: [{ path: 'justfile', " +
+      "offset: 1, limit: 160 }] }.",
     promptSnippet: "Read files or list directory contents",
     promptGuidelines: [
       "Use read for one or more known file or directory paths instead of cat, sed, or ls.",
+      "Put path, offset, and limit inside each targets item; never send path, offset, or limit at the root.",
       "Use read with show_line_numbers=true when exact file line references matter.",
       "Use read recursive directory listing only when the directory tree itself is needed; use Tilth for repository discovery and structural code exploration.",
     ],

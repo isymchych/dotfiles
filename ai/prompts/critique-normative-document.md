@@ -54,6 +54,7 @@ Review standard:
 - remove “legacy / no longer / flat / historical / old model” style framing unless truly required
 - keep negative statements only if the absence itself is an invariant
 - favor durable decision rules over implementation narration
+- documents should be lean
 
 Do not produce exhaustive line-level findings.
 Use quotes only when needed as evidence.
