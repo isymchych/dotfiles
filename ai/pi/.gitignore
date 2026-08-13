@@ -2,6 +2,7 @@ auth.json
 *.auth.json
 sessions/
 mcp-cache.json
+mcp-onboarding.json
 trust.json
 models-store.json
 

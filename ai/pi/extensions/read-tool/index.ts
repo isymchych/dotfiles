@@ -1,17 +1,10 @@
 import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
 import { createReadToolDefinition, defineTool } from "@earendil-works/pi-coding-agent";
-import { stripTerminalSequences } from "@earendil-works/pi-tui";
+import { stripTerminalSequences, truncateToWidth, type Component } from "@earendil-works/pi-tui";
 
-import {
-  emptyCompactText,
-  formatRelativePath,
-  pluralize,
-  rememberCollapsedSummary,
-  renderCollapsedCall,
-  setCompactText,
-} from "../shared/compact-tool-render.ts";
+import { pluralize, setCompactText } from "../shared/compact-tool-render.ts";
 import { executeReadTool, type EnhancedReadDetails, type ReadTargetDetails } from "./execute.ts";
-import { readToolSchema, type ReadTargetInput } from "./schema.ts";
+import { readToolSchema, type ReadToolInput } from "./schema.ts";
 
 /**
  * Replaces Pi's single-file read tool with one canonical reader for files, images, and directories.
@@ -21,6 +14,35 @@ import { readToolSchema, type ReadTargetInput } from "./schema.ts";
  */
 
 const toolCache = new Map<string, ReturnType<typeof createReadToolDefinition>>();
+type SummaryStatus = "success" | "warning";
+type ThemeBg = Parameters<Theme["bg"]>[0];
+
+interface CollapsedSummary {
+  status: SummaryStatus;
+  targets: readonly ReadTargetDetails[];
+  truncated: boolean;
+}
+
+interface ReadRenderState {
+  collapsedSummary?: CollapsedSummary;
+  callComponent?: CollapsedHeaderComponent;
+}
+
+interface RenderContextLike {
+  args: ReadToolInput;
+  state: unknown;
+  lastComponent: unknown;
+  invalidate: () => void;
+  expanded: boolean;
+  isError: boolean;
+  executionStarted: boolean;
+}
+
+interface CollapsedHeaderComponent extends Component {
+  setTheme: (theme: Theme) => void;
+  setBackground: (background: ThemeBg) => void;
+  setContentLines: (contentLines: string[]) => void;
+}
 
 function getBuiltInRead(cwd: string): ReturnType<typeof createReadToolDefinition> {
   const cached = toolCache.get(cwd);
@@ -32,79 +54,207 @@ function getBuiltInRead(cwd: string): ReturnType<typeof createReadToolDefinition
   return tool;
 }
 
-function formatTarget(
-  target: ReadTargetInput,
-  cwd: string,
-  showLineNumbers: boolean | undefined,
-): string {
-  const normalizedPath = target.path.startsWith("@") ? target.path.slice(1) : target.path;
-  let formatted = formatRelativePath(normalizedPath, cwd);
-  if (target.offset !== undefined || target.limit !== undefined) {
-    const startLine = target.offset ?? 1;
-    const endLine = target.limit !== undefined ? startLine + target.limit - 1 : undefined;
-    formatted += endLine !== undefined ? `:${startLine}-${endLine}` : `:${startLine}`;
-  }
-  if (showLineNumbers === true) {
-    formatted += " [numbered]";
-  }
-  return formatted;
-}
-
 function formatCallTarget(
-  targets: readonly ReadTargetInput[],
-  cwd: string,
-  showLineNumbers: boolean | undefined,
+  targets: ReadToolInput["targets"],
   recursive: boolean | undefined,
 ): string {
-  const visible = targets.slice(0, 2).map((target) => formatTarget(target, cwd, showLineNumbers));
-  let label = visible.join(", ");
-  if (targets.length > visible.length) {
-    label += ` +${targets.length - visible.length}`;
-  }
+  let label = pluralize(targets.length, "target", "targets");
   if (recursive === true) {
     label += " [recursive]";
   }
   return label;
 }
 
-function countKind(targets: readonly ReadTargetDetails[], kind: ReadTargetDetails["kind"]): number {
-  return targets.filter((target) => target.kind === kind).length;
+function createCollapsedHeaderComponent(
+  theme: Theme,
+  background: ThemeBg,
+  contentLines: string[],
+): CollapsedHeaderComponent {
+  let currentTheme = theme;
+  let currentBackground = background;
+  let currentContentLines = contentLines;
+
+  return {
+    setTheme(nextTheme) {
+      currentTheme = nextTheme;
+    },
+    setBackground(nextBackground) {
+      currentBackground = nextBackground;
+    },
+    setContentLines(nextContentLines) {
+      currentContentLines = nextContentLines;
+    },
+    render(width) {
+      if (width <= 0) {
+        return [];
+      }
+
+      const blankLine = currentTheme.bg(currentBackground, " ".repeat(width));
+      if (width <= 2) {
+        return new Array(currentContentLines.length + 2).fill(blankLine);
+      }
+
+      const lines = [blankLine];
+      for (const contentLine of currentContentLines) {
+        const inner = truncateToWidth(contentLine, width - 2, "...", true);
+        lines.push(currentTheme.bg(currentBackground, ` ${inner} `));
+      }
+      lines.push(blankLine);
+      return lines;
+    },
+    invalidate() {},
+  };
 }
 
-function summarizeDetails(details: EnhancedReadDetails): {
-  status: "success" | "warning";
-  label: string;
-} {
-  const errors = countKind(details.targets, "error");
+function isCollapsedHeaderComponent(value: unknown): value is CollapsedHeaderComponent {
+  return typeof value === "object" && value !== null && "setContentLines" in value;
+}
+
+function getRenderState(state: unknown): ReadRenderState {
+  if (typeof state !== "object" || state === null) {
+    throw new Error("read expected an object render state");
+  }
+  return state;
+}
+
+function renderTargetSummary(target: ReadTargetDetails, theme: Theme): string {
+  let detail: string;
+  switch (target.kind) {
+    case "file":
+      detail = `${target.lineCount ?? 0}L`;
+      break;
+    case "directory":
+      detail = pluralize(target.entryCount ?? 0, "entry", "entries");
+      break;
+    case "image":
+      detail = "image";
+      break;
+    case "error":
+      detail = "failed";
+      break;
+    default:
+      detail = "";
+  }
+  if (target.truncated === true) {
+    detail += `${detail.length > 0 ? ", " : ""}truncated`;
+  }
+  return `${theme.fg("accent", target.path)}${theme.fg("dim", ` (${detail})`)}`;
+}
+
+function summarizeDetails(details: EnhancedReadDetails): CollapsedSummary {
   const truncated =
     details.targets.some((target) => target.truncated === true) ||
     details.directoryEntryLimitReached === true;
 
-  let label: string;
-  if (details.targets.length === 1) {
-    const [target] = details.targets;
-    if (target === undefined) {
-      label = "empty";
-    } else if (target.kind === "directory") {
-      label = pluralize(target.entryCount ?? 0, "entry", "entries");
-    } else if (target.kind === "image") {
-      label = "image loaded";
-    } else if (target.kind === "file") {
-      label = pluralize(target.lineCount ?? 0, "line", "lines");
-    } else {
-      label = "failed";
+  return {
+    status:
+      details.targets.some((target) => target.kind === "error") || truncated
+        ? "warning"
+        : "success",
+    targets: details.targets,
+    truncated,
+  };
+}
+
+function rememberCollapsedSummary(context: RenderContextLike, summary: CollapsedSummary): void {
+  const state = getRenderState(context.state);
+  const previous = state.collapsedSummary;
+  if (
+    previous?.status === summary.status &&
+    previous.truncated === summary.truncated &&
+    previous.targets === summary.targets
+  ) {
+    return;
+  }
+  state.collapsedSummary = summary;
+  context.invalidate();
+}
+
+function buildCollapsedCallLines(
+  target: string,
+  summary: CollapsedSummary | undefined,
+  theme: Theme,
+  expanded: boolean,
+  executionStarted: boolean,
+): string[] {
+  let title = theme.fg("toolTitle", theme.bold("read"));
+  title += ` ${theme.fg("accent", target)}`;
+
+  if (!expanded && summary !== undefined) {
+    if (summary.targets.length > 1) {
+      if (summary.truncated) {
+        title += theme.fg("warning", " [truncated]");
+      }
+      return [title, ...summary.targets.map((item) => renderTargetSummary(item, theme))];
     }
-  } else {
-    label = pluralize(details.targets.length, "target", "targets");
-    if (errors > 0) {
-      label += `, ${errors} failed`;
+
+    const [singleTarget] = summary.targets;
+    if (singleTarget !== undefined) {
+      title += theme.fg("muted", " -> ");
+      title += renderTargetSummary(singleTarget, theme);
     }
+    return [title];
   }
 
-  if (truncated) {
-    label += " [truncated]";
+  if (!expanded && executionStarted) {
+    title += theme.fg("warning", " ...");
   }
-  return { status: errors > 0 || truncated ? "warning" : "success", label };
+  return [title];
+}
+
+function renderCollapsedCall(
+  theme: Theme,
+  context: RenderContextLike,
+  target: string,
+): CollapsedHeaderComponent {
+  const state = getRenderState(context.state);
+  const summary = state.collapsedSummary;
+  const background = context.isError
+    ? "toolErrorBg"
+    : summary?.status === "success"
+      ? "toolSuccessBg"
+      : "toolPendingBg";
+  const lines = buildCollapsedCallLines(
+    target,
+    summary,
+    theme,
+    context.expanded,
+    context.executionStarted,
+  );
+  const component =
+    (isCollapsedHeaderComponent(context.lastComponent) ? context.lastComponent : undefined) ??
+    state.callComponent ??
+    createCollapsedHeaderComponent(theme, background, lines);
+  state.callComponent = component;
+  component.setTheme(theme);
+  component.setBackground(background);
+  component.setContentLines(lines);
+  return component;
+}
+
+function syncCollapsedCallComponent(theme: Theme, context: RenderContextLike): void {
+  const component = getRenderState(context.state).callComponent;
+  if (component === undefined) {
+    return;
+  }
+  const args = context.args;
+  component.setTheme(theme);
+  component.setBackground(
+    context.isError
+      ? "toolErrorBg"
+      : getRenderState(context.state).collapsedSummary?.status === "success"
+        ? "toolSuccessBg"
+        : "toolPendingBg",
+  );
+  component.setContentLines(
+    buildCollapsedCallLines(
+      formatCallTarget(args.targets, args.recursive),
+      getRenderState(context.state).collapsedSummary,
+      theme,
+      context.expanded,
+      context.executionStarted,
+    ),
+  );
 }
 
 function getTextOutput(content: readonly { type: string; text?: string }[]): string {
@@ -158,13 +308,7 @@ export default function readToolExtension(pi: ExtensionAPI): void {
       );
     },
     renderCall(args, theme, context) {
-      return renderCollapsedCall(
-        context.lastComponent,
-        theme,
-        context,
-        "read",
-        formatCallTarget(args.targets, context.cwd, args.show_line_numbers, args.recursive),
-      );
+      return renderCollapsedCall(theme, context, formatCallTarget(args.targets, args.recursive));
     },
     renderResult(result, options, theme, context) {
       if (options.expanded || options.isPartial || context.isError) {
@@ -172,7 +316,8 @@ export default function readToolExtension(pi: ExtensionAPI): void {
       }
 
       rememberCollapsedSummary(context, summarizeDetails(result.details));
-      return emptyCompactText(context.lastComponent);
+      syncCollapsedCallComponent(theme, context);
+      return setCompactText(context.lastComponent, "");
     },
   });
 

@@ -2,8 +2,9 @@
  * Publishes each Pi process' work state for the Waybar Pi agents module.
  *
  * The extension writes one small per-process state file under XDG_RUNTIME_DIR so
- * external status bars can count agents that are actively running an agent turn
- * or compaction without scraping terminal UI or guessing from process names.
+ * external status bars can count agents that are actively running an agent turn,
+ * compaction, or branch summary without scraping terminal UI or guessing from
+ * process names.
  */
 import { mkdir, rm, writeFile, rename } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -66,6 +67,16 @@ export default function waybarAgentStatusExtension(pi: ExtensionAPI): void {
     if (!event.willRetry) {
       await writeState("idle", ctx);
     }
+  });
+
+  pi.on("session_before_tree", async (event, ctx) => {
+    if (event.preparation.userWantsSummary && event.preparation.entriesToSummarize.length > 0) {
+      await writeState("working", ctx);
+    }
+  });
+
+  pi.on("session_tree", async (_event, ctx) => {
+    await writeState("idle", ctx);
   });
 
   pi.on("agent_settled", async (_event, ctx) => {

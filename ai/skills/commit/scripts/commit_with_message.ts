@@ -128,6 +128,20 @@ export function buildCommitArgs(message: string, options: CommitOptions): string
   return args;
 }
 
+export function buildAmendArgs(message: string, options: CommitOptions): string[] {
+  const lines = message.split("\n");
+  const subject = lines[0] ?? "";
+  const body = lines.slice(2).join("\n").trimEnd();
+
+  // --only with --amend preserves any staged changes instead of folding them
+  // into the rewritten commit.
+  const args = ["commit", "--amend", "--only"];
+  if (options.noVerify) args.push("--no-verify");
+  args.push("-m", subject);
+  if (body) args.push("-m", body);
+  return args;
+}
+
 async function commitMessage(message: string, options: CommitOptions): Promise<GitCommandResult> {
   const args = buildCommitArgs(message, options);
   return await runGit(args);

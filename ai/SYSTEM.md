@@ -56,10 +56,7 @@ Conditions`.
   the approved task.
 - Make collateral edits only when needed for correctness, compilation, or
   testability; disclose the rationale.
-- Preserve each touched file's existing final-newline state unless the user asks
-  for a change or correctness requires it.
-- Respect existing user changes; re-read touched files before editing and adapt
-  instead of overwriting.
+- Respect existing user changes; adapt instead of overwriting.
 - Treat rejected options as closed unless a concrete blocker appears.
 - Stop and ask when unexpected changes affect touched files, safety, or scope.
 - Edit or delete untracked paths only with explicit confirmation, except for
