@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { constants as fsConstants } from "node:fs";
-import { access, readFile, readdir, rename } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { createInterface } from "node:readline/promises";
@@ -17,6 +16,15 @@ import {
   type OpenAICodexUsageCredential,
   fetchUsageSnapshotForCredential,
 } from "./extensions/openai-codex/usage.ts";
+import {
+  type AccountProfile,
+  createNewAccountProfile,
+  finalizeNewAccountProfile,
+  findNewAccountProfile,
+  listAccountProfiles,
+  readActiveProfileName,
+  writeActiveProfileName,
+} from "./runtime/account-profiles.ts";
 
 const usage = `ai [account] [-- <pi args...>]
 
@@ -27,8 +35,8 @@ Examples:
 
 Notes:
   - By default, ai appends ai/SYSTEM.md.
-  - \`account\` selects the OpenAI Codex login in ai/pi/auth.json and then opens Pi.
-  - Saved accounts are stored as <accountId>.auth.json next to auth.json.
+  - \`account\` selects an isolated OpenAI Codex credential profile and then opens Pi.
+  - Each profile has its own auth.json, so changing accounts does not affect existing chats.
   - Use \`ai -- --help\` to show Pi CLI docs.`;
 
 const accelOs = process.env["ACCEL_OS"];
@@ -37,8 +45,9 @@ if (accelOs === undefined || accelOs.length === 0) {
   process.exit(1);
 }
 
+const configDir = path.join(accelOs, "ai", "pi");
 const appendSystemPromptPath = path.join(accelOs, "ai", "SYSTEM.md");
-const accountUsageTimeoutMs = 20000;
+const accountUsageTimeoutMs = 20_000;
 const authFileSchema = Type.Record(Type.String(), Type.Unknown());
 
 const defaultToolNames = [
@@ -57,6 +66,28 @@ const defaultToolNames = [
   // "ls",
 ];
 
+type AccountInfo = {
+  id: string;
+  email: string;
+  plan: string;
+  profile: AccountProfile;
+  isCurrent: boolean;
+  accessToken?: string;
+};
+
+type AccountAction =
+  | { kind: "noop"; labelLines: string[]; account: AccountInfo }
+  | { kind: "new"; labelLines: string[] }
+  | { kind: "switch"; labelLines: string[]; account: AccountInfo };
+
+const writeStdout = (message: string): void => {
+  process.stdout.write(`${message}\n`);
+};
+
+const writeStderr = (message: string): void => {
+  process.stderr.write(`${message}\n`);
+};
+
 const hasExplicitToolSelection = (args: readonly string[]): boolean => {
   return args.some(
     (arg) => arg === "--tools" || arg.startsWith("--tools=") || arg === "--no-tools",
@@ -71,106 +102,39 @@ const buildAppendArgs = (passthrough: readonly string[]): string[] => {
   return appendArgs;
 };
 
-type AccountInfo = {
-  id: string;
-  email: string;
-  plan: string;
-  path: string;
-  isCurrent: boolean;
-  accessToken?: string;
-};
-
-type AccountAction =
-  | { kind: "noop"; labelLines: string[] }
-  | { kind: "new"; labelLines: string[] }
-  | { kind: "switch"; labelLines: string[]; target: AccountInfo };
-
-type LoadedAccount =
-  | { kind: "ok"; filePath: string; info: AccountInfo }
-  | { kind: "error"; filePath: string; message: string };
-
-const writeStdout = (message: string): void => {
-  process.stdout.write(`${message}\n`);
-};
-
-const writeStderr = (message: string): void => {
-  process.stderr.write(`${message}\n`);
-};
-
-const isErrnoException = (value: unknown): value is NodeJS.ErrnoException => {
-  return value instanceof Error && "code" in value;
-};
-
-const fileExists = async (filePath: string): Promise<boolean> => {
-  try {
-    await access(filePath, fsConstants.F_OK);
-    return true;
-  } catch (err: unknown) {
-    if (isErrnoException(err) && err.code === "ENOENT") {
-      return false;
-    }
-    throw err;
-  }
-};
-
-const resolveAuthDir = async (): Promise<string> => {
-  const direct = path.join(accelOs, "ai", "pi");
-  if (await fileExists(direct)) {
-    return direct;
-  }
-  throw new Error(`missing ai/pi under ${accelOs}`);
-};
-
-const parseAccountInfo = (raw: string, filePath: string, isCurrent: boolean): AccountInfo => {
-  const parsed = parseJsonWithSchema(raw, authFileSchema, filePath);
+const parseAccountInfo = (
+  raw: string,
+  profile: AccountProfile,
+  isCurrent: boolean,
+): AccountInfo => {
+  const parsed = parseJsonWithSchema(raw, authFileSchema, profile.authPath);
 
   const credential = parseOpenAICodexCredential(parsed["openai-codex"]);
   if (credential === null) {
-    throw new Error(`missing openai-codex OAuth credential in ${filePath}`);
+    throw new Error(`missing openai-codex OAuth credential in ${profile.authPath}`);
   }
 
-  const profile = resolveOpenAICodexRuntimeAccountProfile(credential, credential.access);
-  const accountId = profile.accountId;
-  if (accountId === undefined || accountId.length === 0) {
-    throw new Error(`missing openai-codex.accountId in ${filePath}`);
+  const account = resolveOpenAICodexRuntimeAccountProfile(credential, credential.access);
+  const id = account.accountId;
+  if (id === undefined || id.length === 0) {
+    throw new Error(`missing openai-codex.accountId in ${profile.authPath}`);
   }
 
-  const email = profile.email ?? "unknown";
-  const plan = profile.plan ?? "unknown";
-
-  const account: AccountInfo = { id: accountId, email, plan, path: filePath, isCurrent };
+  const info: AccountInfo = {
+    id,
+    email: account.email ?? "unknown",
+    plan: account.plan ?? "unknown",
+    profile,
+    isCurrent,
+  };
   if (credential.access !== undefined && credential.access.length > 0) {
-    account.accessToken = credential.access;
+    info.accessToken = credential.access;
   }
-  return account;
+  return info;
 };
 
-const loadAccount = async (filePath: string, isCurrent: boolean): Promise<AccountInfo> => {
-  const raw = await readFile(filePath, "utf8");
-  return parseAccountInfo(raw, filePath, isCurrent);
-};
-
-const formatAccountActionLines = (account: AccountInfo, usageSummary: string): string[] => {
-  const currentMarker = account.isCurrent ? "*" : " ";
-  return [
-    `${currentMarker} ${account.email} (${account.plan})`,
-    `  id: ${account.id}`,
-    `  ${usageSummary}`,
-  ];
-};
-
-const renderAction = (action: AccountAction, index: number): void => {
-  const prefix = `  ${index + 1}) `;
-  const continuationPrefix = " ".repeat(prefix.length);
-  const firstLine = action.labelLines[0];
-  if (firstLine === undefined) {
-    return;
-  }
-
-  writeStdout(`${prefix}${firstLine}`);
-  for (const line of action.labelLines.slice(1)) {
-    writeStdout(`${continuationPrefix}${line}`);
-  }
+const loadAccount = async (profile: AccountProfile, isCurrent: boolean): Promise<AccountInfo> => {
+  return parseAccountInfo(await readFile(profile.authPath, "utf8"), profile, isCurrent);
 };
 
 const resolveUsageIdentityValue = (value: string): string | undefined => {
@@ -224,6 +188,28 @@ const fetchAccountUsageSummaries = async (
   return new Map(entries);
 };
 
+const formatAccountActionLines = (account: AccountInfo, usageSummary: string): string[] => {
+  const currentMarker = account.isCurrent ? "*" : " ";
+  return [
+    `${currentMarker} ${account.email} (${account.plan})`,
+    `  id: ${account.id}`,
+    `  ${usageSummary}`,
+  ];
+};
+
+const renderAction = (action: AccountAction, index: number): void => {
+  const prefix = `  ${index + 1}) `;
+  const continuationPrefix = " ".repeat(prefix.length);
+  const firstLine = action.labelLines[0];
+  if (firstLine === undefined) {
+    return;
+  }
+  writeStdout(`${prefix}${firstLine}`);
+  for (const line of action.labelLines.slice(1)) {
+    writeStdout(`${continuationPrefix}${line}`);
+  }
+};
+
 const promptChoice = async (count: number): Promise<number> => {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -241,92 +227,82 @@ const promptChoice = async (count: number): Promise<number> => {
   }
 };
 
-const renameCurrent = async (current: AccountInfo, authDir: string): Promise<string> => {
-  const targetPath = path.join(authDir, `${current.id}.auth.json`);
-  if (await fileExists(targetPath)) {
-    throw new Error(`refusing to overwrite ${targetPath}`);
+async function prepareAccountProfiles(): Promise<{
+  profiles: AccountProfile[];
+  activeProfileName?: string;
+}> {
+  let activeProfileName = await readActiveProfileName(configDir);
+  const pending = await findNewAccountProfile(configDir);
+  if (pending !== undefined) {
+    try {
+      const pendingAccount = await loadAccount(pending, false);
+      const finalized = await finalizeNewAccountProfile(configDir, pendingAccount.id);
+      if (finalized !== undefined && activeProfileName === pending.name) {
+        activeProfileName = finalized.name;
+        await writeActiveProfileName(configDir, activeProfileName);
+      }
+    } catch (error: unknown) {
+      if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) {
+        throw error;
+      }
+    }
   }
-  await rename(current.path, targetPath);
-  return targetPath;
-};
 
-const runAccountSwitcher = async (): Promise<void> => {
+  const profiles = await listAccountProfiles(configDir);
+  if (
+    activeProfileName !== undefined &&
+    !profiles.some((profile) => profile.name === activeProfileName)
+  ) {
+    activeProfileName = undefined;
+  }
+  if (activeProfileName === undefined && profiles.length === 1) {
+    const profile = profiles[0];
+    if (profile !== undefined) {
+      activeProfileName = profile.name;
+      await writeActiveProfileName(configDir, activeProfileName);
+    }
+  }
+
+  return activeProfileName === undefined ? { profiles } : { profiles, activeProfileName };
+}
+
+async function getActiveAccountProfile(): Promise<AccountProfile> {
+  const { profiles, activeProfileName } = await prepareAccountProfiles();
+  const active = profiles.find((profile) => profile.name === activeProfileName);
+  if (active !== undefined) {
+    return active;
+  }
+  if (profiles.length === 0) {
+    const profile = await createNewAccountProfile(configDir);
+    await writeActiveProfileName(configDir, profile.name);
+    return profile;
+  }
+  throw new Error("multiple account profiles exist; run `ai account` to select one");
+}
+
+async function runAccountSwitcher(): Promise<AccountProfile> {
   if (!process.stdin.isTTY) {
     throw new Error("account switcher requires a TTY");
   }
 
-  const authDir = await resolveAuthDir();
-  const currentPath = path.join(authDir, "auth.json");
-  const hasCurrent = await fileExists(currentPath);
-  let current: AccountInfo | null = null;
-  if (hasCurrent) {
-    current = await loadAccount(currentPath, true);
-  }
-
-  const accounts: AccountInfo[] = [];
-  const seen = new Set<string>();
-  if (current !== null) {
-    accounts.push(current);
-    seen.add(current.id);
-  }
-
-  const entries = await readdir(authDir, { withFileTypes: true });
-  const candidates = entries
-    .filter((entry) => entry.isFile())
-    .filter((entry) => entry.name.endsWith(".auth.json") && entry.name !== "auth.json")
-    .filter((entry) => !entry.name.includes(".backup."))
-    .map((entry) => ({ filePath: path.join(authDir, entry.name) }));
-
-  const loadedAccounts: LoadedAccount[] = await Promise.all(
-    candidates.map(async ({ filePath }) => {
-      try {
-        return { kind: "ok", filePath, info: await loadAccount(filePath, false) };
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return { kind: "error", filePath, message };
-      }
-    }),
+  const { profiles, activeProfileName } = await prepareAccountProfiles();
+  const accounts = await Promise.all(
+    profiles.map(async (profile) => await loadAccount(profile, profile.name === activeProfileName)),
   );
-
-  for (const loaded of loadedAccounts) {
-    if (loaded.kind === "error") {
-      writeStderr(`Skipping ${loaded.filePath}: ${loaded.message}`);
-      continue;
-    }
-    if (seen.has(loaded.info.id)) {
-      writeStderr(`Skipping duplicate account id ${loaded.info.id} in ${loaded.filePath}`);
-      continue;
-    }
-    seen.add(loaded.info.id);
-    accounts.push(loaded.info);
-  }
-
-  if (accounts.length === 0) {
-    throw new Error(`no auth files found in ${authDir}`);
-  }
 
   writeStdout("Loading usage...");
   const usageByAccountId = await fetchAccountUsageSummaries(accounts);
 
   writeStdout("Select account:");
   writeStdout("");
-  const actions: AccountAction[] = [];
-  for (const account of accounts) {
+  const actions: AccountAction[] = accounts.map((account) => {
     const usageSummary = usageByAccountId.get(account.id) ?? "usage unavailable";
     const labelLines = formatAccountActionLines(account, usageSummary);
-    if (account.isCurrent) {
-      actions.push({ kind: "noop", labelLines });
-    } else {
-      actions.push({
-        kind: "switch",
-        labelLines,
-        target: account,
-      });
-    }
-  }
-  if (current !== null) {
-    actions.push({ kind: "new", labelLines: ["+ new account"] });
-  }
+    return account.isCurrent
+      ? { kind: "noop", labelLines, account }
+      : { kind: "switch", labelLines, account };
+  });
+  actions.push({ kind: "new", labelLines: ["+ new account"] });
 
   actions.forEach((action, index) => {
     renderAction(action, index);
@@ -335,34 +311,25 @@ const runAccountSwitcher = async (): Promise<void> => {
     }
   });
 
-  const choice = await promptChoice(actions.length);
-  const selected = actions[choice];
+  const selected = actions[await promptChoice(actions.length)];
   if (selected === undefined) {
     throw new Error("invalid selection");
   }
+  if (selected.kind === "new") {
+    const profile = await createNewAccountProfile(configDir);
+    await writeActiveProfileName(configDir, profile.name);
+    writeStdout("New account profile selected. Run /login and choose OpenAI Codex.");
+    return profile;
+  }
+
+  await writeActiveProfileName(configDir, selected.account.profile.name);
   if (selected.kind === "noop") {
     writeStdout("Account already active.");
-    return;
+  } else {
+    writeStdout(`Selected ${selected.account.id}.`);
   }
-  if (current === null) {
-    if (selected.kind !== "switch") {
-      throw new Error("no current account to rename");
-    }
-    await rename(selected.target.path, currentPath);
-    writeStdout(`Switched to ${selected.target.id}.`);
-    return;
-  }
-
-  if (selected.kind === "new") {
-    const renamed = await renameCurrent(current, authDir);
-    writeStdout(`Renamed ${current.path} to ${renamed}.`);
-    return;
-  }
-
-  const renamed = await renameCurrent(current, authDir);
-  await rename(selected.target.path, currentPath);
-  writeStdout(`Switched to ${selected.target.id}. Previous stored at ${renamed}.`);
-};
+  return selected.account.profile;
+}
 
 const passthrough: string[] = [];
 let parseModifiers = true;
@@ -395,18 +362,19 @@ if (showHelp) {
   process.exit(0);
 }
 
-if (useAccountSwitcher) {
-  try {
-    await runAccountSwitcher();
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    writeStderr(`ai account: ${message}`);
-    process.exit(1);
-  }
+let profile: AccountProfile;
+try {
+  profile = useAccountSwitcher ? await runAccountSwitcher() : await getActiveAccountProfile();
+} catch (error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  writeStderr(`ai: ${message}`);
+  process.exit(1);
 }
 
 const cwd = process.env["AI_CWD"] ?? process.cwd();
 process.chdir(cwd);
+process.env["PI_CODING_AGENT_DIR"] = profile.directory;
+process.env["PI_CODING_AGENT_SESSION_DIR"] = path.join(configDir, "sessions");
 
 const appendArgs = buildAppendArgs(passthrough);
 const { main } = await import("@earendil-works/pi-coding-agent");

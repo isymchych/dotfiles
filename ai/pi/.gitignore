@@ -1,5 +1,5 @@
-auth.json
-*.auth.json
+active-account.json
+profiles/
 sessions/
 mcp-cache.json
 mcp-onboarding.json

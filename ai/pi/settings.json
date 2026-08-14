@@ -4,14 +4,14 @@
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "high",
+  "defaultModel": "gpt-5.6-terra",
+  "defaultThinkingLevel": "medium",
   "autocompleteMaxVisible": 16,
   "skills": [
-    "../skills"
+    "./skills"
   ],
   "packages": [
-    "../../node_modules/pi-mcp-adapter"
+    "../../../../node_modules/pi-mcp-adapter"
   ],
   "extensions": [
     "./extensions/apply-patch/index.ts",
@@ -33,7 +33,7 @@
     "./extensions/write-file/index.ts"
   ],
   "prompts": [
-    "../prompts"
+    "./prompts"
   ],
   "retry": {
     "enabled": true,

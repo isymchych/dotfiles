@@ -325,8 +325,11 @@ for_window [app_id="bluetui"] floating enable, resize set width 60 ppt height 60
 # KEYBINDINGS
 
 # control currently active player
-bindsym --locked XF86AudioPlay exec swayosd-client --playerctl play
-bindsym --locked XF86AudioPause exec swayosd-client --playerctl pause
+bindsym --locked XF86AudioPlay exec swayosd-client --playerctl play-pause
+bindsym --locked XF86AudioPause exec swayosd-client --playerctl play-pause
+bindsym --locked XF86AudioNext exec swayosd-client --playerctl next
+bindsym --locked XF86AudioPrev exec swayosd-client --playerctl prev
+bindsym --locked XF86AudioStop exec swayosd-client --playerctl stop
 
 # Increase volume
 bindsym --locked XF86AudioRaiseVolume exec swayosd-client --output-volume raise
