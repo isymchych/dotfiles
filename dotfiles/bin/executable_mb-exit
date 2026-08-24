@@ -13,13 +13,13 @@ halt
 poweroff"
 
 confirm() {
-  wofi --dmenu <<EOF | grep -q '^yes$'
+  fuzzel --dmenu --only-match <<EOF | grep -q '^yes$'
 no
 yes
 EOF
 }
 
-res=$(echo "$cases" | wofi --dmenu)
+res=$(printf '%s\n' "$cases" | fuzzel --dmenu --only-match)
 
 case "$res" in
     "lock screen")

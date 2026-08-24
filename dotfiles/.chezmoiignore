@@ -30,6 +30,7 @@ bin/completions/_mb-spotify
 .Xdefaults
 .config/chromium-flags.conf
 .config/darkman/**
+.config/fuzzel/**
 .config/gtk-3.0/**
 .config/kanshi/**
 .config/mako/**
@@ -40,7 +41,6 @@ bin/completions/_mb-spotify
 .config/systemd/**
 .config/sway/**
 .config/waybar/**
-.config/wofi/**
 .config/xdg-desktop-portal/**
 .config/zathura/**
 .local/share/applications/**

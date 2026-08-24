@@ -17,7 +17,7 @@ packages:
           - xorg-xrdb
           - wmname
           - kitty
-          - wofi
+          - fuzzel
           - libnotify
 
         desktop_integration:
@@ -54,7 +54,6 @@ packages:
         clipboard:
           - cliphist
           - wl-clipboard
-          - fuzzel
           - zenity
           - file
 

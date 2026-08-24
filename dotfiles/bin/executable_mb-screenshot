@@ -52,7 +52,7 @@ timestamp="$(date +%Y%m%d_%H%M%S_%3N)"
 screenshot_outfile="$screenshots_dir/screenshot_${timestamp}.png"
 
 if [[ "$capture_mode" == "menu" ]]; then
-  capture_mode="$(printf '%s\n' screen window region | wofi --dmenu)"
+  capture_mode="$(printf '%s\n' screen window region | fuzzel --dmenu --only-match)"
 fi
 
 case "$capture_mode" in
