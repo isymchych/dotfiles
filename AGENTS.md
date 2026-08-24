@@ -87,6 +87,7 @@
 - For local npm workspace dependencies, use the package's declared version such as `"0.0.0"`; do not use the `workspace:` protocol because npm does not support it.
 - For Pi constrained tool sampling, enable strict JSON-schema sampling only on schemas compatible with provider strict mode; OpenAI strict tools require every declared property to be listed in `required`, so TypeBox optional properties need nullable-normalization or must remain non-strict.
 - Keep Zsh completion functions for `mb-*` commands in `dotfiles/bin/completions/`; `~/bin/completions` was added to `fpath` before `compinit` so ChezMoi installs and Zsh discovers them together.
+- Treat `dotfiles/.chezmoidata/packages.yaml` as the source of truth for packages required by tracked Linux desktop configuration; keep `docs/linux/README.md` focused on bootstrap, manual, hardware-specific, and optional setup instead of duplicating that inventory.
 
 ## Pi Configuration
 

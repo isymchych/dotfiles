@@ -96,67 +96,37 @@ $ chmod 600 ~/.ssh/key
 
 ## Environment
 
-- sway
-- ttf-dejavu
-- noto-fonts, noto-fonts-emoji - Noto fonts
-- swaylock
-- swayidle
-- waybar, otf-font-awesome, ttf-jetbrains-mono-nerd
-- xorg-xwayland
-- kanshi - automatically switch display configurations
-- wl-clipboard - cli tools for interacting with clipboard
-- cliphist - clipboard manager
-- mako - notification daemon; enable and start mako service
-- swayosd - on-screen display for volume, brightness, and media; `swayosd-server` is started by `sway-session.target`
-- darkman - enable dark mode on sunset
-- wev - monitor keypresses, like xev
-- wtype - xdotool type for wayland
-- libnotify
-- light - to control backlight
+Packages required by the tracked Sway session, user services, and `mb-*`
+desktop helpers are installed automatically from
+`dotfiles/.chezmoidata/packages.yaml`. Keep that manifest as the source of truth
+instead of duplicating its package inventory here.
+
+Notable configured behavior:
+
+- `cliphist`, `darkman`, `kanshi`, `mako`, `swayidle`, `swayosd`, and
+  `wlsunset` are started by `sway-session.target`.
+- `$mod+i` opens clipboard history; `Ctrl+T` switches between history and
+  templates.
+- Clipboard templates are regular files in
+  `~/.config/mb-clipboard/templates/`.
+- The configured terminal backend is installed with the Sway package group;
+  change both `~/bin/xterm` and the package manifest when switching backends.
+
+Manual and hardware-specific setup:
+
+- Build and install the repo-local `mb-bin-tools` package after setting the
+  Rust toolchain to stable:
+
+  ```
+  $ cd "$ACCEL_OS/bin-tools"
+  $ just prod-build-install
+  ```
+
 - gnome-keyring, seahorse - GUI for storing & unlocking SSH keys
   - To automatically unlock gnome-keyring on login, edit `/etc/pam.d/greetd`:
   - Add `auth optional pam_gnome_keyring.so` at the end of the `auth` section
   - Add `session optional pam_gnome_keyring.so auto_start` at the end of the `session` section
   - For git/ssh integration enable the gcr-ssh-agent <https://wiki.archlinux.org/title/GNOME/Keyring>
-- polkit-gnome - allow apps to ask for root password if needed
-- xorg-xrdb
-- xorg-xhost
-- wmname
-- qt5ct - qt5 configuration tool
-- terminal - configs invoke the `~/bin/xterm` shim
-  - alacritty
-  - OR ghostty
-  - OR wezterm
-  - OR kitty
-- wlsunset - adjust display color temperature at night
-- udiskie - automounter for removable media
-- network-manager-applet - network manager applet
-- nm-connection-editor, networkmanager-openvpn, libnma-gtk4 - network manager ui
-- pavucontrol - pulseaudio utils
-- wofi - command runner
-- gsimplecal - calendar
-- grim - capture the screenshot
-- slurp - select the part of the screen
-- satty - simple drawing on top of images
-- wf-recorder - record the screen
-- kooha - simple GUI for recording the screen
-- yazi - file manager
-- p7zip - 7z/zip cli archiver for yazi
-- translate-shell - Google Translate
-- playerctl - CLI to control MPRIS-compatible players (including browsers)
-- rofimoji - pick & insert emoji
-- android-file-transfer - MTP client for android to browse & send files
-- systemctl-tui - TUI for systemctl services & their logs
-
-- gnome-themes-extra - needed for dark theme
-- adwaita, adwaita-qt5 (gtk default) - GTK3 theme
-- papirus-icon-theme - icon theme
-- ttc-iosevka, ttf-iosevka-nerd, ttf-iosevkaterm-nerd - Iosevka Term mono font
-
-<!-- * nordic - dark GTK3 theme -->
-<!-- * ttf-jetbrains-mono - JetBrains Mono font -->
-<!-- * ttf-droid - Droid font -->
-<!-- * ttf-fira-mono - Fira Mono font -->
 
 - interception-caps2esc - bind CapsLock to Escape while pressing and to Control while holding
   - copy `caps-to-esc-and-ctrl.yaml` into `/etc/interception/udevmon.d/`
@@ -167,14 +137,22 @@ $ chmod 600 ~/.ssh/key
   - start and enable bluetooth service
   - start and enable mpris-proxy user service
 
-- trash-cli
-- libsecret
-- xdg-utils
-- imagemagick
-- xdg-desktop-portal-xapp
-- xdg-desktop-portal-wlr - for screensharing
-  - enable pipewire user service
-  - enable chrome://flags/#enable-webrtc-pipewire-capturer
+- Browser screen sharing uses `xdg-desktop-portal-wlr`.
+  - enable the PipeWire user service
+  - enable `chrome://flags/#enable-webrtc-pipewire-capturer`
+
+Optional desktop tools not installed automatically:
+
+- `wev`, `wtype`, `xorg-xhost`
+- `nm-connection-editor`, `networkmanager-openvpn`, `libnma-gtk4`
+- `kooha`, `android-file-transfer`, `systemctl-tui`
+- `ttf-dejavu`, `gnome-themes-extra`, `adwaita-qt5`, `papirus-icon-theme`
+- `ttc-iosevka`, `ttf-iosevka-nerd`, `ttf-iosevkaterm-nerd`
+
+<!-- * nordic - dark GTK3 theme -->
+<!-- * ttf-jetbrains-mono - JetBrains Mono font -->
+<!-- * ttf-droid - Droid font -->
+<!-- * ttf-fira-mono - Fira Mono font -->
 
 - run `rustup default stable`
 - for backlight, add user to video group; https://wiki.archlinux.org/index.php/Backlight#ACPI

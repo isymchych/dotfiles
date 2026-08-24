@@ -2,41 +2,105 @@ packages:
   linux:
     arch:
       pacman:
-        - yazi        # mb-file-manager backend; install unarchiver plugin for previews
-        - python-gobject # mb-file-manager FileManager1 D-Bus support
-        - ripgrep     # fast project search
-        - fd          # ergonomic file finder
-        - tokei       # code line counts
-        - just        # task runner
-        - fzf         # fuzzy matcher
-        - wget        # HTTP(S) downloads
-        - htop        # system monitor
-        - gitui       # TUI for git
-        - git-delta   # git diff viewer
-        - difftastic  # syntax-aware diffs
-        - television  # fuzzy file finder / search
-        - lazydocker  # TUI for Docker
-        - sad         # structural search/replace, with preview
-        - editorconfig-core-c
+        sway_session:
+          - sway
+          - xorg-xwayland
+          - waybar
+          - swaylock
+          - swayidle
+          - kanshi
+          - mako
+          - swayosd
+          - wlsunset
+          - darkman
+          - polkit-gnome
+          - xorg-xrdb
+          - wmname
+          - kitty
+          - wofi
+          - libnotify
 
-        # sway
-        - swayosd     # on-screen display for volume, brightness, media, and mode hints
+        desktop_integration:
+          - network-manager-applet
+          - udiskie
+          - pipewire
+          - pipewire-pulse
+          - pavucontrol
+          - power-profiles-daemon
+          - xdg-desktop-portal
+          - xdg-desktop-portal-gtk
+          - xdg-desktop-portal-wlr
+          - xdg-utils
+          - gnome-keyring
+          - libsecret
+          - seahorse
+          - qt5ct
 
-        # emacs
-        - aspell
-        - aspell-en
-        - aspell-uk
-        - emacs-wayland
+        desktop_features:
+          - grim
+          - slurp
+          - satty
+          - wf-recorder
+          - imagemagick
+          - jq
+          - translate-shell
+          - gsimplecal
+          - playerctl
+          - trash-cli
 
-        # zsh
-        - starship    # shell prompt
-        - noto-fonts-emoji # emoji-capable font
-        - zsh-completions
-        - zsh-autosuggestions
-        - zsh-syntax-highlighting
+        hardware_helpers:
+          - xorg-xinput
 
-        # fonts
-        - noto-fonts-cjk # CJK fonts
-      aur:
-        - mergiraf    # semantic merge driver
-        - rainfrog    # CLI database client
+        clipboard:
+          - cliphist
+          - wl-clipboard
+          - fuzzel
+          - zenity
+          - file
+
+        file_manager:
+          - yazi # mb-file-manager backend; install unarchiver plugin for previews
+          - python-gobject # mb-file-manager FileManager1 D-Bus support
+          - 7zip
+
+        cli:
+          - ripgrep # fast project search
+          - fd # ergonomic file finder
+          - tokei # code line counts
+          - just # task runner
+          - fzf # fuzzy matcher
+          - wget # HTTP(S) downloads
+          - htop # system monitor
+          - gitui # TUI for git
+          - git-delta # git diff viewer
+          - difftastic # syntax-aware diffs
+          - television # fuzzy file finder / search
+          - lazydocker # TUI for Docker
+          - sad # structural search/replace, with preview
+          - mergiraf # semantic merge driver
+          - rainfrog # CLI database client
+          - editorconfig-core-c
+
+        emacs:
+          - aspell
+          - aspell-en
+          - aspell-uk
+          - emacs-wayland
+
+        shell:
+          - starship # shell prompt
+          - zsh-completions
+          - zsh-autosuggestions
+          - zsh-syntax-highlighting
+
+        fonts:
+          - noto-fonts
+          - noto-fonts-cjk
+          - noto-fonts-emoji
+          - otf-font-awesome
+          - ttf-jetbrains-mono-nerd
+          - ttf-ubuntu-font-family
+
+      # Keep AUR packages separate so the installer requires an AUR helper only
+      # for packages unavailable from the official repositories.
+      aur: {}

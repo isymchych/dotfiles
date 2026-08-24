@@ -3,10 +3,10 @@
 pkgname=mb-bin-tools
 pkgrel=1
 pkgver="0.0.0"
-pkgdesc='CLI apps for controlling Linux laptop backlight, volume, microphone, touchpad etc.'
+pkgdesc='CLI apps for controlling Linux laptop audio and touchpad state'
 arch=(x86_64)
 license=(MIT)
-depends=(libnotify libpulse light xorg-xinput)
+depends=(libnotify libpulse xorg-xinput)
 makedepends=(cargo jq)
 options=(!debug)
 
@@ -47,6 +47,5 @@ package() {
   cd ..
 
   install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/mb-audio"
-  install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/mb-backlight"
   install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/mb-touchpad"
 }

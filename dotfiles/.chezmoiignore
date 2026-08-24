@@ -8,30 +8,44 @@ macos-defaults.sh
 {{ end }}
 
 {{ if ne .chezmoi.os "linux" }}
-.local/bin/mb-check-vulnerabilities
-.local/bin/mb-colorpicker
-.local/bin/mb-exit
-.local/bin/mb-lock-screen
-.local/bin/mb-open-80
-.local/bin/mb-player
-.local/bin/mb-run-app
-.local/bin/mb-screenshot
-.local/bin/mb-wine-cleanup-menu-entries
-.local/bin/update-pacman-mirrors.sh
+# Linux desktop commands and completions
+bin/mb-clipboard
+bin/mb-colorpicker
+bin/mb-exit
+bin/mb-file-manager
+bin/mb-lock-screen
+bin/mb-preview
+bin/mb-record
+bin/mb-run-app
+bin/mb-screenshot
+bin/mb-spotify
+bin/completions/_mb-file-manager
+bin/completions/_mb-no-args
+bin/completions/_mb-preview
+bin/completions/_mb-record
+bin/completions/_mb-screenshot
+bin/completions/_mb-spotify
+
+# Linux desktop configuration
+.Xdefaults
+.config/chromium-flags.conf
 .config/darkman/**
-.config/environment.d/**
 .config/gtk-3.0/**
 .config/kanshi/**
 .config/mako/**
+.config/mb-clipboard/**
+.config/mimeapps.list
+.config/spotify-flags.conf
 .config/swayosd/**
 .config/systemd/**
 .config/sway/**
 .config/waybar/**
 .config/wofi/**
+.config/xdg-desktop-portal/**
 .config/zathura/**
 .local/share/applications/**
 .local/share/dark-mode.d/**
+.local/share/dbus-1/**
 .local/share/light-mode.d/**
 .run-sway
-.local/share/chezmoi/run_onchange_install-packages.sh
 {{ end }}

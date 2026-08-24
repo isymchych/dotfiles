@@ -1,6 +1,6 @@
 # bin-tools
 
-CLI apps for controlling a Linux laptop backlight, volume, microphone, touchpad etc.
+CLI apps for controlling Linux laptop audio and touchpad state.
 
 # Build dependencies
 
@@ -17,4 +17,3 @@ CLI apps for controlling a Linux laptop backlight, volume, microphone, touchpad 
 - `pactl` - PulseAudio
 - `notify-send` - showing notifications
 - `swaymsg` - interacting with Sway WM
-- `light` - for controlling laptop brightness

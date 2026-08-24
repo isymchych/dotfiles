@@ -7,8 +7,10 @@
 set -euo pipefail
 
 pacman_packages=(
-{{- range .packages.linux.arch.pacman }}
+{{- range $packages := .packages.linux.arch.pacman }}
+  {{- range $packages }}
   {{ . | quote }}
+  {{- end }}
 {{- end }}
 )
 
@@ -17,8 +19,10 @@ if [ "${#pacman_packages[@]}" -gt 0 ]; then
 fi
 
 aur_packages=(
-{{- range .packages.linux.arch.aur }}
+{{- range $packages := .packages.linux.arch.aur }}
+  {{- range $packages }}
   {{ . | quote }}
+  {{- end }}
 {{- end }}
 )
 
