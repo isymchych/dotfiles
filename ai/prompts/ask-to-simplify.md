@@ -1,9 +1,8 @@
 ---
-description: Check if we can simplify code
+description: See if there are opportunities to simplify code
 ---
 
-Check the code in **$ARGUMENTS** - if we can simplify it.
-I'm trying to clean it up.
+I'd like to know if we can simplify & clean up code: **$ARGUMENTS**.
 
 Focus on:
 
@@ -15,6 +14,8 @@ Focus on:
 - module cohesion lowered by the change
 - cognitive load for the next maintainer
 - cleverness that can be avoided
+
+I'm not asking you to review the code for correctness.
 
 Output:
 Your findings and simplifications by impact, from high to low

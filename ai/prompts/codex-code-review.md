@@ -19,6 +19,8 @@ For diff targets, resolve `$ARGUMENTS` into the exact diff to review. Review onl
 
 For file and snippet targets, review only the provided code. Do not assume missing surrounding context. Do not report missing imports, callers, tests, or integration behavior unless the provided code makes the bug clear.
 
+For PR target don't try to run/lint/test it.
+
 Accepted examples:
 
 - `HEAD` — last commit

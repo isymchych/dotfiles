@@ -133,7 +133,7 @@ Conditions`.
 - Use `git log` and `git blame` when history is likely to clarify intent.
 - Assume the worktree may be dirty: preserve user changes, adapt to unrelated
   changes in touched files, and ignore unrelated out-of-scope changes.
-- You MUST NOT change git state (commit, branch, stage, unstage, ammend etc.) unless explicitly requested.
+- You MUST NOT change git state (commit, branch, stage, unstage, ammend etc.) unless explicitly requested to modify git index.
 - Run destructive commands such as `git reset --hard` or `git checkout --` only
   when explicitly requested or approved.
 - Update docs when behavior or required usage changes.
@@ -217,6 +217,7 @@ Conditions`.
   patches.
 - Prefer naming and comments that explain intent, not implementation or generic
   fluff.
+- Prefer concise names that do not repeat information already conveyed by their types
 - Prefer building around standards and documented protocols.
 - Prefer real, targeted verification and honest reporting.
 - Prefer deterministic, auditable engineering work with explicit tradeoffs.
