@@ -36,6 +36,7 @@ packages:
               - editorconfig-core-c # EditorConfig core code written in C (for use by plugins supporting EditorConfig parsing)
               - iftop # Display bandwidth usage on an interface
               - man-db # A utility for reading man pages
+              - systemctl-tui # Terminal interface for managing systemd services
               # - reflector # A Python 3 module and script to retrieve and filter the latest Pacman mirror list
               - tmux # Terminal multiplexer
               - tree # A directory listing program displaying a depth indented list of files
@@ -68,6 +69,7 @@ packages:
               - slirp4netns # User-mode networking for unprivileged network namespaces
 
             filesystems:
+              - android-file-transfer # Transfer files to and from Android devices over MTP
               - dosfstools # DOS filesystem utilities
               - mtools # A collection of utilities to access MS-DOS disks
               - ntfs-3g # NTFS FUSE driver
@@ -94,6 +96,10 @@ packages:
               - noto-fonts-emoji # Google Noto Color Emoji font
               - otf-font-awesome # Iconic font designed for Bootstrap - otf format
               - terminus-font # Monospaced bitmap font for the Linux virtual console
+              - ttc-iosevka # Iosevka typeface used by tracked application configuration
+              - ttf-dejavu # DejaVu typeface family
+              - ttf-iosevka-nerd # Nerd Fonts-patched Iosevka typeface
+              - ttf-iosevkaterm-nerd # Nerd Fonts-patched Iosevka Term typeface
               - ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
               - ttf-ubuntu-font-family # Ubuntu font family
 
@@ -123,6 +129,7 @@ packages:
               - sway # Tiling Wayland compositor and replacement for the i3 window manager
               - greetd # Generic greeter daemon
               - xorg-xwayland # run X clients under wayland
+              - xorg-xhost # Control X server access for tracked root GUI support
               - waybar # Highly customizable Wayland bar for Sway and Wlroots based compositors
               - swaylock # Screen locker for Wayland
               - swayidle # Idle management daemon for Wayland
@@ -139,7 +146,10 @@ packages:
               - libnotify # Library for sending desktop notifications
 
             desktop_integration:
+              - nm-connection-editor # Graphical NetworkManager connection editor
               - network-manager-applet # Applet for managing network connections
+              - networkmanager-openvpn # OpenVPN support for NetworkManager
+              - papirus-icon-theme # Icon theme selected by the Sway session
               - udiskie # Removable disk automounter using udisks
               - pipewire # Low-latency audio/video router and processor
               - pipewire-pulse # Low-latency audio/video router and processor - PulseAudio replacement
@@ -156,6 +166,8 @@ packages:
             desktop_features:
               - grim # Screenshot utility for Wayland
               - slurp # Select a region in a Wayland compositor
+              - wev # Inspect Wayland input events
+              - wtype # Generate keyboard input on Wayland
               - satty # Modern screenshot annotation tool, inspired by Swappy and Flameshot
               - wf-recorder # Screen recorder for wlroots-based compositors such as sway
               - imagemagick # An image viewing/manipulation program

@@ -78,9 +78,11 @@
 - Prefer named domain/result types over nested utility types such as `Promise<Awaited<ReturnType<typeof fn>>>`; explicit types keep public helper contracts readable.
 - When inspecting installed Pi package APIs in this repo, start from root-level `node_modules/@earendil-works/*/dist/*.d.ts` and exclude `*.map` from code searches because workspace dependencies are hoisted and sourcemaps make compiled output noisy.
 - When changing dotfiles behavior that introduces or depends on installed tools, update the relevant platform docs so fresh-host setup stays reproducible.
+- Before formatting files, inspect the repository's declared formatter and scripts, then use that formatter directly; do not invoke an undeclared formatter through `npx` because it can produce incompatible output or download untracked tooling.
 
 ## Intent Ledger
 
+- Preserve personal operational and application preferences in platform setup guides; this repository is a personal workstation runbook, not a general-purpose distribution guide.
 - For Sway session daemons, prefer user systemd units pulled by `sway-session.target`; keep `dotfiles/dot_config/sway/config` focused on compositor settings and keybindings.
 - For terminal-backed GUI launches in dotfiles, prefer the `xterm` shim over hardcoded terminal emulators so backend selection stays centralized.
 - When runtime helpers are needed by multiple workspaces, put them in an explicit workspace package such as `packages/shared` rather than a root-level `lib/`, so dependency ownership and imports remain clear.

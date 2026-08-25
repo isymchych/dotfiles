@@ -4,8 +4,6 @@ export ACCEL_OS := justfile_directory()
 
 alias c := check
 
-chezmoi := "chezmoi --source \"$ACCEL_OS/dotfiles\""
-
 default:
   @just --list
 
@@ -25,14 +23,3 @@ test:
   npm run test
 
 check: typecheck lint test fmt-check
-
-apply-chezmoi:
-  {{chezmoi}} apply
-
-init-chezmoi:
-  {{chezmoi}} init --destination "$HOME"
-
-install-scripts:
-  npm install --ignore-scripts
-
-bootstrap: apply-chezmoi install-scripts

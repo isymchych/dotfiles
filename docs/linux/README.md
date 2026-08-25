@@ -1,230 +1,204 @@
-# Installation steps
+# Arch Linux setup
 
-## Linux & Windows
+This is the personal installation and maintenance guide for an Accelerando OS
+workstation. Package inventories belong in
+`dotfiles/.chezmoidata/packages.yaml`; this guide records bootstrap steps,
+intentional system choices, manual configuration, and optional software.
 
-In case of dual-booting install Windows first.
-It will create an `EFI` partition.
-During Arch installation mount it as `/efi` and use `reFind` boot manager.
+## What Accel OS manages
 
-## Partitioning
+Accel OS configures an Arch Linux host according to the features declared in
+`dotfiles/.chezmoidata/hosts.yaml`. Depending on those features, it manages:
 
-- Partition table: `gpt`
-- 2 partitions
-  - (if not dual-booting) create EFI system partition as `/boot` - 512Mb
-  - `/ (root)` - rest
-- use `systemd-boot` boot manager
+- Base, workstation, Sway desktop, and hardware-specific packages.
+- The system and user services required by each selected feature.
+- Networking through NetworkManager, including unicast DNS without
+  `systemd-resolved`.
+- Printing, network-printer discovery, and `.local` name resolution through
+  CUPS, Avahi, and mDNS.
+- Firmware updates and a graphical firmware manager.
+- Laptop power management and host-specific battery charge thresholds through
+  TLP.
+- Bluetooth services and desktop media integration.
+- A Sway session with login, audio, portals, notifications, clipboard,
+  screenshots, and display management.
+- Workstation policy for login sessions, power-button behavior, swap
+  preference, and the Linux console.
+- Optional host features such as Caps Lock-to-Escape keyboard interception.
+- Repository-managed command-line and development tooling.
+
+The canonical declarations are
+`dotfiles/.chezmoidata/packages.yaml` for packages and
+`dotfiles/.chezmoidata/services.yaml` for services. Run `mb-doctor` to verify
+that the host matches its declaration and `chezmoi apply` to repair drift.
 
 ## Install Arch
 
-- to make terminal font larger type `setfont ter-132b`
-- locale en_GB.UTF-8 cause week starts from Monday not from Sunday like in en_US.UTF-8 (but generate both locales, just in case)
-- `systemd-logind` is configured automatically to kill user processes on logout
-  and suspend when the power key is pressed
-- in /etc/pacman.conf
-  - enable multilib
-  - enable color output
-  - enable parallel downloads (5)
-- add kernel parameters: mitigations=off random.trust_cpu=on
+### Boot and partitioning
 
-- create/configure Swapfile if needed
-- `vm.swappiness=10` is configured and applied automatically
+- Use GPT.
+- When dual-booting, install Windows first and reuse its EFI system partition.
+- Mount the EFI system partition at `/boot`.
+- Allocate the remaining space to the root filesystem.
+- Use `systemd-boot`. This host boots Arch and Windows with systemd-boot; rEFInd
+  is not part of the current setup.
+- A 512 MiB EFI system partition is sufficient for a non-dual-boot setup.
 
-- NetworkManager manages networking and DNS; do not run a standalone dnsmasq service
-- `fstrim.timer`, `systemd-timesyncd.service`, and `NetworkManager.service` are
-  enabled automatically
-- if laptop, install tlp and enable service - good preferences by default
+### Base system
 
-- install & configure sudo
-- create user, set password
+- Use `setfont ter-132b` in the installer when a larger terminal font is useful.
+- Generate both `en_GB.UTF-8` and `en_US.UTF-8`; use `en_GB.UTF-8` so weeks
+  start on Monday.
+- Enable `multilib`, color, and five parallel downloads in `/etc/pacman.conf`.
+- Install and configure `sudo`.
+- Create the user:
 
-```
-# useradd -m -G wheel,video -s /bin/zsh <username>
-# passwd <username>
-```
-
-- Workstation hosts install Terminus and use `ter-124n` as the Linux console font.
-  Other `/etc/vconsole.conf` settings remain unmanaged.
-
-## Install basic cli and configs
-
-- Bootstrap a fresh installation with `base-devel`, `git`, `chezmoi`, `zsh`,
-  and an AUR helper (`yay`) before applying the dotfiles.
-- Standard CLI, shell, editor, development, filesystem, and desktop application
-  packages are installed automatically for hosts with the `workstation`
-  feature.
-- use usb drive to copy ssh config & certificates, fix permissions:
-
-```
-$ chmod 700 ~/.ssh
-$ chmod 600 ~/.ssh/key
-```
-
-- clone accel-os from github
-- `chezmoi init --source="$HOME/accel-os/dotfiles" --destination="$HOME"`
-- `chezmoi apply` (run with `--dry-run` first on a fresh host)
-- switch user to zsh `chsh -s /bin/zsh`
-
-## GUI
-
-- install video drivers
-- Radeon: install mesa, lib32-mesa, vulkan-radeon, lib32-vulkan-radeon
-- radeontop - to monitor radeon graphics card
-- intel-gpu-tools - to monitor intel graphics card
-- Sway hosts install and configure greetd automatically. Autologin is disabled
-  unless enabled explicitly for the host in `dotfiles/.chezmoidata/hosts.yaml`;
-  `mbTPLin` preserves its current autologin behavior.
-
-## Environment
-
-Packages required by the tracked Sway session, user services, and `mb-*`
-desktop helpers are installed automatically from
-`dotfiles/.chezmoidata/packages.yaml`. Keep that manifest as the source of truth
-instead of duplicating its package inventory here.
-
-Notable configured behavior:
-
-- Host capabilities are declared in `dotfiles/.chezmoidata/hosts.yaml`.
-  Package installation, service enablement, and hardware-specific configuration
-  are derived from each host's feature list. Undeclared hosts receive only the
-  baseline Arch packages and services. Removing a feature disables its managed
-  services and removes its managed configuration, but does not uninstall its
-  packages.
-- `cliphist`, `darkman`, `kanshi`, `mako`, `swayidle`, `swayosd`, and
-  `wlsunset` are started by `sway-session.target`.
-- `$mod+i` opens clipboard history; `Ctrl+T` switches between history and
-  templates.
-- Clipboard templates are regular files in
-  `$ACCEL_OS/scripts/assets/mb-clipboard/templates/`; changes are available
-  immediately without running `chezmoi apply`.
-- The configured terminal backend is installed with the Sway package group;
-  change both `~/bin/xterm` and the package manifest when switching backends.
-- System services declared in `dotfiles/.chezmoidata/services.yaml` are enabled
-  and started automatically after package installation.
-- TLP is the sole system power manager. `tlp-pd` exposes the standard
-  PowerProfiles D-Bus API used by Waybar while retaining TLP's automatic
-  AC/battery profiles and hardware controls. Do not install
-  `power-profiles-daemon` alongside it because the services conflict.
-- Per-host battery charge thresholds are configured in
-  `dotfiles/.chezmoidata/tlp.yaml`. Opted-in hosts install the settings as
-  `/etc/tlp.d/01-accel-os.conf`; hosts without settings remove that managed
-  drop-in.
-- Repo-managed Node commands run directly from their TypeScript sources through
-  wrappers installed in `~/bin`. The wrappers use `fnm` and the repository's
-  `.node-version`; Chezmoi installs that runtime during host setup.
-- Run `mb-doctor` after applying Chezmoi to verify required packages, service
-  states, managed system configuration, and repo-managed command wrappers. The
-  command is read-only; repair reported drift with `chezmoi apply`.
-
-Manual and hardware-specific setup:
-
-- Verify the configured power manager after bootstrapping a host:
-
-  ```
-  $ tlp-stat -s
-  $ tlpctl get
+  ```bash
+  useradd -m -G wheel,video -s /bin/zsh <username>
+  passwd <username>
   ```
 
-- gnome-keyring, seahorse - GUI for storing & unlocking SSH keys
-  - To automatically unlock gnome-keyring on login, edit `/etc/pam.d/greetd`:
-  - Add `auth optional pam_gnome_keyring.so` at the end of the `auth` section
-  - Add `session optional pam_gnome_keyring.so auto_start` at the end of the `session` section
-  - For git/ssh integration enable the gcr-ssh-agent <https://wiki.archlinux.org/title/GNOME/Keyring>
+- Install `base-devel`, `git`, `chezmoi`, `zsh`, and an AUR helper such as
+  `yay`.
+- NetworkManager owns networking and DNS; do not run a standalone `dnsmasq`
+  service.
+- Create a swap file when the host needs swap or hibernation.
+- Install the appropriate video drivers.
 
-- interception-tools and interception-caps2esc are installed and configured
-  automatically to bind CapsLock to Escape when pressed and Control when held.
+### Intentional system tuning
 
-- BlueZ, its command-line and TUI administration tools, `bluetooth.service`,
-  and the `mpris-proxy` user service are installed and enabled automatically.
+These settings trade general-purpose defaults for this personal workstation's
+performance preferences:
 
-- Browser screen sharing uses `xdg-desktop-portal-wlr`.
-  - enable `chrome://flags/#enable-webrtc-pipewire-capturer`
+- Kernel parameter `mitigations=off` disables CPU vulnerability mitigations.
+  This intentionally accepts increased exposure to CPU side-channel attacks for
+  lower mitigation overhead; do not copy it to an untrusted or multi-user host.
+- Kernel parameter `random.trust_cpu=on` allows the kernel to trust the CPU
+  random-number generator when initializing its entropy pool. This assumes the
+  host CPU and firmware are trusted.
+- `vm.swappiness=10` biases the kernel away from swapping under ordinary
+  pressure. Chezmoi manages it in `/etc/sysctl.d/80-accel-os.conf`.
 
-Optional desktop tools not installed automatically:
+Add the kernel parameters to the systemd-boot Arch entry. The current host uses:
 
-- `wev`, `wtype`, `xorg-xhost`
-- `nm-connection-editor`, `networkmanager-openvpn`, `libnma-gtk4`
-- `kooha`, `android-file-transfer`, `systemctl-tui`
-- `ttf-dejavu`, `gnome-themes-extra`, `adwaita-qt5`, `papirus-icon-theme`
-- `ttc-iosevka`, `ttf-iosevka-nerd`, `ttf-iosevkaterm-nerd`
+```text
+mitigations=off random.trust_cpu=on
+```
 
-<!-- * nordic - dark GTK3 theme -->
-<!-- * ttf-jetbrains-mono - JetBrains Mono font -->
-<!-- * ttf-droid - Droid font -->
-<!-- * ttf-fira-mono - Fira Mono font -->
+### Laptop power management
 
-- run `rustup default stable`
-- for backlight, add user to video group; https://wiki.archlinux.org/index.php/Backlight#ACPI
+Laptop hosts use TLP as the sole system power manager. Do not install
+`power-profiles-daemon` alongside it. Per-host charge thresholds live in
+`dotfiles/.chezmoidata/tlp.yaml`.
 
-## Apps
+## Bootstrap the repository
 
-Standard open-source workstation applications are installed automatically from
-`dotfiles/.chezmoidata/packages.yaml`.
+Clone the repository to `~/accel-os`, then initialize, inspect, and apply the
+Chezmoi source directly:
 
-Manual application setup:
+```bash
+chezmoi init --source="$HOME/accel-os/dotfiles" --destination="$HOME"
+chezmoi diff
+chezmoi apply --dry-run --verbose
+chezmoi apply
+npm install --ignore-scripts
+chsh -s /bin/zsh
+```
 
-- Firefox: install the tracked preferences from `firefox/` for the local profile,
-  then tweak Cookie Auto Delete settings.
-- Thunderbird: add accounts and configure it to synchronize only the latest 30
-  days.
-- EasyEffects: enable the auto-gain plugin for volume normalization.
+Run `mb-doctor` afterward to verify packages, services, managed system
+configuration, and repo-managed command wrappers. Repair reported drift with
+`chezmoi apply`.
+
+## Manual setup
+
+### SSH material
+
+Copy the private SSH configuration and certificates from the secure USB drive,
+then restrict their permissions:
+
+```bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/key
+```
+
+### Keyring
+
+GNOME Keyring and Seahorse provide SSH key storage and management. To unlock the
+keyring during greetd login:
+
+1. Add `auth optional pam_gnome_keyring.so` at the end of the `auth` section in
+   `/etc/pam.d/greetd`.
+2. Add `session optional pam_gnome_keyring.so auto_start` at the end of the
+   `session` section.
+3. Enable `gcr-ssh-agent` for Git and SSH integration; consult the ArchWiki
+   GNOME Keyring page.
+
+### Rootless Docker
+
+Docker and its rootless dependencies are installed for workstation hosts.
+Complete Docker's rootless setup manually for the user account.
+
+### Firefox
+
+Install the tracked preferences using the backup and copy workflow in
+[`firefox/README.md`](../../firefox/README.md), then configure Cookie Auto
+Delete. Browser screen sharing uses `xdg-desktop-portal-wlr`; enable
+`chrome://flags/#enable-webrtc-pipewire-capturer` when needed.
+
+### Other applications
+
+- Thunderbird: add accounts and synchronize only the latest 30 days.
+- EasyEffects: enable auto-gain for volume normalization.
 - Proprietary applications such as Spotify, Slack, Skype, and Google Chrome are
-  not installed automatically.
+  installed manually.
 
-## Dev tools
+### Development tools
 
-- Development packages are installed automatically for hosts with the
-  `workstation` feature.
-- Install `git-spr` manually:
-  <https://github.com/ejoffe/spr>
+- Install `git-spr` manually from its upstream repository.
 - Install npm-only language servers needed by Emacs:
 
+  ```bash
+  npm install --global \
+    vscode-langservers-extracted \
+    eslint-language-server@2.4.4
   ```
-  $ npm i -g vscode-langservers-extracted eslint-language-server@2.4.4
-  ```
 
-- Configure Docker for rootless operation after its packages are installed.
+## Hardware-specific setup
 
-## Configure hardware acceleration
+### Graphics and video acceleration
 
-- video acceleration
-  - libva-utils for `vainfo`
-  - vdpauinfo
-  - VA-API support: libva-mesa-driver, lib32-libva-mesa-driver
-  - VDPAU support: mesa-vdpau, lib32-mesa-vdpau
-- Gstreamer support - gstreamer-vaapi
-- tweak video acceleration settings in firefox config
+- Radeon: install Mesa and Vulkan drivers, including required 32-bit variants;
+  use `radeontop` for monitoring.
+- Intel: use `intel-gpu-tools` for monitoring.
+- Use `libva-utils` and `vdpauinfo` to verify acceleration.
+- Install the appropriate VA-API, VDPAU, and GStreamer acceleration packages.
+- Adjust Firefox video-acceleration preferences when required.
 
-# Fingerprint scanner
+### Backlight
 
-- install fprintd
-- add these lines to `/etc/pam.d/{system-local-login,swaylock,sudo,su}`
+Keep the user in the `video` group for backlight control. Consult the ArchWiki
+Backlight page for hardware-specific configuration.
 
+### Fingerprint scanner
+
+Install `fprintd`, then add the following to
+`/etc/pam.d/{system-local-login,swaylock,sudo,su}`:
+
+```text
+# pam_unix is required for swaylock password authentication.
+auth sufficient pam_unix.so try_first_pass likeauth nullok
+auth sufficient pam_fprintd.so
 ```
-# the first line is only needed for swaylock, to be able to auth with password
-auth            sufficient      pam_unix.so try_first_pass likeauth nullok
-auth            sufficient      pam_fprintd.so
-```
 
-# Firmware update service
+### Hibernation
 
-- fwupd and its graphical interface are installed automatically, and the
-  metadata refresh timer is enabled
+1. Create a swap file.
+2. Add `resume` and `resume_offset` kernel parameters.
+3. Add the `resume` hook to `/etc/mkinitcpio.conf`.
+4. Run `mkinitcpio -P`.
 
-## Hibernation
+## Security note
 
-- create swapfile
-- add `resume` and `resume_offset` kernel parameters
-- add `resume` hook into `/etc/mkinitcpio.conf` and run `# mkinitcpio -P`
-
-## Printing
-
-- CUPS, Avahi, and `nss-mdns` are installed automatically for hosts with the
-  `printing` feature.
-- NetworkManager owns unicast DNS and `/etc/resolv.conf`; Avahi owns mDNS and
-  DNS-SD. The managed `hosts` entry in `/etc/nsswitch.conf` routes `.local`
-  lookups through Avahi, while `systemd-resolved` remains disabled to keep
-  resolver ownership unambiguous.
-
-## Tips
-
-- configure max login attempts and login block time in `/etc/security/faillock.conf` [more info](https://wiki.archlinux.org/title/security#Lock_out_user_after_three_failed_login_attempts)
+Configure maximum login attempts and lockout duration in
+`/etc/security/faillock.conf`; consult the ArchWiki security guidance before
+choosing values.

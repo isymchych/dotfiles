@@ -1,55 +1,45 @@
 # Accelerando OS
 
-This repository relies on [chezmoi](https://www.chezmoi.io/) to manage dotfiles.
+Personal workstation configuration managed with
+[chezmoi](https://www.chezmoi.io/). The primary target is Arch Linux with Sway;
+macOS notes are also available.
 
-To bootstrap a new host (with `just`):
+## Repository layout
+
+- `dotfiles/` — Chezmoi source tree for `$HOME`
+- `scripts/` — repo-managed Node TypeScript commands
+- `firefox/` — Firefox preferences and profile installation instructions
+- `docs/linux/` — Arch Linux installation and host setup
+- `docs/mac/` — macOS setup notes
+- `ai/` — coding-agent configuration and automation
+
+## Bootstrap
+
+Install `git` and `chezmoi`, clone this repository to `~/accel-os`, then
+initialize and review the dotfiles:
 
 ```bash
-just init-chezmoi
-just bootstrap
+chezmoi init --source="$HOME/accel-os/dotfiles" --destination="$HOME"
+chezmoi diff
+chezmoi apply --dry-run --verbose
+chezmoi apply
+npm install --ignore-scripts
 ```
 
-## CLI tools I rely on
+Package installation and managed services are derived from host features in
+`dotfiles/.chezmoidata/`.
 
-- `yazi` — file manager (remember to install its `unarchiver` plugin for previews)
-- `ripgrep` — fast project search
-- `fd` — ergonomic file finder
-- `tokei` — code line counts
-- `just` — task runner
-- `fzf` — fuzzy matcher
-- `sad` — structural search/replace, with preview
-- `wget` — HTTP(S) downloads
-- `htop` — system monitor
-- `lazygit` — TUI for git
-- `git-spr` — stacked pull-request workflow
-- `delta` — git diff viewer
-- `difftastic` — syntax-aware diffs
-- `mergiraf` — semantic merge driver
-- `rainfrog` — CLI database client
-- `television` - fuzzy file finder / search
-- `lazydocker` - TUI for Docker
+## Verify
 
-## Optional CLI tools
+```bash
+chezmoi doctor
+mb-doctor
+just check
+```
 
-- `ast-grep` — structural code search/rewrite
+## Guides
 
-## Git workflow
-
-- [Retarget a Git SPR stack](docs/git-spr-retargeting.md)
-
-## Zsh setup
-
-- Install `starship` for the prompt.
-- Install emoji-capable font (e.g., `noto-fonts-emoji`) so glyphs render.
-- Add `zsh-completions`, `zsh-autosuggestions`, and `zsh-syntax-highlighting`.
-- Tip: `Ctrl+X Ctrl+E` opens the current command in `$EDITOR`.
-
-## Firefox
-
-- The `firefox/` directory stays outside chezmoi (`.chezmoiignore` excludes it) because profile IDs vary per host.
-- After installing Firefox, visit `about:profiles`, note the active profile ID, and symlink `firefox/user.js` into that profile (`~/.mozilla/firefox/<profile-id>/user.js`).
-- Restart Firefox to load the preferences.
-
-## Emacs
-
-- Dependencies: `git`, `editorconfig`, `aspell`, `ripgrep`.
+- [Arch Linux setup](docs/linux/README.md)
+- [macOS setup](docs/mac/README.md)
+- [Firefox preferences](firefox/README.md)
+- [Retargeting a Git SPR stack](docs/git-spr-retargeting.md)
