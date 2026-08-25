@@ -52,6 +52,16 @@ disabled_system_services=(
   {{ . | quote }}
 {{- end }}
 {{- if $knownHost }}
+{{- range $feature := $features }}
+  {{- if hasKey $.services.linux.arch.features $feature }}
+    {{- $system := (index $.services.linux.arch.features $feature).system }}
+    {{- if hasKey $system "disabled" }}
+      {{- range $system.disabled }}
+  {{ . | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- range $feature, $featureServices := .services.linux.arch.features }}
   {{- if not (has $feature $features) }}
     {{- range $featureServices.system.enabled }}
@@ -63,7 +73,23 @@ disabled_system_services=(
 )
 
 disabled_user_services=(
+{{- $baseUser := .services.linux.arch.base.user }}
+{{- if hasKey $baseUser "disabled" }}
+{{- range $baseUser.disabled }}
+  {{ . | quote }}
+{{- end }}
+{{- end }}
 {{- if $knownHost }}
+{{- range $feature := $features }}
+  {{- if hasKey $.services.linux.arch.features $feature }}
+    {{- $user := (index $.services.linux.arch.features $feature).user }}
+    {{- if hasKey $user "disabled" }}
+      {{- range $user.disabled }}
+  {{ . | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- range $feature, $featureServices := .services.linux.arch.features }}
   {{- if not (has $feature $features) }}
     {{- range $featureServices.user.enabled }}

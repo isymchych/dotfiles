@@ -110,6 +110,9 @@ Notable configured behavior:
 - Repo-managed Node commands run directly from their TypeScript sources through
   wrappers installed in `~/bin`. The wrappers use `fnm` and the repository's
   `.node-version`; Chezmoi installs that runtime during host setup.
+- Run `mb-doctor` after applying Chezmoi to verify required packages, service
+  states, managed system configuration, and repo-managed command wrappers. The
+  command is read-only; repair reported drift with `chezmoi apply`.
 
 Manual and hardware-specific setup:
 
