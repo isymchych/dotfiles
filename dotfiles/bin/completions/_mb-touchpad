@@ -1,0 +1,8 @@
+#compdef mb-touchpad
+
+_mb-touchpad() {
+  _arguments -s \
+    '(-n --notify)'{-n,--notify}'[show a desktop notification]' \
+    '(-h --help)'{-h,--help}'[show help]' \
+    '1:action:(status on off toggle)'
+}

@@ -35,7 +35,4 @@ init-chezmoi:
 install-scripts:
   npm install --ignore-scripts
 
-install-bin-tools:
-  just -f bin-tools/justfile prod-build-install
-
-bootstrap: apply-chezmoi install-scripts install-bin-tools
+bootstrap: apply-chezmoi install-scripts

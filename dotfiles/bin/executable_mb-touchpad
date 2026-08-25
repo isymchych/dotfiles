@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# zsh-completion: completions/_mb-touchpad
+
+set -euo pipefail
+
+: "${ACCEL_OS:?ACCEL_OS must point at repo root}"
+exec node "$ACCEL_OS/scripts/scripts/mb-touchpad.ts" "$@"

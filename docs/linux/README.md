@@ -107,6 +107,9 @@ Notable configured behavior:
   `dotfiles/.chezmoidata/tlp.yaml`. Opted-in hosts install the settings as
   `/etc/tlp.d/01-accel-os.conf`; hosts without settings remove that managed
   drop-in.
+- `mb-audio` and `mb-touchpad` run directly from their Node TypeScript sources
+  through wrappers installed in `~/bin`; no separate build or installation is
+  required.
 
 Manual and hardware-specific setup:
 
@@ -115,14 +118,6 @@ Manual and hardware-specific setup:
   ```
   $ tlp-stat -s
   $ tlpctl get
-  ```
-
-- Build and install the repo-local `mb-bin-tools` package after setting the
-  Rust toolchain to stable:
-
-  ```
-  $ cd "$ACCEL_OS/bin-tools"
-  $ just prod-build-install
   ```
 
 - gnome-keyring, seahorse - GUI for storing & unlocking SSH keys

@@ -10,6 +10,8 @@ packages:
             - base-devel # Basic tools to build Arch Linux packages
             - chezmoi # Manage your dotfiles across multiple machines
             - git # the fast distributed version control system
+            - nodejs # Runtime for repo-managed TypeScript commands
+            - npm # Install dependencies for repo-managed TypeScript commands
             - openssh # SSH protocol implementation for remote login, command execution and file transfer
             - zsh # A very advanced and programmable command interpreter (shell) for UNIX
 
@@ -48,8 +50,6 @@ packages:
               - kdiff3 # A file comparator/merge tool
               - lld # Linker from the LLVM project
               - neovim # Fork of Vim aiming to improve user experience, plugins, and GUIs
-              - nodejs # Evented I/O for V8 javascript ("Current" release)
-              - npm # JavaScript package manager
               # - rust-analyzer # Rust compiler front-end for IDEs
               - rustup # The Rust toolchain installer
               - sccache # Shared compilation cache
@@ -164,9 +164,6 @@ packages:
               - htop # system monitor used by Waybar click handlers
               - playerctl # mpris media player controller and lib for spotify, vlc, audacious, bmp, xmms2, and others
               - trash-cli # Command line trashcan (recycle bin) interface
-
-            hardware_helpers:
-              - xorg-xinput # Small commandline tool to configure devices
 
             clipboard:
               - cliphist # wayland clipboard manager

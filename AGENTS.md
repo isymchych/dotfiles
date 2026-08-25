@@ -2,10 +2,10 @@
 
 ## Project Structure & Module Organization
 
-- `bin-tools/` is the Rust CLI tools crate (backlight/volume/mic/touchpad helpers).
 - `firefox/` holds `user.js` prefs; outside chezmoi because profile IDs vary.
 - `docs/` contains platform notes (`docs/linux`, `docs/mac`); keep secrets out and reference `.chezmoidata` instead.
-- `scripts/` holds Node TypeScript CLIs (`scripts/scripts/`) and shared modules (`scripts/lib/`).
+- `scripts/` holds Node TypeScript CLIs, including desktop hardware helpers,
+  in `scripts/scripts/`, with shared modules in `scripts/lib/`.
 - `ai/` holds skills and automation for coding agents (Codex, Pi).
 
 ### dotfiles/
