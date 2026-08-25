@@ -3,53 +3,37 @@
   {{- $osID = or .id "" -}}
 {{- end -}}
 {{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
-{{- $host := dict -}}
-{{- if hasKey .tlp.hosts .chezmoi.hostname -}}
-  {{- $host = index .tlp.hosts .chezmoi.hostname -}}
-{{- end -}}
-{{- $hostConfig := dict -}}
-{{- if hasKey .hosts .chezmoi.hostname -}}
-  {{- $hostConfig = index .hosts .chezmoi.hostname -}}
-{{- end -}}
-{{- $features := list -}}
-{{- if hasKey $hostConfig "features" -}}
-  {{- $features = index $hostConfig "features" -}}
-{{- end -}}
-{{- if has "laptop" $features -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
+{{ template "load-resolved-host-state.sh" . }}
+
 config_path=/etc/tlp.d/01-accel-os.conf
 reload_tlp=0
-{{- if hasKey $host "charge_thresholds" }}
-{{- with index $host "charge_thresholds" }}
+
+if has_feature laptop; then
+  if (( tlp_configured )); then
 config="$(mktemp)"
 trap 'rm -f "$config"' EXIT
 
-cat >"$config" <<'EOF'
-START_CHARGE_THRESH_{{ .battery }}={{ .start }}
-STOP_CHARGE_THRESH_{{ .battery }}={{ .stop }}
+cat >"$config" <<EOF
+START_CHARGE_THRESH_${tlp_battery}=${tlp_start}
+STOP_CHARGE_THRESH_${tlp_battery}=${tlp_stop}
 EOF
 
 sudo install -Dm0644 \
   "$config" \
   "$config_path"
 reload_tlp=1
-{{- end }}
-{{- else }}
+  fi
+else
 if [[ -e "$config_path" ]]; then
   sudo rm -f "$config_path"
   reload_tlp=1
 fi
-{{- end }}
+fi
 
 if (( reload_tlp )) && command -v tlp >/dev/null 2>&1; then
   sudo tlp start
 fi
-{{- else -}}
-#!/usr/bin/env bash
-set -euo pipefail
-
-sudo rm -f /etc/tlp.d/01-accel-os.conf
-{{- end }}
 {{ end }}

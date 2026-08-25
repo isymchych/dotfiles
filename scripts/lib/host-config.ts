@@ -167,6 +167,33 @@ export type ResolvedHostState = {
   };
 };
 
+type MutableResolvedHostState = {
+  hostname?: string;
+  knownHost?: boolean;
+  features: string[];
+  packages: string[];
+  services: {
+    system: {
+      enabled: string[];
+      disabled: string[];
+    };
+    user: {
+      enabled: string[];
+      disabled: string[];
+    };
+  };
+  greetd?: {
+    autologin: boolean;
+  };
+  tlp?: {
+    chargeThresholds: {
+      battery: string;
+      start: number;
+      stop: number;
+    };
+  };
+};
+
 type Declaration = {
   value: string;
   path: string;
@@ -200,77 +227,190 @@ function sortedUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort();
 }
 
-export function resolveHostState(config: HostConfig, hostname: string): ResolvedHostState {
-  const host = config.hosts.hosts[hostname];
-  const selectedFeatures = new Set(host?.features ?? []);
-  const packages: string[] = [];
-  const packageProviders = config.packages.packages.linux.arch;
+function parseBoolean(value: string, description: string): boolean {
+  if (value === "true") {
+    return true;
+  }
+  if (value === "false") {
+    return false;
+  }
+  throw new Error(`${description} must be true or false`);
+}
 
-  for (const providerName of ["pacman", "aur"] as const) {
-    const provider = packageProviders[providerName];
-    for (const group of Object.values(provider.base)) {
-      packages.push(...group);
+function parseInteger(value: string, description: string): number {
+  if (!/^\d+$/u.test(value)) {
+    throw new Error(`${description} must be an integer`);
+  }
+  return Number(value);
+}
+
+function parseHostRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 2 || state.hostname !== undefined) {
+    throw new Error(`${location} must declare the host exactly once`);
+  }
+  state.hostname = fields[1] ?? "";
+}
+
+function parseKnownHostRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 2 || state.knownHost !== undefined) {
+    throw new Error(`${location} must declare known_host exactly once`);
+  }
+  state.knownHost = parseBoolean(fields[1] ?? "", `${location} known_host`);
+}
+
+function parseFeatureRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 2) {
+    throw new Error(`${location} has an invalid feature record`);
+  }
+  state.features.push(fields[1] ?? "");
+}
+
+function parsePackageRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 3 || (fields[1] !== "pacman" && fields[1] !== "aur")) {
+    throw new Error(`${location} has an invalid package record`);
+  }
+  state.packages.push(fields[2] ?? "");
+}
+
+function parseServiceRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  const scope = fields[1];
+  const desiredState = fields[2];
+  if (
+    fields.length !== 4 ||
+    (scope !== "system" && scope !== "user") ||
+    (desiredState !== "enabled" && desiredState !== "disabled")
+  ) {
+    throw new Error(`${location} has an invalid service record`);
+  }
+  state.services[scope][desiredState].push(fields[3] ?? "");
+}
+
+function parseGreetdRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 2 || state.greetd !== undefined) {
+    throw new Error(`${location} has an invalid greetd record`);
+  }
+  state.greetd = {
+    autologin: parseBoolean(fields[1] ?? "", `${location} greetd_autologin`),
+  };
+}
+
+function parseTlpRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 4 || state.tlp !== undefined) {
+    throw new Error(`${location} has an invalid TLP record`);
+  }
+  state.tlp = {
+    chargeThresholds: {
+      battery: fields[1] ?? "",
+      start: parseInteger(fields[2] ?? "", `${location} TLP start threshold`),
+      stop: parseInteger(fields[3] ?? "", `${location} TLP stop threshold`),
+    },
+  };
+}
+
+function parseResolvedRecord(
+  state: MutableResolvedHostState,
+  fields: readonly string[],
+  location: string,
+): void {
+  switch (fields[0]) {
+    case "host":
+      parseHostRecord(state, fields, location);
+      break;
+    case "known_host":
+      parseKnownHostRecord(state, fields, location);
+      break;
+    case "feature":
+      parseFeatureRecord(state, fields, location);
+      break;
+    case "package":
+      parsePackageRecord(state, fields, location);
+      break;
+    case "service":
+      parseServiceRecord(state, fields, location);
+      break;
+    case "greetd_autologin":
+      parseGreetdRecord(state, fields, location);
+      break;
+    case "tlp":
+      parseTlpRecord(state, fields, location);
+      break;
+    default:
+      throw new Error(`${location} has unknown record type ${JSON.stringify(fields[0])}`);
+  }
+}
+
+export function parseResolvedHostState(contents: string): ResolvedHostState {
+  const state: MutableResolvedHostState = {
+    features: [],
+    packages: [],
+    services: {
+      system: { enabled: [], disabled: [] },
+      user: { enabled: [], disabled: [] },
+    },
+  };
+
+  for (const [index, line] of contents.split("\n").entries()) {
+    if (line === "") {
+      continue;
     }
-    for (const feature of selectedFeatures) {
-      const groups = provider.features[feature];
-      if (groups === undefined) {
-        continue;
-      }
-      for (const group of Object.values(groups)) {
-        packages.push(...group);
-      }
+
+    const fields = line.split("\t");
+    const location = `resolved host state line ${String(index + 1)}`;
+    if (fields.some((field) => field === "")) {
+      throw new Error(`${location} contains an empty field`);
     }
+
+    parseResolvedRecord(state, fields, location);
   }
 
-  const services = config.services.services.linux.arch;
-  const enabled = {
-    system: [...services.base.system.enabled],
-    user: [...services.base.user.enabled],
-  };
-  const disabled = {
-    system: [...(services.base.system.disabled ?? [])],
-    user: [...(services.base.user.disabled ?? [])],
-  };
-
-  for (const [feature, scopes] of Object.entries(services.features)) {
-    for (const scope of ["system", "user"] as const) {
-      if (selectedFeatures.has(feature)) {
-        enabled[scope].push(...scopes[scope].enabled);
-        disabled[scope].push(...(scopes[scope].disabled ?? []));
-      } else if (host !== undefined) {
-        disabled[scope].push(...scopes[scope].enabled);
-      }
-    }
+  if (state.hostname === undefined || state.knownHost === undefined) {
+    throw new Error("Resolved host state must declare host and known_host");
   }
-
-  const tlp = config.tlp.tlp.hosts[hostname];
 
   return {
-    hostname,
-    features: [...selectedFeatures].sort(),
-    packages: sortedUnique(packages),
+    hostname: state.hostname,
+    features: sortedUnique(state.features),
+    packages: sortedUnique(state.packages),
     services: {
       system: {
-        enabled: sortedUnique(enabled.system),
-        disabled: sortedUnique(disabled.system),
+        enabled: sortedUnique(state.services.system.enabled),
+        disabled: sortedUnique(state.services.system.disabled),
       },
       user: {
-        enabled: sortedUnique(enabled.user),
-        disabled: sortedUnique(disabled.user),
+        enabled: sortedUnique(state.services.user.enabled),
+        disabled: sortedUnique(state.services.user.disabled),
       },
     },
-    ...(host?.greetd === undefined ? {} : { greetd: host.greetd }),
-    ...(tlp === undefined
-      ? {}
-      : {
-          tlp: {
-            chargeThresholds: {
-              battery: tlp.charge_thresholds.battery,
-              start: tlp.charge_thresholds.start,
-              stop: tlp.charge_thresholds.stop,
-            },
-          },
-        }),
+    ...(state.greetd === undefined ? {} : { greetd: state.greetd }),
+    ...(state.tlp === undefined ? {} : { tlp: state.tlp }),
   };
 }
 

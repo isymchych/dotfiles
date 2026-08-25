@@ -3,22 +3,17 @@
   {{- $osID = or .id "" -}}
 {{- end -}}
 {{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
-{{- $features := list -}}
-{{- if hasKey .hosts .chezmoi.hostname -}}
-  {{- $host := index .hosts .chezmoi.hostname -}}
-  {{- if hasKey $host "features" -}}
-    {{- $features = index $host "features" -}}
-  {{- end -}}
-{{- end -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
+{{ template "load-resolved-host-state.sh" . }}
+
 nsswitch=/etc/nsswitch.conf
-{{- if has "printing" $features }}
-desired_hosts='hosts: mymachines files myhostname mdns_minimal [NOTFOUND=return] dns'
-{{- else }}
-desired_hosts='hosts: mymachines files myhostname dns'
-{{- end }}
+if has_feature printing; then
+  desired_hosts='hosts: mymachines files myhostname mdns_minimal [NOTFOUND=return] dns'
+else
+  desired_hosts='hosts: mymachines files myhostname dns'
+fi
 
 if [[ ! -f "$nsswitch" ]]; then
   printf 'Missing %s; refusing to configure name resolution.\n' "$nsswitch" >&2

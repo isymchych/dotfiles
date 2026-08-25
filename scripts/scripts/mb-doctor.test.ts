@@ -9,7 +9,7 @@ import {
   type DoctorContext,
   type DoctorDependencies,
 } from "../lib/doctor.ts";
-import { resolveHostState, type HostConfig, type ResolvedHostState } from "../lib/host-config.ts";
+import { parseResolvedHostState, type ResolvedHostState } from "../lib/host-config.ts";
 
 function commandResult(code: number, stdout = "", stderr = ""): CommandResult {
   return { code, stdout, stderr, success: code === 0 };
@@ -50,126 +50,75 @@ const validFiles = new Map([
   ["/etc/nsswitch.conf", "passwd: files\nhosts: mymachines files myhostname dns\n"],
 ]);
 
-test("resolveHostState selects feature packages and convergent service states", () => {
-  const config: HostConfig = {
-    packages: {
-      packages: {
-        linux: {
-          arch: {
-            pacman: {
-              base: { system: ["base-package"] },
-              features: {
-                selected: { packages: ["selected-package"] },
-                unselected: { packages: ["unselected-package"] },
-              },
-            },
-            aur: { base: {}, features: {} },
-          },
-        },
-      },
-    },
-    services: {
+test("parseResolvedHostState reads the canonical resolved state", () => {
+  assert.deepEqual(
+    parseResolvedHostState(`host\ttest-host
+known_host\ttrue
+feature\tselected
+package\tpacman\tbase-package
+package\taur\tselected-package
+service\tsystem\tenabled\tbase.service
+service\tsystem\tenabled\tselected.service
+service\tsystem\tdisabled\tdisabled.service
+service\tsystem\tdisabled\tselected-disabled.service
+service\tsystem\tdisabled\tunselected.service
+service\tuser\tenabled\tselected-user.service
+service\tuser\tdisabled\tdisabled-user.service
+service\tuser\tdisabled\tunselected-user.service
+greetd_autologin\tfalse
+tlp\tBAT0\t75\t80
+`),
+    {
+      hostname: "test-host",
+      features: ["selected"],
+      packages: ["base-package", "selected-package"],
       services: {
-        linux: {
-          arch: {
-            base: {
-              system: { enabled: ["base.service"], disabled: ["disabled.service"] },
-              user: { enabled: [], disabled: ["disabled-user.service"] },
-            },
-            features: {
-              selected: {
-                system: {
-                  enabled: ["selected.service"],
-                  disabled: ["selected-disabled.service"],
-                },
-                user: { enabled: ["selected-user.service"] },
-              },
-              unselected: {
-                system: { enabled: ["unselected.service"] },
-                user: { enabled: ["unselected-user.service"] },
-              },
-            },
-          },
+        system: {
+          enabled: ["base.service", "selected.service"],
+          disabled: ["disabled.service", "selected-disabled.service", "unselected.service"],
+        },
+        user: {
+          enabled: ["selected-user.service"],
+          disabled: ["disabled-user.service", "unselected-user.service"],
+        },
+      },
+      greetd: { autologin: false },
+      tlp: {
+        chargeThresholds: {
+          battery: "BAT0",
+          start: 75,
+          stop: 80,
         },
       },
     },
-    hosts: {
-      hosts: {
-        "test-host": { features: ["selected"] },
-      },
-    },
-    tlp: { tlp: { hosts: {} } },
-  };
-
-  assert.deepEqual(resolveHostState(config, "test-host"), {
-    hostname: "test-host",
-    features: ["selected"],
-    packages: ["base-package", "selected-package"],
-    services: {
-      system: {
-        enabled: ["base.service", "selected.service"],
-        disabled: ["disabled.service", "selected-disabled.service", "unselected.service"],
-      },
-      user: {
-        enabled: ["selected-user.service"],
-        disabled: ["disabled-user.service", "unselected-user.service"],
-      },
-    },
-  });
+  );
 });
 
-test("resolveHostState applies only baseline service state to an undeclared host", () => {
-  const config: HostConfig = {
-    packages: {
-      packages: {
-        linux: {
-          arch: {
-            pacman: {
-              base: { system: ["base-package"] },
-              features: { optional: { packages: ["optional-package"] } },
-            },
-            aur: { base: {}, features: {} },
-          },
-        },
-      },
-    },
-    services: {
+test("parseResolvedHostState reads an undeclared host baseline", () => {
+  assert.deepEqual(
+    parseResolvedHostState(`host\tundeclared-host
+known_host\tfalse
+package\tpacman\tbase-package
+service\tsystem\tenabled\tbase.service
+service\tsystem\tdisabled\tbase-disabled.service
+service\tuser\tdisabled\tbase-disabled-user.service
+`),
+    {
+      hostname: "undeclared-host",
+      features: [],
+      packages: ["base-package"],
       services: {
-        linux: {
-          arch: {
-            base: {
-              system: { enabled: ["base.service"], disabled: ["base-disabled.service"] },
-              user: { enabled: [], disabled: ["base-disabled-user.service"] },
-            },
-            features: {
-              optional: {
-                system: { enabled: ["optional.service"] },
-                user: { enabled: ["optional-user.service"] },
-              },
-            },
-          },
+        system: {
+          enabled: ["base.service"],
+          disabled: ["base-disabled.service"],
+        },
+        user: {
+          enabled: [],
+          disabled: ["base-disabled-user.service"],
         },
       },
     },
-    hosts: { hosts: {} },
-    tlp: { tlp: { hosts: {} } },
-  };
-
-  assert.deepEqual(resolveHostState(config, "undeclared-host"), {
-    hostname: "undeclared-host",
-    features: [],
-    packages: ["base-package"],
-    services: {
-      system: {
-        enabled: ["base.service"],
-        disabled: ["base-disabled.service"],
-      },
-      user: {
-        enabled: [],
-        disabled: ["base-disabled-user.service"],
-      },
-    },
-  });
+  );
 });
 
 function createDependencies(overrides: Partial<DoctorDependencies> = {}): DoctorDependencies {

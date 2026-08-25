@@ -3,18 +3,12 @@
   {{- $osID = or .id "" -}}
 {{- end -}}
 {{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
-{{- $host := dict -}}
-{{- if hasKey .hosts .chezmoi.hostname -}}
-  {{- $host = index .hosts .chezmoi.hostname -}}
-{{- end -}}
-{{- $features := list -}}
-{{- if hasKey $host "features" -}}
-  {{- $features = index $host "features" -}}
-{{- end -}}
-{{- if has "caps2esc" $features -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
+{{ template "load-resolved-host-state.sh" . }}
+
+if has_feature caps2esc; then
 config="$(mktemp)"
 trap 'rm -f "$config"' EXIT
 
@@ -32,10 +26,7 @@ sudo install -Dm0644 \
 if systemctl is-active --quiet udevmon.service; then
   sudo systemctl restart udevmon.service
 fi
-{{- else -}}
-#!/usr/bin/env bash
-set -euo pipefail
-
+else
 sudo rm -f /etc/interception/udevmon.d/caps-to-esc-and-ctrl.yaml
-{{- end }}
+fi
 {{ end }}

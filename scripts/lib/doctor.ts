@@ -237,11 +237,7 @@ function requireUniqueLine(
   }
 }
 
-function checkConsoleFont(
-  problems: string[],
-  contents: string | null,
-  enabled: boolean,
-): void {
+function checkConsoleFont(problems: string[], contents: string | null, enabled: boolean): void {
   const filePath = "/etc/vconsole.conf";
   const begin = "# BEGIN accel-os console font";
   const end = "# END accel-os console font";

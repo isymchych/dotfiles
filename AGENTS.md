@@ -89,6 +89,7 @@
 - Keep Zsh completion functions for `mb-*` commands in `dotfiles/bin/completions/`; `~/bin/completions` was added to `fpath` before `compinit` so ChezMoi installs and Zsh discovers them together.
 - Treat `dotfiles/.chezmoidata/packages.yaml` as the source of truth for packages required by tracked Linux desktop configuration; keep `docs/linux/README.md` focused on bootstrap, manual, hardware-specific, and optional setup instead of duplicating that inventory.
 - Keep baseline environment for repo-managed commands in `dotfiles/dot_zshenv_tools`; reserve `dot_zshrc_tools` for interactive shell behavior and `dot_run-sway` for graphical-session configuration.
+- Resolve host features, packages, services, and host-specific settings in `dotfiles/.chezmoitemplates/resolved-host-state`; provisioning templates and `mb-doctor` must consume that canonical resolved state instead of independently interpreting `.chezmoidata`.
 
 ## Pi Configuration
 

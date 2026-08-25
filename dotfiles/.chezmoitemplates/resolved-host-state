@@ -1,0 +1,74 @@
+{{- $hostname := .chezmoi.hostname -}}
+{{- $host := dict -}}
+{{- $knownHost := false -}}
+{{- if hasKey .hosts $hostname -}}
+  {{- $host = index .hosts $hostname -}}
+  {{- $knownHost = true -}}
+{{- end -}}
+{{- $features := list -}}
+{{- if hasKey $host "features" -}}
+  {{- $features = index $host "features" -}}
+{{- end -}}
+{{ printf "host\t%s\n" $hostname -}}
+{{ printf "known_host\t%t\n" $knownHost -}}
+{{ range $feature := $features -}}
+{{ printf "feature\t%s\n" $feature -}}
+{{ end -}}
+{{ range $providerName, $provider := .packages.linux.arch -}}
+  {{- range $packages := $provider.base -}}
+    {{- range $package := $packages -}}
+{{ printf "package\t%s\t%s\n" $providerName $package -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $feature := $features -}}
+    {{- if hasKey $provider.features $feature -}}
+      {{- range $packages := index $provider.features $feature -}}
+        {{- range $package := $packages -}}
+{{ printf "package\t%s\t%s\n" $providerName $package -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $scope := list "system" "user" -}}
+  {{- $baseState := index $.services.linux.arch.base $scope -}}
+  {{- range $service := $baseState.enabled -}}
+{{ printf "service\t%s\tenabled\t%s\n" $scope $service -}}
+  {{- end -}}
+  {{- if hasKey $baseState "disabled" -}}
+    {{- range $service := $baseState.disabled -}}
+{{ printf "service\t%s\tdisabled\t%s\n" $scope $service -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $feature, $featureScopes := $.services.linux.arch.features -}}
+    {{- $featureState := index $featureScopes $scope -}}
+    {{- if has $feature $features -}}
+      {{- range $service := $featureState.enabled -}}
+{{ printf "service\t%s\tenabled\t%s\n" $scope $service -}}
+      {{- end -}}
+      {{- if hasKey $featureState "disabled" -}}
+        {{- range $service := $featureState.disabled -}}
+{{ printf "service\t%s\tdisabled\t%s\n" $scope $service -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else if $knownHost -}}
+      {{- range $service := $featureState.enabled -}}
+{{ printf "service\t%s\tdisabled\t%s\n" $scope $service -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey $host "greetd" -}}
+  {{- $greetd := index $host "greetd" -}}
+  {{- if hasKey $greetd "autologin" -}}
+{{ printf "greetd_autologin\t%t\n" (index $greetd "autologin") -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey .tlp.hosts $hostname -}}
+  {{- $tlp := index .tlp.hosts $hostname -}}
+  {{- if hasKey $tlp "charge_thresholds" -}}
+    {{- with index $tlp "charge_thresholds" -}}
+{{ printf "tlp\t%s\t%d\t%d\n" .battery .start .stop -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

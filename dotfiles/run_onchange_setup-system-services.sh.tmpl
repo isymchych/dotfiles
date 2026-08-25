@@ -3,102 +3,15 @@
   {{- $osID = or .id "" -}}
 {{- end -}}
 {{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
-{{- $host := dict -}}
-{{- $knownHost := false -}}
-{{- if hasKey .hosts .chezmoi.hostname -}}
-  {{- $host = index .hosts .chezmoi.hostname -}}
-  {{- $knownHost = true -}}
-{{- end -}}
-{{- $features := list -}}
-{{- if hasKey $host "features" -}}
-  {{- $features = index $host "features" -}}
-{{- end -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
-{{- if not $knownHost }}
+{{ template "load-resolved-host-state.sh" . }}
+
+if (( ! known_host )); then
 printf 'Warning: host %s is not declared in hosts.yaml; enabling base services only.\n' \
-  {{ .chezmoi.hostname | quote }} >&2
-{{- end }}
-
-system_services=(
-{{- range .services.linux.arch.base.system.enabled }}
-  {{ . | quote }}
-{{- end }}
-{{- range $feature := $features }}
-  {{- if hasKey $.services.linux.arch.features $feature }}
-    {{- range (index $.services.linux.arch.features $feature).system.enabled }}
-  {{ . | quote }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-)
-
-user_services=(
-{{- range .services.linux.arch.base.user.enabled }}
-  {{ . | quote }}
-{{- end }}
-{{- range $feature := $features }}
-  {{- if hasKey $.services.linux.arch.features $feature }}
-    {{- range (index $.services.linux.arch.features $feature).user.enabled }}
-  {{ . | quote }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-)
-
-disabled_system_services=(
-{{- range .services.linux.arch.base.system.disabled }}
-  {{ . | quote }}
-{{- end }}
-{{- if $knownHost }}
-{{- range $feature := $features }}
-  {{- if hasKey $.services.linux.arch.features $feature }}
-    {{- $system := (index $.services.linux.arch.features $feature).system }}
-    {{- if hasKey $system "disabled" }}
-      {{- range $system.disabled }}
-  {{ . | quote }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- range $feature, $featureServices := .services.linux.arch.features }}
-  {{- if not (has $feature $features) }}
-    {{- range $featureServices.system.enabled }}
-  {{ . | quote }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- end }}
-)
-
-disabled_user_services=(
-{{- $baseUser := .services.linux.arch.base.user }}
-{{- if hasKey $baseUser "disabled" }}
-{{- range $baseUser.disabled }}
-  {{ . | quote }}
-{{- end }}
-{{- end }}
-{{- if $knownHost }}
-{{- range $feature := $features }}
-  {{- if hasKey $.services.linux.arch.features $feature }}
-    {{- $user := (index $.services.linux.arch.features $feature).user }}
-    {{- if hasKey $user "disabled" }}
-      {{- range $user.disabled }}
-  {{ . | quote }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- range $feature, $featureServices := .services.linux.arch.features }}
-  {{- if not (has $feature $features) }}
-    {{- range $featureServices.user.enabled }}
-  {{ . | quote }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- end }}
-)
+  "$resolved_hostname" >&2
+fi
 
 assert_disjoint() {
   local enabled_name=$1
@@ -119,15 +32,15 @@ assert_disjoint() {
   done
 }
 
-assert_disjoint system_services disabled_system_services
-assert_disjoint user_services disabled_user_services
+assert_disjoint enabled_system_services disabled_system_services
+assert_disjoint enabled_user_services disabled_user_services
 
-if [ "${#system_services[@]}" -gt 0 ]; then
-  sudo systemctl enable --now "${system_services[@]}"
+if [ "${#enabled_system_services[@]}" -gt 0 ]; then
+  sudo systemctl enable --now "${enabled_system_services[@]}"
 fi
 
-if [ "${#user_services[@]}" -gt 0 ]; then
-  systemctl --user enable --now "${user_services[@]}"
+if [ "${#enabled_user_services[@]}" -gt 0 ]; then
+  systemctl --user enable --now "${enabled_user_services[@]}"
 fi
 
 for service in "${disabled_system_services[@]}"; do

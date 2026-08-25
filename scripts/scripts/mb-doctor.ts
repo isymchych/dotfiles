@@ -9,7 +9,7 @@ import { getErrorMessage } from "@accel-os/shared/guards";
 import { runCommand } from "@accel-os/shared/process";
 
 import { formatDoctorResults, runDoctor, type DoctorDependencies } from "../lib/doctor.ts";
-import { readHostConfig, resolveHostState, validateHostConfig } from "../lib/host-config.ts";
+import { parseResolvedHostState, readHostConfig, validateHostConfig } from "../lib/host-config.ts";
 
 const scriptsDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptsDirectory, "../..");
@@ -96,10 +96,27 @@ async function main(args: readonly string[]): Promise<void> {
     throw new Error(`Invalid host configuration:\n${configErrors.join("\n")}`);
   }
 
-  const hostname = os.hostname();
+  const resolvedState = await runCommand(
+    "chezmoi",
+    [
+      "--source",
+      path.join(repositoryRoot, "dotfiles"),
+      "execute-template",
+      '{{ template "resolved-host-state" . }}',
+    ],
+    { env: process.env },
+  );
+  if (!resolvedState.success) {
+    throw new Error(
+      `Failed to resolve host configuration: ${
+        resolvedState.stderr || `chezmoi exited with status ${String(resolvedState.code)}`
+      }`,
+    );
+  }
+
   const results = await runDoctor(
     {
-      state: resolveHostState(config, hostname),
+      state: parseResolvedHostState(resolvedState.stdout),
       repositoryRoot,
       homeDirectory: os.homedir(),
       username: os.userInfo().username,
