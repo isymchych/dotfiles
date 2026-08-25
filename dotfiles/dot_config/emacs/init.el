@@ -27,9 +27,6 @@
   :group 'mb-customizations)
 
 
-;; see https://platform.openai.com/api-keys
-(defcustom mb-openai-api-key nil "An OpenAI API key to be used by packages." :type 'string :group 'mb-customizations)
-
 (defcustom mb-editor nil "Which keybindings to use. Evil by default." :type 'string :group 'mb-customizations)
 (setq mb-editor (or mb-editor (getenv "MB_EMACS_EDITOR") "evil"))
 (message "EDITOR MODE: %s" mb-editor)
@@ -46,32 +43,20 @@
 
 
 (require 'package)
+(require 'use-package)
 
-;; this is needed to install use-package
 (add-to-list 'package-archives
   '("melpa" . "https://melpa.org/packages/") t)
 
-(setq package-enable-at-startup nil)
-(setq package-install-upgrade-built-in t)
-
-(package-initialize)
-
-(eval-when-compile
-  (require 'use-package)
-
-  (require 'use-package-ensure)
-  (setq use-package-always-ensure t))
-
-(setq use-package-verbose t)
-
-(require 'bind-key) ; for :bind in use-package
+(setq package-install-upgrade-built-in t
+  use-package-always-ensure t
+  use-package-verbose t)
 
 ;; no-littering: organize emacs temporary files
 (use-package no-littering
-  :config
-  ;; https://github.com/emacscollective/no-littering/pull/221
-  (setq treesit--install-language-grammar-out-dir-history (list (no-littering-expand-var-file-name "tree-sitter/")))
-  (setq treesit-extra-load-path          (list (no-littering-expand-var-file-name "tree-sitter/"))))
+  :custom
+  (treesit-extra-load-path
+    (list (no-littering-expand-var-file-name "tree-sitter/"))))
 
 
 ;; NOTE: the background-color was added in early-init.el but should be removed
@@ -87,12 +72,6 @@
       (fboundp 'menu-bar-mode)
       mb-is-mac-os)
   (menu-bar-mode t))
-
-;; Terminal mouse support
-(unless window-system
-  (require 'mouse)
-  (xterm-mouse-mode t)
-  (defun track-mouse (e)))
 
 (setq-default
   ;; scroll one line at a time (less "jumpy" than defaults)
@@ -138,10 +117,6 @@
   indicate-empty-lines nil
 
   font-lock-maximum-decoration t
-  color-theme-is-global t
-
-  ;; Don't defer screen updates when performing operations.
-  redisplay-dont-pause t
 
   ;; skip duplicates from the kill-ring to simplify yanking
   kill-do-not-save-duplicates t
@@ -498,20 +473,13 @@ narrowed."
     0.15
     nil
     (lambda ()
-      (when-let ((new-font (if (fboundp 'x-select-font)
-                             (x-select-font)
-                             (mouse-select-font)))
-                  (new-font-name (font-xlfd-name new-font)))
+      (when-let* ((new-font (if (fboundp 'x-select-font)
+                              (x-select-font)
+                              (mouse-select-font)))
+                   (new-font-name (font-xlfd-name new-font)))
         (message "MB selected font: %s" new-font-name)
         (set-frame-font new-font-name nil t)
         (customize-save-variable 'mb-font new-font-name)))))
-
-
-;; https://emacs.stackexchange.com/a/2471
-(defun mb/invoke-C-c ()
-  "Simulate pressing C-c."
-  (interactive)
-  (setq unread-command-events (listify-key-sequence "\C-c")))
 
 
 (defun mb/open-xterm-here ()
@@ -615,7 +583,7 @@ narrowed."
 
   (defun project-find-root (path)
     "Search up the PATH for `project-root-markers'."
-    (when-let ((root (locate-dominating-file path #'project-root-p)))
+    (when-let* ((root (locate-dominating-file path #'project-root-p)))
       (cons 'transient (expand-file-name root))))
 
   (add-to-list 'project-find-functions #'project-find-root))
@@ -1678,6 +1646,7 @@ targets."
 
 ;; EditorConfig
 (use-package editorconfig
+  :ensure nil
   :diminish editorconfig-mode
   :config
   (add-hook 'prog-mode-hook 'editorconfig-apply)
@@ -1687,6 +1656,7 @@ targets."
 
 ;; Show available keybindings in a separate window
 (use-package which-key
+  :ensure nil
   :diminish which-key-mode
   :bind (("C-h w"            . 'which-key-show-major-mode)
           ("C-h W"            . 'which-key-show-top-level))
@@ -1931,29 +1901,15 @@ targets."
 
 
 
-;; Download tree-sitter grammars
-(use-package treesit-auto
+;; Prefer built-in tree-sitter modes and install missing grammars on demand.
+(use-package treesit
+  :ensure nil
   :custom
-  (treesit-auto-install 'prompt)
+  (treesit-enabled-modes t)
+  (treesit-auto-install-grammar 'ask)
+  (treesit-font-lock-level 4)
   :config
-  (setq treesit-font-lock-level 4)
-  ;; (setq treesit-language-source-alist (treesit-auto--build-treesit-source-alist))
-  ;; (message "treesit-auto: %s languages" (length treesit-language-source-alist))
-  ;; Don't use 'all here: some treesit-auto recipes intentionally have no file
-  ;; pattern (e.g. phpdoc/jsdoc), which would add (nil . MODE) entries.
-  (treesit-auto-add-to-auto-mode-alist)
-  (setq auto-mode-alist (seq-filter #'car-safe auto-mode-alist))
-  (global-treesit-auto-mode)
-
-  (add-to-list 'auto-mode-alist '("\\.mts\\'" . typescript-ts-mode))
-
-  (add-hook 'tsx-ts-mode-hook #'lsp-deferred)
-  (add-hook 'js-ts-mode-hook #'lsp-deferred)
-  (add-hook 'typescript-ts-mode-hook #'lsp-deferred)
-  (add-hook 'rust-ts-mode-hook #'lsp-deferred)
-  (add-hook 'yaml-ts-mode-hook #'lsp-deferred) ;; https://github.com/redhat-developer/yaml-language-server
-  (add-hook 'html-ts-mode-hook #'lsp-deferred) ;; https://github.com/angular/vscode-ng-language-service
-  )
+  (add-to-list 'auto-mode-alist '("\\.mts\\'" . typescript-ts-mode)))
 
 
 
@@ -1961,6 +1917,14 @@ targets."
 (use-package lsp-mode
   :diminish lsp-mode
   :defer t
+  :hook
+  ((tsx-ts-mode . lsp-deferred)
+    (js-ts-mode . lsp-deferred)
+    (typescript-ts-mode . lsp-deferred)
+    (rust-ts-mode . lsp-deferred)
+    (yaml-ts-mode . lsp-deferred)
+    (html-ts-mode . lsp-deferred)
+    (mhtml-ts-mode . lsp-deferred))
   :init
   (setq lsp-keymap-prefix "C-c C-l"
     lsp-idle-delay 0.6
@@ -2029,11 +1993,11 @@ targets."
 
   (defun mb/lsp-rust-analyzer-run-flycheck ()
     "Request fresh Clippy diagnostics when Rust Analyzer initializes a buffer."
-    (when-let ((workspace (car (lsp-workspaces))))
+    (when-let* ((workspace (car (lsp-workspaces))))
       (when (and (derived-mode-p 'rust-ts-mode)
-                 (eq (lsp--workspace-server-id workspace) 'rust-analyzer))
+              (eq (lsp--workspace-server-id workspace) 'rust-analyzer))
         (lsp-notify "rust-analyzer/runFlycheck"
-                    `(:textDocument ,(lsp--text-document-identifier))))))
+          `(:textDocument ,(lsp--text-document-identifier))))))
 
   (add-hook 'lsp-managed-mode-hook #'mb/lsp-rust-analyzer-run-flycheck t)
 
@@ -2140,39 +2104,6 @@ targets."
 
 
 
-;; Gptel: interact with chatgpt and other LLMs
-(use-package gptel
-  :disabled
-  :if mb-openai-api-key
-  :custom
-  ((gptel-api-key mb-openai-api-key)
-    (gptel-max-tokens 2500)
-    (gptel-model "gpt-4o"))
-  :bind ("C-x C-a" . 'gptel-send)
-  :config
-  (define-key gptel-mode-map (kbd "C-c l m")      'gptel-menu)
-
-  (define-key gptel-mode-map (kbd "C-c C-c")    'gptel-send)
-  (define-key gptel-mode-map (kbd "M-RET")      'gptel-send)
-  (define-key gptel-mode-map (kbd "M-<return>") 'gptel-send))
-
-
-
-;; Codeium: AI autocomplete
-(use-package codeium
-  :disabled
-  :init
-  (if (not (package-installed-p 'codeium))
-    (package-vc-install "https://github.com/Exafunction/codeium.el"))
-  :config
-  ;; get codeium status in the modeline
-  (setq codeium-mode-line-enable
-    (lambda (api) (not (memq api '(CancelRequest Heartbeat AcceptCompletion)))))
-  (add-to-list 'mode-line-misc-info '(:eval (car-safe codeium-mode-line)) t)
-  )
-
-
-
 ;; Justfile mode syntax
 (use-package just-mode
   :defer t)
@@ -2188,21 +2119,11 @@ targets."
           ("?" . justl-help-popup)))
 
 
-;; Markdown
-(use-package markdown-mode
-  :defer t
-  :config
-  (add-hook 'markdown-mode-hook 'flyspell-mode)
-  (message "mb: MARKDOWN MODE"))
-
-;; Markdown treesit mode
+;; Markdown tree-sitter mode
 (use-package markdown-ts-mode
-  :disabled
+  :ensure nil
   :mode ("\\.md\\'" . markdown-ts-mode)
-  :defer t
-  :config
-  (add-hook 'markdown-ts-mode-hook 'flyspell-mode)
-  (message "mb: MARKDOWN-TS MODE"))
+  :hook (markdown-ts-mode . outline-minor-mode))
 
 
 
@@ -2436,7 +2357,6 @@ targets."
 
 
 
-;; TODO codeium
 ;; TODO dap-mode
 ;; TODO combobulate for tree-sitter-based navigation
 ;; TODO replace treemacs with dirvish

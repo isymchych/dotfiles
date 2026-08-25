@@ -26,10 +26,6 @@
 ;; default is too low 4k considering that the some of the language server responses are in 800k - 3M range.
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 
-(setq byte-compile-warnings '(not obsolete))
-(setq warning-suppress-log-types '((comp) (bytecomp)))
-(setq native-comp-async-report-warnings-errors 'silent)
-
 ;; Silence stupid startup message
 (setq inhibit-startup-echo-area-message (user-login-name))
 ;; disable startup screen
