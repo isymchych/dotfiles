@@ -72,6 +72,7 @@ type CommandResult = {
 
 const IMAGE_PREVIEW_PATTERN = /binary.*(jpg|jpeg|png|bmp|gif|webp|tiff)/iu;
 const MODES = ["history", "templates", "emoji"] as const satisfies readonly Mode[];
+const TEMPLATES_DIR = fileURLToPath(new URL("../assets/mb-clipboard/templates/", import.meta.url));
 const EMOJI_KEYWORDS = parseJsonWithSchema(
   readFileSync(fileURLToPath(import.meta.resolve("emojilib")), "utf8"),
   Type.Record(Type.String(), Type.Array(Type.String())),
@@ -134,7 +135,7 @@ async function createPaths(): Promise<Paths> {
   await chmod(runtimeDir, 0o700);
 
   return {
-    templatesDir: path.join(configDir, "templates"),
+    templatesDir: TEMPLATES_DIR,
     fuzzelConfig: path.join(configDir, "fuzzel.ini"),
     thumbnailDir,
     lastSaveDirFile: path.join(cacheDir, "last-save-dir"),

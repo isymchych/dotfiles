@@ -91,6 +91,30 @@ test("extensionForMime uses canonical mappings and binary fallback", () => {
   assert.equal(extensionForMime("application/unknown"), "bin");
 });
 
+test("templates are read directly from the repository", async () => {
+  const fixture = await createFixture();
+  try {
+    const templatePath = fileURLToPath(
+      new URL("../assets/mb-clipboard/templates/task-template.md", import.meta.url),
+    );
+    const template = await readFile(templatePath);
+
+    const result = await runClipboard({
+      ...fixture.env,
+      FUZZEL_SELECTION: "t:0",
+    });
+
+    assert.equal(result.code, 0, result.stderr);
+    assert.equal(
+      await readFile(fixture.menuCapture, "utf8"),
+      "t:0\ttask-template.md\nt:1\ttz-template.md\n",
+    );
+    assert.deepEqual(await readFile(fixture.copyCapture), template);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
 test("history copy streams exact binary bytes through cliphist and wl-copy", async () => {
   const fixture = await createFixture();
   try {
@@ -201,7 +225,6 @@ async function createFixture(overrides: Readonly<Record<string, string>> = {}): 
 
   await Promise.all([
     mkdir(binDir, { recursive: true }),
-    mkdir(path.join(configHome, "mb-clipboard", "templates"), { recursive: true }),
     mkdir(path.dirname(saveDestination), { recursive: true }),
   ]);
 

@@ -94,7 +94,8 @@ Notable configured behavior:
 - `$mod+i` opens clipboard history; `Ctrl+T` switches between history and
   templates.
 - Clipboard templates are regular files in
-  `~/.config/mb-clipboard/templates/`.
+  `$ACCEL_OS/scripts/assets/mb-clipboard/templates/`; changes are available
+  immediately without running `chezmoi apply`.
 - The configured terminal backend is installed with the Sway package group;
   change both `~/bin/xterm` and the package manifest when switching backends.
 - System services declared in `dotfiles/.chezmoidata/services.yaml` are enabled
