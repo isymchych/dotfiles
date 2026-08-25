@@ -129,6 +129,171 @@ async function checkPackages(
   return pass("packages", `${String(state.packages.length)} required packages installed`);
 }
 
+async function checkUserAccount(
+  context: DoctorContext,
+  dependencies: DoctorDependencies,
+): Promise<DoctorResult> {
+  const problems: string[] = [];
+  const requiredGroups = ["video", "wheel"];
+
+  const passwd = await dependencies.runCommand("getent", ["passwd", context.username]);
+  if (!passwd.success) {
+    return fail(
+      "user-account",
+      `cannot inspect account ${context.username}`,
+      [passwd.stderr || `getent exited with status ${String(passwd.code)}`],
+      `Repair the account entry for ${context.username}`,
+    );
+  }
+
+  const entries = passwd.stdout
+    .trim()
+    .split("\n")
+    .filter((line) => line !== "");
+  if (entries.length !== 1) {
+    problems.push(
+      `expected one passwd entry for ${context.username}, found ${String(entries.length)}`,
+    );
+  } else {
+    const fields = entries[0]?.split(":") ?? [];
+    const shell = fields[6];
+    if (fields.length !== 7 || shell === undefined) {
+      problems.push(`cannot parse passwd entry for ${context.username}`);
+    } else if (shell !== "/bin/zsh") {
+      problems.push(`default shell: expected /bin/zsh, found ${shell || "empty"}`);
+    }
+  }
+
+  const groups = await dependencies.runCommand("id", ["-nG", context.username]);
+  if (!groups.success) {
+    problems.push(
+      groups.stderr || `cannot query groups: id exited with status ${String(groups.code)}`,
+    );
+  } else {
+    const memberships = new Set(
+      groups.stdout
+        .trim()
+        .split(/\s+/u)
+        .filter((group) => group !== ""),
+    );
+    for (const group of requiredGroups) {
+      if (!memberships.has(group)) {
+        problems.push(`missing required group: ${group}`);
+      }
+    }
+  }
+
+  if (problems.length > 0) {
+    return fail(
+      "user-account",
+      `${String(problems.length)} account configuration problem(s)`,
+      problems,
+      `Run: sudo usermod --append --groups wheel,video ${context.username}; chsh -s /bin/zsh`,
+    );
+  }
+
+  return pass("user-account", "/bin/zsh with wheel and video group membership");
+}
+
+function countPamRule(contents: string, expected: readonly string[]): number {
+  return contents
+    .split("\n")
+    .map((line) => line.replace(/#.*/u, "").trim())
+    .filter((line) => line !== "")
+    .map((line) => line.split(/\s+/u))
+    .filter(
+      (fields) =>
+        fields.length === expected.length &&
+        fields.every((field, index) => field === expected[index]),
+    ).length;
+}
+
+async function checkPamKeyring(
+  context: DoctorContext,
+  dependencies: DoctorDependencies,
+): Promise<DoctorResult> {
+  if (!context.state.features.includes("sway")) {
+    return skip("pam-keyring", "not required without the sway feature");
+  }
+
+  const filePath = "/etc/pam.d/greetd";
+  const contents = await dependencies.readText(filePath);
+  if (contents === null) {
+    return fail(
+      "pam-keyring",
+      "greetd PAM configuration is missing",
+      [filePath],
+      `Configure GNOME Keyring integration in ${filePath}`,
+    );
+  }
+
+  const problems: string[] = [];
+  const rules = [
+    ["auth", "optional", "pam_gnome_keyring.so"],
+    ["session", "optional", "pam_gnome_keyring.so", "auto_start"],
+  ] as const;
+  for (const rule of rules) {
+    const count = countPamRule(contents, rule);
+    if (count !== 1) {
+      problems.push(`expected exactly one ${rule.join(" ")} rule, found ${String(count)}`);
+    }
+  }
+
+  if (problems.length > 0) {
+    return fail(
+      "pam-keyring",
+      `${String(problems.length)} greetd PAM keyring problem(s)`,
+      problems,
+      `Configure GNOME Keyring integration in ${filePath}`,
+    );
+  }
+
+  return pass("pam-keyring", "greetd unlocks and starts GNOME Keyring");
+}
+
+async function checkGcrSshAgent(
+  context: DoctorContext,
+  dependencies: DoctorDependencies,
+): Promise<DoctorResult> {
+  if (!context.state.features.includes("sway")) {
+    return skip("gcr-ssh-agent", "not required without the sway feature");
+  }
+
+  const problems: string[] = [];
+  const socketUnit = "gcr-ssh-agent.socket";
+  const enabled = await dependencies.runCommand("systemctl", ["--user", "is-enabled", socketUnit]);
+  if (!enabled.success || enabled.stdout.trim() !== "enabled") {
+    problems.push(`${socketUnit}: expected enabled, found ${enabled.stdout.trim() || "unknown"}`);
+  }
+
+  const active = await dependencies.runCommand("systemctl", ["--user", "is-active", socketUnit]);
+  if (!active.success || active.stdout.trim() !== "active") {
+    problems.push(`${socketUnit}: expected active, found ${active.stdout.trim() || "unknown"}`);
+  }
+
+  const runtimeDirectory = context.environment["XDG_RUNTIME_DIR"];
+  if (runtimeDirectory === undefined || runtimeDirectory === "") {
+    problems.push("XDG_RUNTIME_DIR is unset");
+  } else {
+    const expectedSocket = path.join(runtimeDirectory, "gcr/ssh");
+    const actualSocket = context.environment["SSH_AUTH_SOCK"];
+    if (actualSocket !== expectedSocket) {
+      problems.push(`SSH_AUTH_SOCK: expected ${expectedSocket}, found ${actualSocket || "unset"}`);
+    }
+  }
+
+  if (problems.length > 0) {
+    return fail(
+      "gcr-ssh-agent",
+      `${String(problems.length)} SSH agent integration problem(s)`,
+      problems,
+      `Run: systemctl --user enable --now ${socketUnit}; then start a new Sway session`,
+    );
+  }
+
+  return pass("gcr-ssh-agent", "socket enabled, active, and selected by SSH_AUTH_SOCK");
+}
+
 const runtimeActiveStates = new Set(["active", "activating", "deactivating", "reloading"]);
 
 async function checkServiceScope(
@@ -468,6 +633,7 @@ export async function runDoctor(
   return Promise.all([
     protectCheck("host", async () => checkHost(context, dependencies)),
     protectCheck("packages", async () => checkPackages(context.state, dependencies)),
+    protectCheck("user-account", async () => checkUserAccount(context, dependencies)),
     protectCheck("system-services", async () =>
       checkServiceScope("system", context.state, dependencies),
     ),
@@ -475,6 +641,8 @@ export async function runDoctor(
       checkServiceScope("user", context.state, dependencies),
     ),
     protectCheck("managed-config", async () => checkManagedConfiguration(context, dependencies)),
+    protectCheck("pam-keyring", async () => checkPamKeyring(context, dependencies)),
+    protectCheck("gcr-ssh-agent", async () => checkGcrSshAgent(context, dependencies)),
     protectCheck("script-runtime", async () => checkScriptRuntime(context, dependencies)),
   ]);
 }

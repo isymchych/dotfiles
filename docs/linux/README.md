@@ -106,8 +106,10 @@ chsh -s /bin/zsh
 ```
 
 Run `mb-doctor` afterward to verify packages, services, managed system
-configuration, and repo-managed command wrappers. Repair reported drift with
-`chezmoi apply`.
+configuration, the user's shell and required groups, Sway keyring and SSH-agent
+integration, and repo-managed command wrappers. Repair managed drift with
+`chezmoi apply`; the doctor reports explicit remediation for manual account and
+keyring configuration.
 
 ## Manual setup
 
@@ -132,6 +134,9 @@ keyring during greetd login:
    `session` section.
 3. Enable `gcr-ssh-agent` for Git and SSH integration; consult the ArchWiki
    GNOME Keyring page.
+
+`mb-doctor` verifies both greetd PAM rules, the enabled and active
+`gcr-ssh-agent.socket`, and the Sway `SSH_AUTH_SOCK` selection.
 
 ### Rootless Docker
 

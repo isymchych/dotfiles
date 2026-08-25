@@ -146,6 +146,12 @@ function createDependencies(overrides: Partial<DoctorDependencies> = {}): Doctor
       if (command === "pacman") {
         return commandResult(0, "base-package");
       }
+      if (command === "getent" && args.join(" ") === "passwd test") {
+        return commandResult(0, "test:x:1000:1000::/home/test:/bin/zsh\n");
+      }
+      if (command === "id" && args.join(" ") === "-nG test") {
+        return commandResult(0, "test video wheel\n");
+      }
       if (command === "/home/test/bin/accel-node") {
         return commandResult(0, "v24.0.0");
       }
@@ -186,9 +192,12 @@ test("runDoctor passes when the declared host state is satisfied", async () => {
     [
       { id: "host", status: "pass" },
       { id: "packages", status: "pass" },
+      { id: "user-account", status: "pass" },
       { id: "system-services", status: "pass" },
       { id: "user-services", status: "pass" },
       { id: "managed-config", status: "pass" },
+      { id: "pam-keyring", status: "skip" },
+      { id: "gcr-ssh-agent", status: "skip" },
       { id: "script-runtime", status: "pass" },
     ],
   );
@@ -402,6 +411,118 @@ test("runDoctor verifies the greetd configuration and file metadata", async () =
   assert.match(details, /greetd\/config\.toml: contents differ/u);
   assert.match(details, /run-sway\.sh: expected root:root ownership/u);
   assert.match(details, /run-sway\.sh: expected mode 0755, found 0777/u);
+});
+
+test("runDoctor reports user account drift", async () => {
+  const base = createDependencies();
+  const dependencies = createDependencies({
+    async runCommand(command, args, options) {
+      if (command === "getent") {
+        return commandResult(0, "test:x:1000:1000::/home/test:/bin/bash\n");
+      }
+      if (command === "id") {
+        return commandResult(0, "test wheel\n");
+      }
+      return base.runCommand(command, args, options);
+    },
+  });
+
+  const results = await runDoctor(context, dependencies);
+  const account = results.find((result) => result.id === "user-account");
+
+  assert.ok(account);
+  assert.equal(account.status, "fail");
+  assert.deepEqual(account.details, [
+    "default shell: expected /bin/zsh, found /bin/bash",
+    "missing required group: video",
+  ]);
+});
+
+test("runDoctor verifies Sway keyring and SSH agent integration", async () => {
+  const swayContext: DoctorContext = {
+    ...context,
+    state: { ...state, features: ["sway"] },
+    environment: {
+      XDG_RUNTIME_DIR: "/run/user/1000",
+      SSH_AUTH_SOCK: "/run/user/1000/gcr/ssh",
+    },
+  };
+  const base = createDependencies();
+  const dependencies = createDependencies({
+    async readText(filePath) {
+      if (filePath === "/etc/pam.d/greetd") {
+        return [
+          "#%PAM-1.0",
+          "auth optional pam_gnome_keyring.so",
+          "session optional pam_gnome_keyring.so auto_start",
+          "",
+        ].join("\n");
+      }
+      return validFiles.get(filePath) ?? null;
+    },
+    async runCommand(command, args, options) {
+      if (command === "systemctl" && args.at(-1) === "gcr-ssh-agent.socket") {
+        if (args.includes("is-enabled")) {
+          return commandResult(0, "enabled\n");
+        }
+        if (args.includes("is-active")) {
+          return commandResult(0, "active\n");
+        }
+      }
+      return base.runCommand(command, args, options);
+    },
+  });
+
+  const results = await runDoctor(swayContext, dependencies);
+
+  assert.equal(results.find((result) => result.id === "pam-keyring")?.status, "pass");
+  assert.equal(results.find((result) => result.id === "gcr-ssh-agent")?.status, "pass");
+});
+
+test("runDoctor reports incomplete Sway keyring and SSH agent integration", async () => {
+  const swayContext: DoctorContext = {
+    ...context,
+    state: { ...state, features: ["sway"] },
+    environment: {
+      XDG_RUNTIME_DIR: "/run/user/1000",
+      SSH_AUTH_SOCK: "/tmp/other-agent",
+    },
+  };
+  const base = createDependencies();
+  const dependencies = createDependencies({
+    async readText(filePath) {
+      if (filePath === "/etc/pam.d/greetd") {
+        return "auth optional pam_gnome_keyring.so\n";
+      }
+      return validFiles.get(filePath) ?? null;
+    },
+    async runCommand(command, args, options) {
+      if (command === "systemctl" && args.at(-1) === "gcr-ssh-agent.socket") {
+        if (args.includes("is-enabled")) {
+          return commandResult(1, "disabled\n");
+        }
+        if (args.includes("is-active")) {
+          return commandResult(3, "inactive\n");
+        }
+      }
+      return base.runCommand(command, args, options);
+    },
+  });
+
+  const results = await runDoctor(swayContext, dependencies);
+  const pam = results.find((result) => result.id === "pam-keyring");
+  const agent = results.find((result) => result.id === "gcr-ssh-agent");
+
+  assert.ok(pam);
+  assert.equal(pam.status, "fail");
+  assert.match(pam.details?.join("\n") ?? "", /session optional pam_gnome_keyring/u);
+  assert.ok(agent);
+  assert.equal(agent.status, "fail");
+  assert.deepEqual(agent.details, [
+    "gcr-ssh-agent.socket: expected enabled, found disabled",
+    "gcr-ssh-agent.socket: expected active, found inactive",
+    "SSH_AUTH_SOCK: expected /run/user/1000/gcr/ssh, found /tmp/other-agent",
+  ]);
 });
 
 test("formatDoctorResults includes details, remediation, and totals", () => {
