@@ -1,0 +1,53 @@
+{{- $osID := "" -}}
+{{- with .chezmoi.osRelease }}
+  {{- $osID = or .id "" -}}
+{{- end -}}
+{{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
+{{- $features := list -}}
+{{- if hasKey .hosts .chezmoi.hostname -}}
+  {{- $host := index .hosts .chezmoi.hostname -}}
+  {{- if hasKey $host "features" -}}
+    {{- $features = index $host "features" -}}
+  {{- end -}}
+{{- end -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+nsswitch=/etc/nsswitch.conf
+{{- if has "printing" $features }}
+desired_hosts='hosts: mymachines files myhostname mdns_minimal [NOTFOUND=return] dns'
+{{- else }}
+desired_hosts='hosts: mymachines files myhostname dns'
+{{- end }}
+
+if [[ ! -f "$nsswitch" ]]; then
+  printf 'Missing %s; refusing to configure name resolution.\n' "$nsswitch" >&2
+  exit 1
+fi
+
+hosts_count=$(grep -cE '^[[:space:]]*hosts:' "$nsswitch" || true)
+if [[ "$hosts_count" -ne 1 ]]; then
+  printf 'Expected exactly one hosts entry in %s, found %s.\n' \
+    "$nsswitch" "$hosts_count" >&2
+  exit 1
+fi
+
+if grep -Fxq "$desired_hosts" "$nsswitch"; then
+  exit 0
+fi
+
+config=$(mktemp)
+staged="${nsswitch}.accel-os.$$"
+trap 'rm -f "$config"; sudo rm -f "$staged"' EXIT
+
+awk -v hosts="$desired_hosts" '
+  /^[[:space:]]*hosts:/ {
+    print hosts
+    next
+  }
+  { print }
+' "$nsswitch" >"$config"
+
+sudo install -o root -g root -m 0644 "$config" "$staged"
+sudo mv -f "$staged" "$nsswitch"
+{{ end }}

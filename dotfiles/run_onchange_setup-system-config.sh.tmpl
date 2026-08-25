@@ -1,0 +1,128 @@
+{{- $osID := "" -}}
+{{- with .chezmoi.osRelease }}
+  {{- $osID = or .id "" -}}
+{{- end -}}
+{{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
+{{- $host := dict -}}
+{{- if hasKey .hosts .chezmoi.hostname -}}
+  {{- $host = index .hosts .chezmoi.hostname -}}
+{{- end -}}
+{{- $features := list -}}
+{{- if hasKey $host "features" -}}
+  {{- $features = index $host "features" -}}
+{{- end -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+install_config() {
+  local source=$1
+  local destination=$2
+
+  if [[ ! -f "$destination" ]] || ! cmp -s "$source" "$destination"; then
+    sudo install -Dm0644 "$source" "$destination"
+    return 0
+  fi
+
+  return 1
+}
+
+temp_dir=$(mktemp -d)
+trap 'rm -rf "$temp_dir"' EXIT
+
+logind_config="$temp_dir/logind.conf"
+cat >"$logind_config" <<'EOF'
+# Managed by accel-os.
+[Login]
+KillUserProcesses=yes
+HandlePowerKey=suspend
+EOF
+install_config \
+  "$logind_config" \
+  /etc/systemd/logind.conf.d/80-accel-os.conf || true
+
+sysctl_config="$temp_dir/sysctl.conf"
+cat >"$sysctl_config" <<'EOF'
+# Managed by accel-os.
+vm.swappiness = 10
+EOF
+if install_config "$sysctl_config" /etc/sysctl.d/80-accel-os.conf; then
+  sudo sysctl --load=/etc/sysctl.d/80-accel-os.conf
+fi
+
+vconsole=/etc/vconsole.conf
+vconsole_input=/dev/null
+vconsole_config="$temp_dir/vconsole.conf"
+begin_marker='# BEGIN accel-os console font'
+end_marker='# END accel-os console font'
+manage_console_font={{ if has "workstation" $features }}1{{ else }}0{{ end }}
+
+if [[ -f "$vconsole" ]]; then
+  vconsole_input=$vconsole
+fi
+
+if [[ -f "$vconsole" ]] || (( manage_console_font )); then
+  awk \
+    -v begin="$begin_marker" \
+    -v end="$end_marker" \
+    -v enable="$manage_console_font" '
+    function fail(message) {
+      printf "Invalid accel-os block: %s\n", message > "/dev/stderr"
+      invalid = 1
+      exit 42
+    }
+    $0 == begin {
+      if (managed) {
+        fail("nested begin marker")
+      }
+      if (seen_begin) {
+        fail("duplicate begin marker")
+      }
+      seen_begin = 1
+      managed = 1
+      next
+    }
+    $0 == end {
+      if (!managed) {
+        fail("end marker without preceding begin marker")
+      }
+      managed = 0
+      next
+    }
+    managed {
+      next
+    }
+    /^[[:space:]]*FONT=/ {
+      if (!enable) {
+        print
+        next
+      }
+      if ($0 != "FONT=ter-124n") {
+        printf "Refusing to replace unmanaged console font: %s\n", $0 > "/dev/stderr"
+        exit 42
+      }
+      next
+    }
+    {
+      print
+    }
+    END {
+      if (invalid) {
+        exit 42
+      }
+      if (managed) {
+        printf "Invalid accel-os block: begin marker without following end marker\n" > "/dev/stderr"
+        exit 42
+      }
+      if (enable) {
+        print begin
+        print "FONT=ter-124n"
+        print end
+      }
+    }
+  ' "$vconsole_input" >"$vconsole_config"
+
+  if install_config "$vconsole_config" "$vconsole"; then
+    sudo systemctl restart systemd-vconsole-setup.service
+  fi
+fi
+{{ end }}

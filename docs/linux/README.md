@@ -18,10 +18,8 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 
 - to make terminal font larger type `setfont ter-132b`
 - locale en_GB.UTF-8 cause week starts from Monday not from Sunday like in en_US.UTF-8 (but generate both locales, just in case)
-- in /etc/systemd/logind.conf
-  - set KillUserProcesses=yes to kill user processes on logout
-  - set HandlePowerKey=suspend
-  - ?? set HandleLidSwitch=lock
+- `systemd-logind` is configured automatically to kill user processes on logout
+  and suspend when the power key is pressed
 - in /etc/pacman.conf
   - enable multilib
   - enable color output
@@ -29,12 +27,11 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 - add kernel parameters: mitigations=off random.trust_cpu=on
 
 - create/configure Swapfile if needed
-- set vm.swappiness=10
+- `vm.swappiness=10` is configured and applied automatically
 
-- if SSD install util-linux; enable fstrim.timer
-- start/enable systemd-timesyncd
-- install networkmanager, enable/start NetworkManager.service
-- install dnsmasq, enable/start it
+- NetworkManager manages networking and DNS; do not run a standalone dnsmasq service
+- `fstrim.timer`, `systemd-timesyncd.service`, and `NetworkManager.service` are
+  enabled automatically
 - if laptop, install tlp and enable service - good preferences by default
 
 - install & configure sudo
@@ -45,29 +42,16 @@ During Arch installation mount it as `/efi` and use `reFind` boot manager.
 # passwd <username>
 ```
 
-- To change linux console font
-  - install terminus-font
-  - add `FONT=ter124n` to `/etc/vconsole.conf` and restart systemd-vconsole-setup.service
-    - `24` is font size, `n` means normal <https://gist.github.com/danielcbaldwin/0eb3def2478150b32ad27280f8a937fb>
+- Workstation hosts install Terminus and use `ter-124n` as the Linux console font.
+  Other `/etc/vconsole.conf` settings remain unmanaged.
 
 ## Install basic cli and configs
 
-- install pacman -S --needed base-devel git go neovim just
-- install yay
-- install openssh, chezmoi, rustup, sccache, lld
-- install zsh, zsh-completions, zsh-autosuggestions, zsh-syntax-highlighting, starship, ttf-nerd-fonts-symbols, powerline-fonts
-- install udisks2 to mount usb drives
-- htop
-- zip
-- man-db
-- tmux
-- tree
-- ntfs-3g
-- dosfstools, mtools - for fat32
-- upower
-- downgrade - allows to downgrade packages
-- reflector - rate pacman mirrors
-- hunspell, en_GB
+- Bootstrap a fresh installation with `base-devel`, `git`, `chezmoi`, `zsh`,
+  and an AUR helper (`yay`) before applying the dotfiles.
+- Standard CLI, shell, editor, development, filesystem, and desktop application
+  packages are installed automatically for hosts with the `workstation`
+  feature.
 - use usb drive to copy ssh config & certificates, fix permissions:
 
 ```
@@ -79,7 +63,6 @@ $ chmod 600 ~/.ssh/key
 - `chezmoi init --source="$HOME/accel-os/dotfiles" --destination="$HOME"`
 - `chezmoi apply` (run with `--dry-run` first on a fresh host)
 - switch user to zsh `chsh -s /bin/zsh`
-- install pipewire pipewire-pulse
 
 ## GUI
 
@@ -87,12 +70,9 @@ $ chmod 600 ~/.ssh/key
 - Radeon: install mesa, lib32-mesa, vulkan-radeon, lib32-vulkan-radeon
 - radeontop - to monitor radeon graphics card
 - intel-gpu-tools - to monitor intel graphics card
-- install greetd
-- enable `greetd.service`
-- copy docs/linux/run-sway.sh into /usr/local/bin/
-- Update `/etc/greetd/config.toml`: `command = "agreety --cmd run-sway.sh"`
-- `systemctl edit greetd` and change service type to `idle` to prevent systemd logs overwriting login prompt
-- ? configure autologin
+- Sway hosts install and configure greetd automatically. Autologin is disabled
+  unless enabled explicitly for the host in `dotfiles/.chezmoidata/hosts.yaml`;
+  `mbTPLin` preserves its current autologin behavior.
 
 ## Environment
 
@@ -103,6 +83,12 @@ instead of duplicating its package inventory here.
 
 Notable configured behavior:
 
+- Host capabilities are declared in `dotfiles/.chezmoidata/hosts.yaml`.
+  Package installation, service enablement, and hardware-specific configuration
+  are derived from each host's feature list. Undeclared hosts receive only the
+  baseline Arch packages and services. Removing a feature disables its managed
+  services and removes its managed configuration, but does not uninstall its
+  packages.
 - `cliphist`, `darkman`, `kanshi`, `mako`, `swayidle`, `swayosd`, and
   `wlsunset` are started by `sway-session.target`.
 - `$mod+i` opens clipboard history; `Ctrl+T` switches between history and
@@ -111,8 +97,25 @@ Notable configured behavior:
   `~/.config/mb-clipboard/templates/`.
 - The configured terminal backend is installed with the Sway package group;
   change both `~/bin/xterm` and the package manifest when switching backends.
+- System services declared in `dotfiles/.chezmoidata/services.yaml` are enabled
+  and started automatically after package installation.
+- TLP is the sole system power manager. `tlp-pd` exposes the standard
+  PowerProfiles D-Bus API used by Waybar while retaining TLP's automatic
+  AC/battery profiles and hardware controls. Do not install
+  `power-profiles-daemon` alongside it because the services conflict.
+- Per-host battery charge thresholds are configured in
+  `dotfiles/.chezmoidata/tlp.yaml`. Opted-in hosts install the settings as
+  `/etc/tlp.d/01-accel-os.conf`; hosts without settings remove that managed
+  drop-in.
 
 Manual and hardware-specific setup:
+
+- Verify the configured power manager after bootstrapping a host:
+
+  ```
+  $ tlp-stat -s
+  $ tlpctl get
+  ```
 
 - Build and install the repo-local `mb-bin-tools` package after setting the
   Rust toolchain to stable:
@@ -128,17 +131,13 @@ Manual and hardware-specific setup:
   - Add `session optional pam_gnome_keyring.so auto_start` at the end of the `session` section
   - For git/ssh integration enable the gcr-ssh-agent <https://wiki.archlinux.org/title/GNOME/Keyring>
 
-- interception-caps2esc - bind CapsLock to Escape while pressing and to Control while holding
-  - copy `caps-to-esc-and-ctrl.yaml` into `/etc/interception/udevmon.d/`
-  - `systemctl enable --now udevmon.service`
+- interception-tools and interception-caps2esc are installed and configured
+  automatically to bind CapsLock to Escape when pressed and Control when held.
 
-- if bluetooth
-  - install bluez, bluez-utils, bluetui
-  - start and enable bluetooth service
-  - start and enable mpris-proxy user service
+- BlueZ, its command-line and TUI administration tools, `bluetooth.service`,
+  and the `mpris-proxy` user service are installed and enabled automatically.
 
 - Browser screen sharing uses `xdg-desktop-portal-wlr`.
-  - enable the PipeWire user service
   - enable `chrome://flags/#enable-webrtc-pipewire-capturer`
 
 Optional desktop tools not installed automatically:
@@ -159,57 +158,32 @@ Optional desktop tools not installed automatically:
 
 ## Apps
 
-- Firefox
-  - install config from accel-os
-  - tweak settings of Cookie Auto Delete
-- Thunderbird
-  - add accounts
-  - configure to synchronise only latest 30 days
-- Chromium
-- easyeffects - enable "auto gain" plugin, for volume normalisation
-- transmission-gtk
-- telegram-desktop
-- spotify
-- newsboat - rss reader
-- safeeyes - break reminder
-- file-roller - GUI archive manager
-- gparted
-- wdisplays-git - display configuration GUI
-- zathura, zathura-pdf-mupdf - pdf viewer
-- mpv, mpv-mpris - video player
-- imv - image viewer
-- yt-dlp - download videos from video hosting services
-- gnome-calculator - calculator
-- syncthing - file sync
-- iftop - CLI network connections monitor
+Standard open-source workstation applications are installed automatically from
+`dotfiles/.chezmoidata/packages.yaml`.
 
-- slack
-- skype
-- google chrome
+Manual application setup:
+
+- Firefox: install the tracked preferences from `firefox/` for the local profile,
+  then tweak Cookie Auto Delete settings.
+- Thunderbird: add accounts and configure it to synchronize only the latest 30
+  days.
+- EasyEffects: enable the auto-gain plugin for volume normalization.
+- Proprietary applications such as Spotify, Slack, Skype, and Google Chrome are
+  not installed automatically.
 
 ## Dev tools
 
-- emacs-wayland, aspell, aspell-en
-- ripgrep - search in files
-- jq - filter json
-- fd - better "find"
-- tokei - count lines of code
-- kdiff3
-- delta - better git diffs
-- `git-spr` <https://github.com/ejoffe/spr> - stacked pull requests for GitHub
-- `github-cli` - CLI for interacting with GitHub
-- watchexec - run commands on file change
-- cargo-outdated
-- cargo-release - helpers for release management
-- rust-analyzer
-- Node.js
-- npm
-- editorconfig-core-c
-- install typescript typescript-language-server eslint-language-server@2.4.4 (needed for emacs-lsp)
-  - npm i -g vscode-langservers-extracted
-- android-tools, android-udev
-- uv - fast python package & project manager
-- Rootless docker
+- Development packages are installed automatically for hosts with the
+  `workstation` feature.
+- Install `git-spr` manually:
+  <https://github.com/ejoffe/spr>
+- Install npm-only language servers needed by Emacs:
+
+  ```
+  $ npm i -g vscode-langservers-extracted eslint-language-server@2.4.4
+  ```
+
+- Configure Docker for rootless operation after its packages are installed.
 
 ## Configure hardware acceleration
 
@@ -234,7 +208,8 @@ auth            sufficient      pam_fprintd.so
 
 # Firmware update service
 
-- install fwupd, gnome-firmware
+- fwupd and its graphical interface are installed automatically, and the
+  metadata refresh timer is enabled
 
 ## Hibernation
 
@@ -244,10 +219,12 @@ auth            sufficient      pam_fprintd.so
 
 ## Printing
 
-- install cups, avahi, nss-mdns
-- edit `/etc/nsswitch.conf` and change the hosts line to include `mdns_minimal [NOTFOUND=return]` before resolve and dns [source](https://wiki.archlinux.org/title/avahi#Hostname_resolution)
-- disable `systemd-resolved` service due to conflict with avahi
-- enable and start cups service
+- CUPS, Avahi, and `nss-mdns` are installed automatically for hosts with the
+  `printing` feature.
+- NetworkManager owns unicast DNS and `/etc/resolv.conf`; Avahi owns mDNS and
+  DNS-SD. The managed `hosts` entry in `/etc/nsswitch.conf` routes `.local`
+  lookups through Avahi, while `systemd-resolved` remains disabled to keep
+  resolver ownership unambiguous.
 
 ## Tips
 

@@ -47,21 +47,21 @@ test("parseHistoryList validates IDs and detects image previews case-insensitive
       ].join("\n"),
     ),
     [
-        {
-          id: "12",
-          preview: "hello world",
-          imageExtension: null,
-        },
-        {
-          id: "13",
-          preview: "BINARY DATA payload",
-          imageExtension: null,
-        },
-        {
-          id: "14",
-          preview: "BiNaRy image/PNG data",
-          imageExtension: "png",
-        },
+      {
+        id: "12",
+        preview: "hello world",
+        imageExtension: null,
+      },
+      {
+        id: "13",
+        preview: "BINARY DATA payload",
+        imageExtension: null,
+      },
+      {
+        id: "14",
+        preview: "BiNaRy image/PNG data",
+        imageExtension: "png",
+      },
     ],
   );
 });
@@ -165,9 +165,7 @@ test("image menu generation creates escaped reusable previews and removes stale 
     const svg = await readFile(previewIcon, "utf8");
     assert.match(svg, /cache&amp;&quot;quoted/u);
     const menu = await readFile(fixture.menuCapture);
-    assert.ok(
-      menu.includes(Buffer.from(`h:7\tBiNaRy image/PNG data\0icon\x1f${previewIcon}\n`)),
-    );
+    assert.ok(menu.includes(Buffer.from(`h:7\tBiNaRy image/PNG data\0icon\x1f${previewIcon}\n`)));
 
     const secondRun = await runClipboard({ ...fixture.env, DECODE_FAIL: "1" });
     assert.equal(secondRun.code, 0, secondRun.stderr);

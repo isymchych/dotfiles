@@ -1,0 +1,41 @@
+{{- $osID := "" -}}
+{{- with .chezmoi.osRelease }}
+  {{- $osID = or .id "" -}}
+{{- end -}}
+{{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
+{{- $host := dict -}}
+{{- if hasKey .hosts .chezmoi.hostname -}}
+  {{- $host = index .hosts .chezmoi.hostname -}}
+{{- end -}}
+{{- $features := list -}}
+{{- if hasKey $host "features" -}}
+  {{- $features = index $host "features" -}}
+{{- end -}}
+{{- if has "caps2esc" $features -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+config="$(mktemp)"
+trap 'rm -f "$config"' EXIT
+
+cat >"$config" <<'EOF'
+- JOB: "intercept -g $DEVNODE | caps2esc -m 1 | uinput -d $DEVNODE"
+  DEVICE:
+    EVENTS:
+      EV_KEY: [KEY_CAPSLOCK, KEY_ESC]
+EOF
+
+sudo install -Dm0644 \
+  "$config" \
+  /etc/interception/udevmon.d/caps-to-esc-and-ctrl.yaml
+
+if systemctl is-active --quiet udevmon.service; then
+  sudo systemctl restart udevmon.service
+fi
+{{- else -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+sudo rm -f /etc/interception/udevmon.d/caps-to-esc-and-ctrl.yaml
+{{- end }}
+{{ end }}

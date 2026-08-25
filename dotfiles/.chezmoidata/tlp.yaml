@@ -1,0 +1,7 @@
+tlp:
+  hosts:
+    mbTPLin:
+      charge_thresholds:
+        battery: BAT0
+        start: 75
+        stop: 80

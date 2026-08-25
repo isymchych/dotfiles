@@ -17,7 +17,7 @@
   ],
   "modules-right": [
     "custom/pi-agents",
-    "systemd-failed-units",
+    "custom/systemd-failed-units",
     "cpu",
     "memory",
     // "memory#swap",
@@ -65,11 +65,13 @@
   },
   "cpu": {
     "format": " {usage:2}%",
-    "tooltip": true
+    "tooltip": true,
+    "on-click": "xterm run -- htop --sort-key=PERCENT_CPU"
   },
   "memory": {
     "format": "RAM {percentage:2}%",
-    "tooltip-format": "{used:0.1f}GiB out of {total:0.1f}GiB used"
+    "tooltip-format": "{used:0.1f}GiB out of {total:0.1f}GiB used",
+    "on-click": "xterm run -- htop --sort-key=PERCENT_MEM"
   },
   "memory#swap": {
     "format": "SWAP{swapPercentage:3}%",
@@ -161,9 +163,13 @@
       "power-saver": "<span color='green'></span>"
     }
   },
-  "systemd-failed-units": {
-    "format": "✗ {nr_failed}",
-    "format-ok": "✓"
+  "custom/systemd-failed-units": {
+    "exec": "~/.config/waybar/systemd_failed_units.sh status",
+    "interval": 10,
+    "return-type": "json",
+    "escape": true,
+    "format": "{text}",
+    "on-click": "xterm run --class=systemd-failures -- ~/.config/waybar/systemd_failed_units.sh inspect"
   },
   "custom/pi-agents": {
     "exec": "~/.config/waybar/pi_agents.sh",

@@ -1,0 +1,53 @@
+services:
+  linux:
+    arch:
+      base:
+        system:
+          enabled:
+            - NetworkManager.service
+            - fstrim.timer
+            - systemd-timesyncd.service
+          disabled:
+            - systemd-resolved.service
+        user:
+          enabled: []
+      features:
+        sway:
+          system:
+            enabled:
+              - greetd.service
+          user:
+            enabled: []
+        laptop:
+          system:
+            enabled:
+              - tlp.service
+              - tlp-pd.service
+          user:
+            enabled: []
+        bluetooth:
+          system:
+            enabled:
+              - bluetooth.service
+          user:
+            enabled:
+              - mpris-proxy.service
+        printing:
+          system:
+            enabled:
+              - cups.service
+              - avahi-daemon.service
+          user:
+            enabled: []
+        firmware:
+          system:
+            enabled:
+              - fwupd-refresh.timer
+          user:
+            enabled: []
+        caps2esc:
+          system:
+            enabled:
+              - udevmon.service
+          user:
+            enabled: []

@@ -1,0 +1,73 @@
+{{- $osID := "" -}}
+{{- with .chezmoi.osRelease }}
+  {{- $osID = or .id "" -}}
+{{- end -}}
+{{- if and (eq .chezmoi.os "linux") (eq $osID "arch") -}}
+{{- $host := dict -}}
+{{- if hasKey .hosts .chezmoi.hostname -}}
+  {{- $host = index .hosts .chezmoi.hostname -}}
+{{- end -}}
+{{- $features := list -}}
+{{- if hasKey $host "features" -}}
+  {{- $features = index $host "features" -}}
+{{- end -}}
+{{- $greetd := dict -}}
+{{- if hasKey $host "greetd" -}}
+  {{- $greetd = index $host "greetd" -}}
+{{- end -}}
+{{- $autologin := false -}}
+{{- if hasKey $greetd "autologin" -}}
+  {{- $autologin = index $greetd "autologin" -}}
+{{- end -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+config_path=/etc/greetd/config.toml
+launcher_path=/usr/local/bin/run-sway.sh
+
+{{- if has "sway" $features }}
+config=$(mktemp)
+launcher=$(mktemp)
+trap 'rm -f "$config" "$launcher"' EXIT
+
+cat >"$launcher" <<'EOF'
+#!/usr/bin/env zsh
+# Managed by accel-os.
+
+source "$HOME/.run-sway"
+EOF
+
+cat >"$config" <<'EOF'
+# Managed by accel-os.
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "agreety --cmd /usr/local/bin/run-sway.sh"
+user = "greeter"
+{{- if $autologin }}
+
+[initial_session]
+command = "/usr/local/bin/run-sway.sh"
+user = {{ .chezmoi.username | quote }}
+{{- end }}
+EOF
+
+if [[ ! -f "$launcher_path" ]] || ! cmp -s "$launcher" "$launcher_path"; then
+  sudo install -Dm0755 "$launcher" "$launcher_path"
+fi
+
+if [[ ! -f "$config_path" ]] || ! cmp -s "$config" "$config_path"; then
+  sudo install -Dm0644 "$config" "$config_path"
+fi
+{{- else }}
+managed_marker='# Managed by accel-os.'
+
+for path in "$config_path" "$launcher_path"; do
+  if [[ -f "$path" ]] && grep -Fqx "$managed_marker" "$path"; then
+    sudo rm -f "$path"
+  fi
+done
+{{- end }}
+{{ end }}

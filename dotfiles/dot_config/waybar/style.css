@@ -259,18 +259,24 @@ window#waybar {
   color: @highlight-color;
 }
 
-#systemd-failed-units {
-  color: @urgent-color;
-
-  animation-name: blink;
-  animation-duration: 0.5s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-
+#custom-systemd-failed-units {
   font-size: 2em;
   padding-top: 8px;
   padding-bottom: 8px;
+}
+
+#custom-systemd-failed-units.systemd-failed-units--degraded {
+  color: @urgent-color;
+
+  animation-name: blink;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: 6;
+  animation-direction: alternate;
+}
+
+#custom-systemd-failed-units.systemd-failed-units--ok {
+  padding: 0;
 }
 
 #custom-pi-agents {

@@ -1,0 +1,12 @@
+hosts:
+  mbTPLin:
+    features:
+      - workstation
+      - sway
+      - laptop
+      - bluetooth
+      - printing
+      - firmware
+      - caps2esc
+    greetd:
+      autologin: true

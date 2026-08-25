@@ -2,104 +2,216 @@ packages:
   linux:
     arch:
       pacman:
-        sway_session:
-          - sway
-          - xorg-xwayland
-          - waybar
-          - swaylock
-          - swayidle
-          - kanshi
-          - mako
-          - swayosd
-          - wlsunset
-          - darkman
-          - polkit-gnome
-          - xorg-xrdb
-          - wmname
-          - kitty
-          - fuzzel
-          - libnotify
+        base:
+          system:
+            - networkmanager # Network connection manager and user applications
 
-        desktop_integration:
-          - network-manager-applet
-          - udiskie
-          - pipewire
-          - pipewire-pulse
-          - pavucontrol
-          - power-profiles-daemon
-          - xdg-desktop-portal
-          - xdg-desktop-portal-gtk
-          - xdg-desktop-portal-wlr
-          - xdg-utils
-          - gnome-keyring
-          - libsecret
-          - seahorse
-          - qt5ct
+          bootstrap:
+            - base-devel # Basic tools to build Arch Linux packages
+            - chezmoi # Manage your dotfiles across multiple machines
+            - git # the fast distributed version control system
+            - openssh # SSH protocol implementation for remote login, command execution and file transfer
+            - zsh # A very advanced and programmable command interpreter (shell) for UNIX
 
-        desktop_features:
-          - grim
-          - slurp
-          - satty
-          - wf-recorder
-          - imagemagick
-          - jq
-          - translate-shell
-          - gsimplecal
-          - playerctl
-          - trash-cli
+        features:
+          workstation:
+            cli:
+              - ripgrep # fast project search
+              - fd # ergonomic file finder
+              - tokei # code line counts
+              - just # task runner
+              - fzf # fuzzy matcher
+              - wget # HTTP(S) downloads
+              - gitui # TUI for git
+              - git-delta # git diff viewer
+              - difftastic # syntax-aware diffs
+              - television # fuzzy file finder / search
+              - lazydocker # TUI for Docker
+              - sad # structural search/replace, with preview
+              - mergiraf # semantic merge driver
+              - rainfrog # CLI database client
+              - editorconfig-core-c # EditorConfig core code written in C (for use by plugins supporting EditorConfig parsing)
+              - iftop # Display bandwidth usage on an interface
+              - man-db # A utility for reading man pages
+              # - reflector # A Python 3 module and script to retrieve and filter the latest Pacman mirror list
+              - tmux # Terminal multiplexer
+              - tree # A directory listing program displaying a depth indented list of files
+              - zip # Compressor/archiver for creating and modifying zipfiles
 
-        hardware_helpers:
-          - xorg-xinput
+            development:
+              - android-tools # Android platform tools
+              - android-udev # Udev rules to connect Android devices to your linux box
+              - cargo-outdated # A cargo subcommand for displaying when Rust dependencies are out of date
+              # - cargo-release # Cargo subcommand "release": everything about releasing a rust crate
+              - github-cli # The GitHub CLI
+              - go # Core compiler tools for the Go programming language
+              - kdiff3 # A file comparator/merge tool
+              - lld # Linker from the LLVM project
+              - neovim # Fork of Vim aiming to improve user experience, plugins, and GUIs
+              - nodejs # Evented I/O for V8 javascript ("Current" release)
+              - npm # JavaScript package manager
+              # - rust-analyzer # Rust compiler front-end for IDEs
+              - rustup # The Rust toolchain installer
+              - sccache # Shared compilation cache
+              - typescript # JavaScript with syntax for types
+              - typescript-language-server # Language Server Protocol (LSP) implementation for TypeScript using tsserver
+              - uv # An extremely fast Python package installer and resolver written in Rust
+              # - watchexec # Executes commands in response to file modifications
 
-        clipboard:
-          - cliphist
-          - wl-clipboard
-          - zenity
-          - file
+            containers:
+              - docker # Pack, ship and run any application as a lightweight container
+              - docker-buildx # Docker CLI plugin for extended build capabilities with BuildKit
+              - docker-compose # Fast, isolated development environments using Docker
+              # - fuse-overlayfs # FUSE implementation of overlayfs
+              - rootlesskit # Native "fake root" for implementing rootless containers
+              - slirp4netns # User-mode networking for unprivileged network namespaces
 
-        file_manager:
-          - yazi # mb-file-manager backend; install unarchiver plugin for previews
-          - python-gobject # mb-file-manager FileManager1 D-Bus support
-          - 7zip
+            filesystems:
+              - dosfstools # DOS filesystem utilities
+              - mtools # A collection of utilities to access MS-DOS disks
+              - ntfs-3g # NTFS FUSE driver
+              - udisks2 # Daemon, tools and libraries to access and manipulate disks, storage devices and technologies
+              - upower # Abstraction for enumerating power devices, listening to device events and querying history and statistics
 
-        cli:
-          - ripgrep # fast project search
-          - fd # ergonomic file finder
-          - tokei # code line counts
-          - just # task runner
-          - fzf # fuzzy matcher
-          - wget # HTTP(S) downloads
-          - htop # system monitor
-          - gitui # TUI for git
-          - git-delta # git diff viewer
-          - difftastic # syntax-aware diffs
-          - television # fuzzy file finder / search
-          - lazydocker # TUI for Docker
-          - sad # structural search/replace, with preview
-          - mergiraf # semantic merge driver
-          - rainfrog # CLI database client
-          - editorconfig-core-c
+            emacs:
+              - aspell # A spell checker designed to eventually replace Ispell
+              - aspell-en # English dictionary for aspell
+              - aspell-uk # Ukrainian dictionary for aspell
+              - emacs-wayland # The extensible, customizable, self-documenting real-time display editor with PGTK enabled
+              - hunspell # Spell checker and morphological analyzer library and program
+              - hunspell-en_gb # GB English hunspell dictionaries
 
-        emacs:
-          - aspell
-          - aspell-en
-          - aspell-uk
-          - emacs-wayland
+            shell:
+              - starship # shell prompt
+              - zsh-completions # Additional completion definitions for Zsh
+              - zsh-autosuggestions # Fish-like autosuggestions for zsh
+              - zsh-syntax-highlighting # Fish shell like syntax highlighting for Zsh
 
-        shell:
-          - starship # shell prompt
-          - zsh-completions
-          - zsh-autosuggestions
-          - zsh-syntax-highlighting
+            fonts:
+              - noto-fonts # Google Noto TTF fonts
+              - noto-fonts-cjk # Google Noto CJK fonts
+              - noto-fonts-emoji # Google Noto Color Emoji font
+              - otf-font-awesome # Iconic font designed for Bootstrap - otf format
+              - terminus-font # Monospaced bitmap font for the Linux virtual console
+              - ttf-jetbrains-mono-nerd # Patched font JetBrains Mono from nerd fonts library
+              - ttf-ubuntu-font-family # Ubuntu font family
 
-        fonts:
-          - noto-fonts
-          - noto-fonts-cjk
-          - noto-fonts-emoji
-          - otf-font-awesome
-          - ttf-jetbrains-mono-nerd
-          - ttf-ubuntu-font-family
+            desktop_apps:
+              - chromium # A web browser built for speed, simplicity, and security
+              - easyeffects # Audio Effects for Pipewire applications
+              - file-roller # Create and modify archives
+              - firefox # Fast, Private & Safe Web Browser
+              - gnome-calculator # GNOME Scientific calculator
+              - gparted # A Partition Magic clone, frontend to GNU Parted
+              - newsboat # RSS/Atom feed reader for text terminals
+              - syncthing # Open Source Continuous Replication / Cluster Synchronization Thing
+              - thunderbird # Standalone mail and news reader from mozilla.org
+              - transmission-gtk # Fast, easy, and free BitTorrent client (GTK+ GUI)
+              - wdisplays # Graphical application for configuring Wayland displays
+
+            media:
+              - imv # Image viewer for Wayland and X11
+              - mpv # a free, open source, and cross-platform media player
+              - mpv-mpris # MPRIS plugin for mpv
+              - yt-dlp # A youtube-dl fork with additional features and fixes
+              - zathura # Minimalistic document viewer
+              - zathura-pdf-mupdf # PDF support for Zathura (MuPDF backend) (Supports PDF, ePub, and OpenXPS)
+
+          sway:
+            sway_session:
+              - sway # Tiling Wayland compositor and replacement for the i3 window manager
+              - greetd # Generic greeter daemon
+              - xorg-xwayland # run X clients under wayland
+              - waybar # Highly customizable Wayland bar for Sway and Wlroots based compositors
+              - swaylock # Screen locker for Wayland
+              - swayidle # Idle management daemon for Wayland
+              - kanshi # Dynamic output configuration for Wayland WMs
+              - mako # Lightweight notification daemon for Wayland
+              - swayosd # A GTK based on screen display for keyboard shortcuts like caps-lock and volume
+              - wlsunset # Day/night gamma adjustments for Wayland compositors
+              - darkman # Framework for dark-mode and light-mode transitions on Linux desktop
+              - polkit-gnome # Legacy polkit authentication agent for GNOME
+              - xorg-xrdb # X server resource database utility
+              - wmname # A utility to set the name of your window manager
+              - kitty # A modern, hackable, featureful, OpenGL-based terminal emulator
+              - fuzzel # Application launcher for wlroots based Wayland compositors
+              - libnotify # Library for sending desktop notifications
+
+            desktop_integration:
+              - network-manager-applet # Applet for managing network connections
+              - udiskie # Removable disk automounter using udisks
+              - pipewire # Low-latency audio/video router and processor
+              - pipewire-pulse # Low-latency audio/video router and processor - PulseAudio replacement
+              - pavucontrol # PulseAudio Volume Control
+              - xdg-desktop-portal # Desktop integration portals for sandboxed apps
+              - xdg-desktop-portal-gtk # A backend implementation for xdg-desktop-portal using GTK
+              - xdg-desktop-portal-wlr # xdg-desktop-portal backend for wlroots
+              - xdg-utils # Command line tools that assist applications with a variety of desktop integration tasks
+              - gnome-keyring # Stores passwords and encryption keys
+              - libsecret # Library for storing and retrieving passwords and other secrets
+              - seahorse # GNOME application for managing PGP keys
+              - qt5ct # Qt5 Configuration Utility
+
+            desktop_features:
+              - grim # Screenshot utility for Wayland
+              - slurp # Select a region in a Wayland compositor
+              - satty # Modern screenshot annotation tool, inspired by Swappy and Flameshot
+              - wf-recorder # Screen recorder for wlroots-based compositors such as sway
+              - imagemagick # An image viewing/manipulation program
+              - jq # Command-line JSON processor
+              - translate-shell # A command-line interface and interactive shell for Google Translate
+              - gsimplecal # Simple and lightweight GTK calendar
+              - htop # system monitor used by Waybar click handlers
+              - playerctl # mpris media player controller and lib for spotify, vlc, audacious, bmp, xmms2, and others
+              - trash-cli # Command line trashcan (recycle bin) interface
+
+            hardware_helpers:
+              - xorg-xinput # Small commandline tool to configure devices
+
+            clipboard:
+              - cliphist # wayland clipboard manager
+              - wl-clipboard # Command-line copy/paste utilities for Wayland
+              - zenity # Display graphical dialog boxes from shell scripts
+              - file # File type identification utility
+
+            file_manager:
+              - yazi # mb-file-manager backend; install unarchiver plugin for previews
+              - python-gobject # mb-file-manager FileManager1 D-Bus support
+              - 7zip # File archiver for extremely high compression
+
+          laptop:
+            power:
+              - tlp-pd # TLP-backed PowerProfiles API for Waybar; do not pair with power-profiles-daemon
+
+          bluetooth:
+            packages:
+              - bluez # Daemons for the bluetooth protocol stack
+              - bluez-utils # Development and debugging utilities for the bluetooth protocol stack
+              - bluetui # TUI for managing bluetooth devices
+
+          printing:
+            packages:
+              - cups # OpenPrinting CUPS - daemon package
+              - avahi # Service Discovery for Linux using mDNS/DNS-SD (compatible with Bonjour)
+              - nss-mdns # NSS module for resolving .local hostnames through mDNS
+
+          firmware:
+            packages:
+              - fwupd # Simple daemon to allow session software to update firmware
+              - gnome-firmware # Manage firmware on devices supported by fwupd
+
+          caps2esc:
+            packages:
+              - interception-tools # A minimal composable infrastructure on top of libudev and libevdev
+              - interception-caps2esc # Interception plugin that transforms the most useless key ever in the most useful one
 
       # Keep AUR packages separate so the installer requires an AUR helper only
       # for packages unavailable from the official repositories.
-      aur: {}
+      aur:
+        base: {}
+        features:
+          workstation:
+            utilities:
+              - downgrade # Bash script for downgrading one or more packages to a version in your cache or the A.L.A
+            containers:
+              - docker-rootless-extras # Extras to run docker as non-root
