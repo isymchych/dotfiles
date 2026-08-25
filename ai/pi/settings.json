@@ -40,7 +40,7 @@
     "maxRetries": 5,
     "baseDelayMs": 3000
   },
-  "shellPath": "/usr/bin/bash",
+  "shellPath": "/bin/bash",
   "enabledModels": [
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.5",

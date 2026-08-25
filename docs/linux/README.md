@@ -93,23 +93,16 @@ Laptop hosts use TLP as the sole system power manager. Do not install
 
 ## Bootstrap the repository
 
-Clone the repository to `~/accel-os`, then initialize, inspect, and apply the
-Chezmoi source directly:
+Install `fnm`, set Zsh as the login shell, then follow the canonical
+[repository bootstrap](../../README.md#bootstrap):
 
 ```bash
-chezmoi init --source="$HOME/accel-os/dotfiles" --destination="$HOME"
-chezmoi diff
-chezmoi apply --dry-run --verbose
-chezmoi apply
-npm install --ignore-scripts
 chsh -s /bin/zsh
 ```
 
-Run `mb-doctor` afterward to verify packages, services, managed system
-configuration, the user's shell and required groups, Sway keyring and SSH-agent
-integration, and repo-managed command wrappers. Repair managed drift with
-`chezmoi apply`; the doctor reports explicit remediation for manual account and
-keyring configuration.
+On Arch, `./bootstrap --apply` finishes by running `mb-doctor`. Repair managed
+drift with `chezmoi apply`; the doctor reports remediation for manual account
+and keyring configuration.
 
 ## Manual setup
 

@@ -1,52 +1,110 @@
-# Setting up
+# macOS setup
 
-- Install brew
-- Fonts:
-  brew tap homebrew/cask-fonts
-  brew install font-noto-sans, font-jetbrains-mono-nerd-font, font-dejavu
-  brew install --cask font-iosevka-nerd-font
-- ITerm 2:
-  - brew tap homebrew/cask-versions
-  - brew install --cask iterm2-beta
-  - Preferences -> General/Preferences -> Check "Load preferences from a custom folder or URL" and point it at `~/.config/iterm2`
-- brew install git git-delta chezmoi fnm zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions starship coreutils
-- Clone accel-os
-- `chezmoi init --source="$HOME/accel-os/dotfiles" && chezmoi apply`
-- Use zsh as a shell `chsh -s /bin/zsh`
-- CLI tools
-  brew install aspell editorconfig fd lazygit htop jq just yazi ripgrep tokei wget nvim
-- kdiff3 - diff tool
-  brew install --cask kdiff3
-- Install Owly - prevent Mac from sleeping in 15 minutes
-- LinearMouse - disable mouse acceleration
-  brew install --cask linearmouse --no-quarantine
-- Rectangle - windows management
-  brew install --cask rectangle
-- Emacs https://github.com/d12frosted/homebrew-emacs-plus
-  brew tap d12frosted/emacs-plus
-  brew install libgccjit
-  brew install emacs-plus --with-modern-purple-flat-icon --with-native-comp
-  ln -s /opt/homebrew/opt/emacs-plus@28/Emacs.app /Applications
-- optional git-credentials-manager-core - for passwordless auth
-  brew tap microsoft/git
-  brew cask install git-credential-manager-core
-- sad - code search and replace
-  brew install ms-jpq/sad/sad
-- Stretchly - break time reminder
-  brew install --cask stretchly
-- Install Telegram
-- Karabiner elements - remap keys
-  brew install karabiner-elements
+The macOS support tier covers the portable Accel OS core: shell configuration,
+the pinned Node runtime, `ACCEL_OS`, `ai`, and portable repository commands. The
+Arch package, service, Sway, and `mb-doctor` automation does not apply.
 
-# Settings
+## Bootstrap
+
+Install [Homebrew](https://brew.sh/), then make it available in the current
+shell. Use the path matching the host:
+
+```bash
+# Apple Silicon
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Intel
+eval "$(/usr/local/bin/brew shellenv)"
+```
+
+Install the portable prerequisites:
+
+```bash
+brew install git chezmoi fnm zsh
+```
+
+Follow the canonical [repository bootstrap](../../README.md#bootstrap), then set
+Zsh as the login shell:
+
+```bash
+chsh -s /bin/zsh
+```
+
+Run `./bootstrap` to inspect the Chezmoi changes and `./bootstrap --apply` to
+apply them, install the pinned Node runtime and repository dependencies, and
+verify the portable configuration. Start a new login shell afterward so
+`ACCEL_OS`, `~/bin`, and the managed shell configuration are available.
+
+## Optional workstation setup
+
+### Shell and CLI tools
+
+```bash
+brew install \
+  aspell \
+  coreutils \
+  editorconfig \
+  fd \
+  git-delta \
+  htop \
+  jq \
+  just \
+  lazygit \
+  neovim \
+  ripgrep \
+  starship \
+  tokei \
+  wget \
+  yazi \
+  zsh-autosuggestions \
+  zsh-completions \
+  zsh-syntax-highlighting
+```
+
+### Fonts
+
+```bash
+brew install --cask \
+  font-dejavu-sans \
+  font-iosevka-nerd-font \
+  font-jetbrains-mono-nerd-font \
+  font-noto-sans
+```
+
+### Applications
+
+- iTerm2: install the desired release, then configure it to load preferences
+  from `~/.config/iterm2`.
+- KDiff3: `brew install --cask kdiff3`
+- LinearMouse: `brew install --cask linearmouse --no-quarantine`
+- Rectangle: `brew install --cask rectangle`
+- Stretchly: `brew install --cask stretchly`
+- Karabiner-Elements: `brew install --cask karabiner-elements`
+- Install Owly to prevent the Mac from sleeping during long-running work.
+- Install Telegram when needed.
+
+### Emacs
+
+Use the `d12frosted/homebrew-emacs-plus` tap and select the current Emacs
+version and build options intentionally rather than relying on the historical
+version-specific command previously recorded here.
+
+### Other development tools
+
+- `brew install ms-jpq/sad/sad`
+- Install a Git credential manager when passwordless HTTPS authentication is
+  needed.
+
+## Settings
 
 - Trackpad -> enable "Tap to click"
 - Map caps lock to control
 - Make ctrl-c etc work https://apple.stackexchange.com/a/170671
 - Exclude projects folder from the Spotlight index to prevent high CPU usage
 
-# Dev tools
+## Language servers
 
-- brew install yaml-language-server
-- brew install typescript-language-server
-- brew install vscode-langservers-extracted
+```bash
+brew install yaml-language-server
+npm install --global typescript-language-server vscode-langservers-extracted
+```

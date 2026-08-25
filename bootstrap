@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: ./bootstrap [--apply]
+
+Inspect the Chezmoi changes required to bootstrap this repository.
+Pass --apply to apply them, install repository dependencies, and verify the host.
+EOF
+}
+
+require_command() {
+  local command_name=$1
+
+  command -v "$command_name" >/dev/null 2>&1 || {
+    printf 'bootstrap: required command not found: %s\n' "$command_name" >&2
+    exit 1
+  }
+}
+
+apply=0
+if (( $# > 1 )); then
+  usage >&2
+  exit 2
+fi
+
+case "${1:-}" in
+  "")
+    ;;
+  --apply)
+    apply=1
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+repository_root=$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+readonly repository_root
+readonly dotfiles_source="$repository_root/dotfiles"
+readonly node_version_file="$repository_root/.node-version"
+
+export ACCEL_OS="$repository_root"
+export PATH="$HOME/bin:$PATH"
+
+[[ -d "$dotfiles_source" ]] || {
+  printf 'bootstrap: missing Chezmoi source: %s\n' "$dotfiles_source" >&2
+  exit 1
+}
+[[ -r "$node_version_file" ]] || {
+  printf 'bootstrap: missing Node version file: %s\n' "$node_version_file" >&2
+  exit 1
+}
+
+require_command chezmoi
+require_command fnm
+require_command zsh
+
+printf '==> Reviewing pending changes\n'
+chezmoi --source="$dotfiles_source" --destination="$HOME" diff
+
+printf '\n==> Validating the apply\n'
+chezmoi --source="$dotfiles_source" --destination="$HOME" apply --dry-run --verbose
+
+if (( apply == 0 )); then
+  printf '\nInspection complete. Run %q --apply to apply and verify the configuration.\n' "$0"
+  exit 0
+fi
+
+printf '\n==> Initializing Chezmoi\n'
+chezmoi init --source="$dotfiles_source" --destination="$HOME"
+
+printf '\n==> Applying dotfiles\n'
+chezmoi apply
+
+printf '\n==> Installing repository dependencies\n'
+(
+  cd "$repository_root"
+  fnm exec --using="$node_version_file" npm install --ignore-scripts
+)
+
+printf '\n==> Verifying portable configuration\n'
+chezmoi doctor
+"$HOME/bin/accel-node" --version
+(
+  cd "$repository_root"
+  fnm exec --using="$node_version_file" npm run check
+)
+"$HOME/bin/ai" help >/dev/null
+
+if [[ "$(uname -s)" == "Linux" && -r /etc/os-release ]]; then
+  # shellcheck disable=SC1091
+  . /etc/os-release
+  if [[ "${ID:-}" == "arch" ]]; then
+    printf '\n==> Verifying Arch workstation configuration\n'
+    "$HOME/bin/mb-doctor"
+  fi
+fi
+
+printf '\nBootstrap complete. Start a new Zsh login shell with: exec zsh -l\n'

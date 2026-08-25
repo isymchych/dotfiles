@@ -22,4 +22,5 @@ lint:
 test:
   npm run test
 
-check: typecheck lint test fmt-check
+check:
+  npm run check

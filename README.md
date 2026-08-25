@@ -13,29 +13,41 @@ macOS notes are also available.
 - `docs/mac/` — macOS setup notes
 - `ai/` — coding-agent configuration and automation
 
+## Platform support
+
+Arch Linux and macOS share the portable shell and repository tooling. Arch also
+includes managed packages and services, host verification, and the Sway desktop
+configuration.
+
 ## Bootstrap
 
-Install `git` and `chezmoi`, clone this repository to `~/accel-os`, then
-initialize and review the dotfiles:
+Install `git`, `chezmoi`, `fnm`, and `zsh` using the platform guide, then clone
+this repository at the path used by the default `ACCEL_OS` value:
 
 ```bash
-chezmoi init --source="$HOME/accel-os/dotfiles" --destination="$HOME"
-chezmoi diff
-chezmoi apply --dry-run --verbose
-chezmoi apply
-npm install --ignore-scripts
+git clone <repository-url> "$HOME/accel-os"
+cd "$HOME/accel-os"
+./bootstrap
 ```
 
-Package installation and managed services are derived from host features in
+The first run displays the pending changes and validates a dry-run without
+changing the home directory. Review the output, then apply and verify the
+configuration:
+
+```bash
+./bootstrap --apply
+exec zsh -l
+```
+
+`./bootstrap --apply` installs repository dependencies with the pinned Node
+runtime, runs `chezmoi doctor` and the repository checks, and runs `mb-doctor`
+on Arch Linux.
+
+The bootstrap derives `ACCEL_OS` from its repository location for the duration
+of the run. The shell configuration defaults it to `$HOME/accel-os`; configure
+the environment before starting Zsh if the repository lives elsewhere. Arch
+package installation and managed services are derived from host features in
 `dotfiles/.chezmoidata/`.
-
-## Verify
-
-```bash
-chezmoi doctor
-mb-doctor
-just check
-```
 
 ## Guides
 
