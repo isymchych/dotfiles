@@ -9,6 +9,7 @@ packages:
           bootstrap:
             - base-devel # Basic tools to build Arch Linux packages
             - chezmoi # Manage your dotfiles across multiple machines
+            - fnm # Install and select the repo-pinned Node runtime
             - git # the fast distributed version control system
             - nodejs # Runtime for repo-managed TypeScript commands
             - npm # Install dependencies for repo-managed TypeScript commands

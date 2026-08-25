@@ -107,9 +107,9 @@ Notable configured behavior:
   `dotfiles/.chezmoidata/tlp.yaml`. Opted-in hosts install the settings as
   `/etc/tlp.d/01-accel-os.conf`; hosts without settings remove that managed
   drop-in.
-- `mb-audio` and `mb-touchpad` run directly from their Node TypeScript sources
-  through wrappers installed in `~/bin`; no separate build or installation is
-  required.
+- Repo-managed Node commands run directly from their TypeScript sources through
+  wrappers installed in `~/bin`. The wrappers use `fnm` and the repository's
+  `.node-version`; Chezmoi installs that runtime during host setup.
 
 Manual and hardware-specific setup:
 

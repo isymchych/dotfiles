@@ -4,4 +4,4 @@
 set -euo pipefail
 
 : "${ACCEL_OS:?ACCEL_OS must point at repo root}"
-exec node "$ACCEL_OS/scripts/scripts/mb-touchpad.ts" "$@"
+exec "$HOME/bin/accel-node" "$ACCEL_OS/scripts/scripts/mb-touchpad.ts" "$@"

@@ -88,6 +88,7 @@
 - For Pi constrained tool sampling, enable strict JSON-schema sampling only on schemas compatible with provider strict mode; OpenAI strict tools require every declared property to be listed in `required`, so TypeBox optional properties need nullable-normalization or must remain non-strict.
 - Keep Zsh completion functions for `mb-*` commands in `dotfiles/bin/completions/`; `~/bin/completions` was added to `fpath` before `compinit` so ChezMoi installs and Zsh discovers them together.
 - Treat `dotfiles/.chezmoidata/packages.yaml` as the source of truth for packages required by tracked Linux desktop configuration; keep `docs/linux/README.md` focused on bootstrap, manual, hardware-specific, and optional setup instead of duplicating that inventory.
+- Keep baseline environment for repo-managed commands in `dotfiles/dot_zshenv_tools`; reserve `dot_zshrc_tools` for interactive shell behavior and `dot_run-sway` for graphical-session configuration.
 
 ## Pi Configuration
 

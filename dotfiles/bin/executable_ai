@@ -3,4 +3,4 @@ set -euo pipefail
 
 : "${ACCEL_OS:?ACCEL_OS must point at repo root}"
 export AI_CWD="$PWD"
-exec node "$ACCEL_OS/ai/pi/ai.ts" "$@"
+exec "$HOME/bin/accel-node" "$ACCEL_OS/ai/pi/ai.ts" "$@"

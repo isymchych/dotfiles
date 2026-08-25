@@ -5,4 +5,4 @@ set -euo pipefail
 
 : "${ACCEL_OS:?ACCEL_OS must point at repo root}"
 export AI_CWD="$PWD"
-exec node "$ACCEL_OS/scripts/scripts/worktree.ts" "$@"
+exec "$HOME/bin/accel-node" "$ACCEL_OS/scripts/scripts/worktree.ts" "$@"

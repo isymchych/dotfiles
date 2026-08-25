@@ -9,12 +9,12 @@
   - brew tap homebrew/cask-versions
   - brew install --cask iterm2-beta
   - Preferences -> General/Preferences -> Check "Load preferences from a custom folder or URL" and point it at `~/.config/iterm2`
-- brew install git git-delta chezmoi zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions starship coreutils
+- brew install git git-delta chezmoi fnm zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions starship coreutils
 - Clone accel-os
 - `chezmoi init --source="$HOME/accel-os/dotfiles" && chezmoi apply`
 - Use zsh as a shell `chsh -s /bin/zsh`
 - CLI tools
-  brew install aspell editorconfig fd lazygit htop jq just yazi fnm ripgrep tokei wget nvim
+  brew install aspell editorconfig fd lazygit htop jq just yazi ripgrep tokei wget nvim
 - kdiff3 - diff tool
   brew install --cask kdiff3
 - Install Owly - prevent Mac from sleeping in 15 minutes

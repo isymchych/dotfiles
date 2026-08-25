@@ -1,6 +1,5 @@
 #!/usr/bin/env zsh
 
-export ACCEL_OS="$HOME/accel-os"
 export TERMINAL=xterm
 export BROWSER=firefox
 
@@ -37,15 +36,6 @@ export NO_AT_BRIDGE=1
 
 # disable wine adding win soft menu items
 export WINEDLLOVERRIDES=winemenubuilder.exe=d
-
-export CARGO_HOME=$HOME/.cargo
-export GOPATH=$HOME/.go
-
-# PATH
-export NPM_BIN="$HOME/.npm-global/bin"
-export YARN_BIN="$HOME/.config/yarn/global/node_modules/.bin"
-export RUST_BIN="$HOME/.cargo/bin"
-export PATH=$PATH:$NPM_BIN:$YARN_BIN:$RUST_BIN
 
 # for gcr-ssh-agent
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
