@@ -2,7 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
-(defcustom mb-font "Iosevka Fixed:weight=medium:size=17" "Default font to be used by Emacs. Use \\[mb/change-font] to customize." :type 'string :group 'mb-customizations)
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+(require 'mb-options)
 
 ;; redirect native compilation files into no-littering dir
 (when (fboundp 'startup-redirect-eln-cache)

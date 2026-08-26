@@ -1,7 +1,11 @@
-;;; init-evil.el --- evil config file -*- lexical-binding: t; -*-
+;;; mb-modal-evil.el --- evil config file -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; * Evil guide https://github.com/noctuid/evil-guide
 ;;; Code:
+
+(require 'mb-bindings)
+(require 'mb-ui)
+(require 'use-package)
 
 ;; Evil: vim mode
 (use-package evil
@@ -281,21 +285,6 @@
   (add-hook 'evil-insert-state-exit-hook 'company-abort))
 
 
-;; corfu
-(with-eval-after-load 'corfu
-  (mapc #'evil-declare-ignore-repeat
-        '(corfu-next
-          corfu-previous
-          corfu-first
-          corfu-last))
-
-  (mapc #'evil-declare-change-repeat
-        '(corfu-insert
-          corfu-insert-exact
-          corfu-complete)))
-
-
-
 ;; Anzu: show number of matches in mode-line while searching
 (use-package anzu
   :diminish anzu-mode
@@ -325,17 +314,17 @@
   (setq doom-modeline-always-show-macro-register t)
 
   ;; minibuffer colors for evil states https://emacs.stackexchange.com/a/76861
-  (defun color-minibuffer (color)
+  (defun mb/evil-color-minibuffer (color)
     `(lambda ()
        (when (minibufferp)
          (face-remap-add-relative 'minibuffer-prompt :foreground ,color))))
-  (add-hook 'evil-normal-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-normal-state nil t)))
-  (add-hook 'evil-operator-state-entry-hook (color-minibuffer (face-foreground 'doom-modeline-evil-operator-state nil t)))
-  (add-hook 'evil-insert-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-insert-state nil t)))
-  (add-hook 'evil-replace-state-entry-hook  (color-minibuffer (face-foreground 'doom-modeline-evil-replace-state nil t)))
-  (add-hook 'evil-visual-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-visual-state nil t)))
-  (add-hook 'evil-motion-state-entry-hook   (color-minibuffer (face-foreground 'doom-modeline-evil-motion-state nil t)))
-  (add-hook 'evil-emacs-state-entry-hook    (color-minibuffer (face-foreground 'doom-modeline-evil-emacs-state nil t)))
+  (add-hook 'evil-normal-state-entry-hook   (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-normal-state nil t)))
+  (add-hook 'evil-operator-state-entry-hook (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-operator-state nil t)))
+  (add-hook 'evil-insert-state-entry-hook   (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-insert-state nil t)))
+  (add-hook 'evil-replace-state-entry-hook  (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-replace-state nil t)))
+  (add-hook 'evil-visual-state-entry-hook   (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-visual-state nil t)))
+  (add-hook 'evil-motion-state-entry-hook   (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-motion-state nil t)))
+  (add-hook 'evil-emacs-state-entry-hook    (mb/evil-color-minibuffer (face-foreground 'doom-modeline-evil-emacs-state nil t)))
   )
 
 
@@ -371,7 +360,7 @@
   ;; UX: Don't delete the current hunk's indicators while we're editing
   ;; https://github.com/doomemacs/doomemacs/blob/master/modules/ui/vc-gutter/config.el#L204
   (add-hook 'diff-hl-flydiff-mode-hook
-            (defun +vc-gutter-init-flydiff-mode-h ()
+            (defun mb/evil-diff-hl-init-flydiff-mode ()
               (if (not diff-hl-flydiff-mode)
                   (remove-hook 'evil-insert-state-exit-hook #'diff-hl-flydiff-update)
                 (add-hook 'evil-insert-state-exit-hook #'diff-hl-flydiff-update)))))
@@ -431,5 +420,5 @@
     (kbd "?")     'justl-help-popup))
 
 
-(provide 'init-evil)
-;;; init-evil.el ends here
+(provide 'mb-modal-evil)
+;;; mb-modal-evil.el ends here

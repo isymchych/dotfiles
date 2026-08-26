@@ -1,4 +1,4 @@
-;;; init-speedbar.el --- same-frame Speedbar config -*- lexical-binding: t; -*-
+;;; mb-speedbar.el --- same-frame Speedbar config -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; Native Speedbar configuration and commands shared by the main config and
 ;; focused ERT tests.
@@ -61,5 +61,5 @@ Directories and non-file items retain Speedbar's native behavior."
 
 (global-set-key (kbd "M-1") #'mb/speedbar-dwim)
 
-(provide 'init-speedbar)
-;;; init-speedbar.el ends here
+(provide 'mb-speedbar)
+;;; mb-speedbar.el ends here

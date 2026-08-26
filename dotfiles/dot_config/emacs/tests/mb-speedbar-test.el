@@ -1,4 +1,4 @@
-;;; init-speedbar-test.el --- tests for init-speedbar -*- lexical-binding: t; -*-
+;;; mb-speedbar-test.el --- tests for mb-speedbar -*- lexical-binding: t; -*-
 ;;; Code:
 
 (require 'cl-lib)
@@ -6,7 +6,7 @@
 
 (load
   (expand-file-name
-    "../init-speedbar.el"
+    "../lisp/mb-speedbar.el"
     (file-name-directory (or load-file-name buffer-file-name)))
   nil nil t)
 
@@ -85,5 +85,5 @@
           (kill-buffer buffer))
         (delete-directory directory t)))))
 
-(provide 'init-speedbar-test)
-;;; init-speedbar-test.el ends here
+(provide 'mb-speedbar-test)
+;;; mb-speedbar-test.el ends here
