@@ -44,7 +44,7 @@
   "Return the modal editor selected by MB_EMACS_EDITOR."
   (let ((value (downcase (or (getenv "MB_EMACS_EDITOR") "evil"))))
     (if (member value '("evil" "none"))
-      (intern value)
+	(intern value)
       (user-error "Invalid MB_EMACS_EDITOR value: %s" value))))
 
 (defcustom mb-editor (mb/editor-from-environment)

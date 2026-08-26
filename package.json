@@ -6,22 +6,24 @@
   "workspaces": [
     "ai/pi",
     "ai/skills",
-    "packages/shared",
-    "scripts"
+    "packages/commands",
+    "packages/shared"
   ],
   "allowScripts": {
     "koffi@2.16.2": true,
     "tilth@0.9.0": true
   },
   "scripts": {
-    "check": "npm run check:completions && npm run check:host-config && npm run fmt:check && npm run lint && npm run typecheck && npm test",
-    "check:completions": "node scripts/scripts/check-completions.ts",
-    "check:host-config": "node scripts/scripts/check-host-config.ts",
-    "fmt": "oxfmt ai/pi ai/skills packages/shared scripts",
-    "fmt:check": "oxfmt --check ai/pi ai/skills packages/shared scripts",
-    "lint": "oxlint ai/pi ai/skills packages/shared scripts",
+    "fmt": "oxfmt ai/pi ai/skills packages scripts",
+    "fmt:check": "oxfmt --check ai/pi ai/skills packages scripts",
+    "lint": "oxlint ai/pi ai/skills packages scripts",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "dependencies": {
+    "@accel-os/shared": "0.0.0",
+    "typebox": "^1.1.36",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

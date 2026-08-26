@@ -621,7 +621,7 @@ async function protectCheck(id: string, run: () => Promise<DoctorResult>): Promi
       id,
       "check could not run",
       [error instanceof Error ? error.message : String(error)],
-      "Resolve the reported error and rerun mb-doctor",
+      "Resolve the reported error and rerun `just doctor`",
     );
   }
 }

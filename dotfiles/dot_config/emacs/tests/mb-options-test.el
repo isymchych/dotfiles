@@ -4,10 +4,10 @@
 (require 'ert)
 
 (load
-  (expand-file-name
-    "../lisp/mb-options.el"
-    (file-name-directory (or load-file-name buffer-file-name)))
-  nil nil t)
+ (expand-file-name
+  "../lisp/mb-options.el"
+  (file-name-directory (or load-file-name buffer-file-name)))
+ nil nil t)
 
 (ert-deftest mb/editor-from-environment-defaults-to-evil ()
   (let ((process-environment (copy-sequence process-environment)))

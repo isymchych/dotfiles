@@ -29,8 +29,9 @@ Accel OS configures an Arch Linux host according to the features declared in
 
 The canonical declarations are
 `dotfiles/.chezmoidata/packages.yaml` for packages and
-`dotfiles/.chezmoidata/services.yaml` for services. Run `mb-doctor` to verify
-that the host matches its declaration and `chezmoi apply` to repair drift.
+`dotfiles/.chezmoidata/services.yaml` for services. Run `just doctor` from the
+repository to verify that the host matches its declaration and `chezmoi apply`
+to repair drift.
 
 ## Install Arch
 
@@ -58,8 +59,8 @@ that the host matches its declaration and `chezmoi apply` to repair drift.
   passwd <username>
   ```
 
-- Install `base-devel`, `git`, `chezmoi`, `zsh`, and an AUR helper such as
-  `yay`.
+  - Install `base-devel`, `git`, `chezmoi`, `fnm`, `just`, `zsh`, and an AUR
+    helper such as `yay`.
 - NetworkManager owns networking and DNS; do not run a standalone `dnsmasq`
   service.
 - Create a swap file when the host needs swap or hibernation.
@@ -100,9 +101,9 @@ Install `fnm`, set Zsh as the login shell, then follow the canonical
 chsh -s /bin/zsh
 ```
 
-On Arch, `./bootstrap --apply` finishes by running `mb-doctor`. Repair managed
-drift with `chezmoi apply`; the doctor reports remediation for manual account
-and keyring configuration.
+On Arch, `./bootstrap --apply` finishes by running `just doctor`. Repair
+managed drift with `chezmoi apply`; the doctor reports remediation for manual
+account and keyring configuration.
 
 ## Manual setup
 
@@ -128,7 +129,7 @@ keyring during greetd login:
 3. Enable `gcr-ssh-agent` for Git and SSH integration; consult the ArchWiki
    GNOME Keyring page.
 
-`mb-doctor` verifies both greetd PAM rules, the enabled and active
+`just doctor` verifies both greetd PAM rules, the enabled and active
 `gcr-ssh-agent.socket`, and the Sway `SSH_AUTH_SOCK` selection.
 
 ### Rootless Docker

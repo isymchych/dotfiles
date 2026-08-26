@@ -31,13 +31,13 @@
   :ensure nil
   :config
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                            try-expand-dabbrev-all-buffers
-                                            try-expand-dabbrev-from-kill
-                                            try-complete-file-name-partially
-                                            try-complete-file-name
-                                            try-expand-all-abbrevs
-                                            try-expand-list
-                                            try-expand-line))
+                                           try-expand-dabbrev-all-buffers
+                                           try-expand-dabbrev-from-kill
+                                           try-complete-file-name-partially
+                                           try-complete-file-name
+                                           try-expand-all-abbrevs
+                                           try-expand-list
+                                           try-expand-line))
 
   (global-set-key [remap dabbrev-expand] 'hippie-expand))
 
@@ -53,8 +53,8 @@
     (setq ispell-program-name "aspell") ; use aspell instead of ispell
     (setq ispell-personal-dictionary (expand-file-name "aspell.en.pws" no-littering-var-directory))
     (setq-default ispell-extra-args '("--sug-mode=ultra"
-                                       "--lang=en_GB"
-                                       "--camel-case")))
+                                      "--lang=en_GB"
+                                      "--camel-case")))
 
   (add-hook 'text-mode-hook 'flyspell-mode)
   (add-hook 'prog-mode-hook (lambda ()
@@ -104,15 +104,15 @@
   :ensure nil
   :config
   (setq show-paren-delay 0
-    ;; decrease overlay priority because
-    ;; it's higher than selection
-    show-paren-priority 10
-    ;; highlight everything inside parens
-    show-paren-style 'expression
+	;; decrease overlay priority because
+	;; it's higher than selection
+	show-paren-priority 10
+	;; highlight everything inside parens
+	show-paren-style 'expression
 
-    show-paren-highlight-openparen t
-    show-paren-when-point-inside-paren t
-    show-paren-when-point-in-periphery t)
+	show-paren-highlight-openparen t
+	show-paren-when-point-inside-paren t
+	show-paren-when-point-in-periphery t)
   (show-paren-mode 1))
 
 
@@ -164,7 +164,7 @@
   :after undo-fu
   :config
   (setq undo-fu-session-compression 'zst
-    undo-fu-session-incompatible-files '("\\.gpg$" "/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+	undo-fu-session-incompatible-files '("\\.gpg$" "/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
 
   (global-undo-fu-session-mode))
 
@@ -192,7 +192,7 @@
   :commands (comment-dwim-2)
   :bind
   (([remap comment-line] . 'comment-dwim-2)
-    ([remap comment-dwim] . 'comment-dwim-2)))
+   ([remap comment-dwim] . 'comment-dwim-2)))
 
 
 
@@ -207,8 +207,8 @@
 
   :config
   (setq
-    yas-verbosity          2
-    yas-wrap-around-region t)
+   yas-verbosity          2
+   yas-wrap-around-region t)
 
   ;; Remove GUI dropdown prompt (prefer ivy/helm)
   (delq 'yas-dropdown-prompt yas-prompt-functions)
@@ -276,7 +276,7 @@
   :bind (("C-c w" . er/expand-region))
   :init
   (setq expand-region-contract-fast-key "W"
-    expand-region-reset-fast-key    "r"))
+	expand-region-reset-fast-key    "r"))
 
 
 
@@ -284,9 +284,9 @@
 (use-package rainbow-mode
   :defer t
   :hook ((web-mode . rainbow-mode)
-          (css-mode . rainbow-mode)
-          (scss-mode . rainbow-mode)
-          (js-mode . rainbow-mode))
+         (css-mode . rainbow-mode)
+         (scss-mode . rainbow-mode)
+         (js-mode . rainbow-mode))
   :diminish rainbow-mode)
 
 
@@ -304,23 +304,23 @@
   :hook ((yaml-mode yaml-ts-mode prog-mode html-ts-mode) . indent-bars-mode)
   :init
   (if (not (package-installed-p 'indent-bars))
-    (package-vc-install "https://github.com/jdtsmith/indent-bars"))
+      (package-vc-install "https://github.com/jdtsmith/indent-bars"))
   :config
   ;; NOTE: emacs-plus on mac doens't support :stipple face https://github.com/d12frosted/homebrew-emacs-plus/issues/622
   ;; NOTE: emacs@29 with PGTK doens't display :stipples correctly (fixed in 30) https://github.com/jdtsmith/indent-bars/issues/3
   (setq indent-bars-prefer-character
-    (or mb-is-mac-os
-      (and mb-is-linux (< emacs-major-version 30))))
+	(or mb-is-mac-os
+	    (and mb-is-linux (< emacs-major-version 30))))
 
   (setq
-    indent-bars-color '(highlight :face-bg t :blend 0.2)
-    indent-bars-pattern "."
-    indent-bars-width-frac 0.1
-    indent-bars-pad-frac 0.1
-    indent-bars-zigzag nil
-    indent-bars-color-by-depth nil
-    indent-bars-highlight-current-depth nil
-    indent-bars-display-on-blank-lines nil))
+   indent-bars-color '(highlight :face-bg t :blend 0.2)
+   indent-bars-pattern "."
+   indent-bars-width-frac 0.1
+   indent-bars-pad-frac 0.1
+   indent-bars-zigzag nil
+   indent-bars-color-by-depth nil
+   indent-bars-highlight-current-depth nil
+   indent-bars-display-on-blank-lines nil))
 
 
 
@@ -329,8 +329,8 @@
   :commands (visual-fill-column-mode)
   :init
   (setq-default
-    visual-fill-column-center-text t
-    visual-fill-column-enable-sensible-window-split t)
+   visual-fill-column-center-text t
+   visual-fill-column-enable-sensible-window-split t)
 
   (defvar-local mb-visual-fill-mode nil)
   (defun mb/toggle-visual-fill-mode ()

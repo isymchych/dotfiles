@@ -2,7 +2,7 @@
 
 The macOS support tier covers the portable Accel OS core: shell configuration,
 the pinned Node runtime, `ACCEL_OS`, `ai`, and portable repository commands. The
-Arch package, service, Sway, and `mb-doctor` automation does not apply.
+Arch package, service, Sway, and `just doctor` automation does not apply.
 
 ## Bootstrap
 
@@ -20,7 +20,7 @@ eval "$(/usr/local/bin/brew shellenv)"
 Install the portable prerequisites:
 
 ```bash
-brew install git chezmoi fnm zsh
+brew install git chezmoi fnm just zsh
 ```
 
 Follow the canonical [repository bootstrap](../../README.md#bootstrap), then set

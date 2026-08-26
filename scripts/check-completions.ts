@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
-const binDirectory = resolve(scriptsDirectory, "../../dotfiles/bin");
+const binDirectory = resolve(scriptsDirectory, "../dotfiles/bin");
 const completionDeclaration = /^# zsh-completion:\s+(completions\/_[a-z0-9-]+)\s*$/m;
 const compdefDeclaration = /^#compdef\s+(.+)$/m;
 

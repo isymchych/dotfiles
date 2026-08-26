@@ -127,14 +127,14 @@
   (define-key evil-normal-state-map "gD" 'xref-find-definitions-other-window)
 
   (evil-define-key 'emacs minibuffer-mode-map
-    ;; insert newline with Ctrl-Enter
-    (kbd "C-<return>") 'newline
-    (kbd "C-RET") 'newline
-    (kbd "C-w") 'evil-delete-backward-word
+		   ;; insert newline with Ctrl-Enter
+		   (kbd "C-<return>") 'newline
+		   (kbd "C-RET") 'newline
+		   (kbd "C-w") 'evil-delete-backward-word
 
-    ;; make Enter work as expected in minibuffer default (emacs) state
-    (kbd "<return>") 'exit-minibuffer
-    (kbd "RET") 'exit-minibuffer)
+		   ;; make Enter work as expected in minibuffer default (emacs) state
+		   (kbd "<return>") 'exit-minibuffer
+		   (kbd "RET") 'exit-minibuffer)
 
 
   ;; Overload shifts so that they don't lose the selection
@@ -158,8 +158,8 @@
   (evil-define-key '(normal visual) 'global (kbd "<SPC>") 'mb/invoke-C-c)
 
   (evil-define-key 'normal 'global
-    (kbd "C-.") nil
-    (kbd "C-,") nil))
+		   (kbd "C-.") nil
+		   (kbd "C-,") nil))
 
 ;; integration of evil with various packages
 (use-package evil-collection
@@ -175,30 +175,30 @@
   (add-hook 'view-mode-hook
             (lambda ()
               (evil-collection-define-key 'normal 'view-mode-map
-                " " 'nil)))
+					  " " 'nil)))
 
   (add-hook 'image-mode-hook
             (lambda ()
               (evil-collection-define-key 'normal 'image-mode-map
-                " " 'nil)))
+					  " " 'nil)))
 
-    (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'mb/dired-up-directory
-      "l" 'dired-find-file
-      (kbd "RET") 'dired-find-alternate-file
-      " " 'nil)
+  (evil-collection-define-key 'normal 'dired-mode-map
+			      "h" 'mb/dired-up-directory
+			      "l" 'dired-find-file
+			      (kbd "RET") 'dired-find-alternate-file
+			      " " 'nil)
 
-    (with-eval-after-load 'evil-collection-speedbar
-      (evil-collection-define-key 'normal 'speedbar-mode-map
-        "h" 'speedbar-contract-line
-        "l" 'mb/speedbar-open-in-active-window
-        "L" 'speedbar-edit-line
-        "q" 'mb/speedbar-dwim
-        "?" 'mb/speedbar-help)
+  (with-eval-after-load 'evil-collection-speedbar
+    (evil-collection-define-key 'normal 'speedbar-mode-map
+				"h" 'speedbar-contract-line
+				"l" 'mb/speedbar-open-in-active-window
+				"L" 'speedbar-edit-line
+				"q" 'mb/speedbar-dwim
+				"?" 'mb/speedbar-help)
 
-      (evil-collection-define-key 'normal 'speedbar-file-key-map
-        "H" 'speedbar-up-directory
-        "L" 'speedbar-edit-line)))
+    (evil-collection-define-key 'normal 'speedbar-file-key-map
+				"H" 'speedbar-up-directory
+				"L" 'speedbar-edit-line)))
 
 
 ;; match visual selection with * and #
@@ -399,12 +399,12 @@
   (evil-add-command-properties #'flymake-goto-prev-error :jump t)
 
   (evil-define-key 'normal flymake-mode-map
-    (kbd "M-e j") 'flymake-goto-next-error
-    (kbd "M-e M-j") 'flymake-goto-next-error
-    (kbd "M-e k") 'flymake-goto-prev-error
-    (kbd "M-e l") 'flymake-show-project-diagnostics
-    (kbd "M-e M-k") 'flymake-goto-prev-error
-    (kbd "M-e b") 'flymake-start))
+		   (kbd "M-e j") 'flymake-goto-next-error
+		   (kbd "M-e M-j") 'flymake-goto-next-error
+		   (kbd "M-e k") 'flymake-goto-prev-error
+		   (kbd "M-e l") 'flymake-show-project-diagnostics
+		   (kbd "M-e M-k") 'flymake-goto-prev-error
+		   (kbd "M-e b") 'flymake-start))
 
 
 ;; gptel
@@ -415,9 +415,9 @@
 ;; justl
 (with-eval-after-load 'justl
   (evil-define-key 'normal justl-mode-map
-    (kbd "e")     'justl-exec-recipe
-    (kbd "E")     'justl-exec-eshell
-    (kbd "?")     'justl-help-popup))
+		   (kbd "e")     'justl-exec-recipe
+		   (kbd "E")     'justl-exec-eshell
+		   (kbd "?")     'justl-help-popup))
 
 
 (provide 'mb-modal-evil)

@@ -72,7 +72,7 @@
     (interactive)
     (let ((file (dired-get-file-for-visit)))
       (if (file-directory-p file)
-        (dired-find-alternate-file)
+          (dired-find-alternate-file)
         (dired-find-file))))
 
   (define-key dired-mode-map (kbd "h")                  'mb/dired-up-directory)
@@ -107,7 +107,7 @@
 (use-package goto-chg
   :bind
   (("C-," . goto-last-change)
-    ("C-." . goto-last-change-reverse)))
+   ("C-." . goto-last-change-reverse)))
 
 
 

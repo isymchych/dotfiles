@@ -7,7 +7,8 @@ macOS notes are also available.
 ## Repository layout
 
 - `dotfiles/` — Chezmoi source tree for `$HOME`
-- `scripts/` — repo-managed Node TypeScript commands
+- `scripts/` — repository checks, formatting, and host verification
+- `packages/commands/` — Node TypeScript implementations for installed `mb-*` commands
 - `firefox/` — Firefox preferences and profile installation instructions
 - `docs/linux/` — Arch Linux installation and host setup
 - `docs/mac/` — macOS setup notes
@@ -40,8 +41,8 @@ exec zsh -l
 ```
 
 `./bootstrap --apply` installs repository dependencies with the pinned Node
-runtime, runs `chezmoi doctor` and the repository checks, and runs `mb-doctor`
-on Arch Linux.
+runtime, runs `chezmoi doctor` and `just check`, and runs `just doctor` on Arch
+Linux.
 
 The bootstrap derives `ACCEL_OS` from its repository location for the duration
 of the run. The shell configuration defaults it to `$HOME/accel-os`; configure

@@ -13,10 +13,10 @@
   (vertico-mode)
 
   (setq
-    ;; Show more candidates
-    vertico-count 20
-    ;; enable cycling for `vertico-next' and `vertico-previous'.
-    vertico-cycle t)
+   ;; Show more candidates
+   vertico-count 20
+   ;; enable cycling for `vertico-next' and `vertico-previous'.
+   vertico-cycle t)
 
   (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
@@ -32,16 +32,16 @@
   :init
   (defun mb/orderless-without-if-bang (pattern _index _total)
     (cond
-      ((equal "!" pattern)
-        '(orderless-literal . ""))
-      ((string-prefix-p "!" pattern)
-        `(orderless-without-literal . ,(substring pattern 1)))))
+     ((equal "!" pattern)
+      '(orderless-literal . ""))
+     ((string-prefix-p "!" pattern)
+      `(orderless-without-literal . ,(substring pattern 1)))))
 
   (setq completion-styles '(basic orderless)
-    ;; orderless-matching-styles '(orderless-regexp)
-    orderless-style-dispatchers '(mb/orderless-without-if-bang)
-    completion-category-defaults nil
-    completion-category-overrides '((file (styles partial-completion)))))
+	;; orderless-matching-styles '(orderless-regexp)
+	orderless-style-dispatchers '(mb/orderless-without-if-bang)
+	completion-category-defaults nil
+	completion-category-overrides '((file (styles partial-completion)))))
 
 
 
@@ -56,25 +56,25 @@
 (use-package consult
   :init
   (setq
-    consult-preview-key (list :debounce 1 'any)
-    register-preview-delay 0.5
-    register-preview-function #'consult-register-format)
+   consult-preview-key (list :debounce 1 'any)
+   register-preview-delay 0.5
+   register-preview-function #'consult-register-format)
 
   ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
 
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
-    xref-show-definitions-function #'consult-xref)
+	xref-show-definitions-function #'consult-xref)
 
   :config
   (setq
-    consult-line-numbers-widen t
-    consult-async-min-input 2
-    consult-async-refresh-delay  0.15
-    consult-async-input-throttle 0.2
-    consult-async-input-debounce 0.1
-    consult-narrow-key "C-+")
+   consult-line-numbers-widen t
+   consult-async-min-input 2
+   consult-async-refresh-delay  0.15
+   consult-async-input-throttle 0.2
+   consult-async-input-debounce 0.1
+   consult-narrow-key "C-+")
 
   ;; use consult instead of the standard *Completions* buffer
   (setq completion-in-region-function #'consult-completion-in-region)
@@ -83,7 +83,7 @@
   (advice-add #'tmm-add-prompt :after #'minibuffer-hide-completions)
   (advice-add #'ffap-menu-ask :around (lambda (&rest args)
                                         (cl-letf (((symbol-function #'minibuffer-completion-help)
-                                                    #'ignore))
+                                                   #'ignore))
                                           (apply args))))
 
 
@@ -99,7 +99,7 @@
   (defun mb/consult-ripgrep-symbol-at-point (&optional dir)
     (interactive)
     (consult-ripgrep dir (if (region-active-p)
-                           (mb/get-selected-text)
+                             (mb/get-selected-text)
                            (thing-at-point 'symbol))))
 
   (defun mb/consult-ripgrep-in-current-dir ()
@@ -109,7 +109,7 @@
   (defun mb/consult-fd-thing-at-point (&optional dir)
     (interactive)
     (consult-fd dir (if (region-active-p)
-                      (mb/get-selected-text)
+			(mb/get-selected-text)
                       (thing-at-point 'filename))))
 
   (defun mb/consult-fd-in-current-dir ()
@@ -172,7 +172,7 @@
   :commands (embark-act)
   :bind
   (("C-h B" . 'embark-bindings-at-point)
-    ("M-." .  'embark-act))
+   ("M-." .  'embark-act))
 
   :config
   ;; Optionally replace the key help with a completing-read interface
@@ -180,9 +180,9 @@
 
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
-    '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-       nil
-       (window-parameters (mode-line-format . none)))))
+	       '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		 nil
+		 (window-parameters (mode-line-format . none)))))
 
 
 
@@ -208,36 +208,36 @@ current target followed by an ellipsis if there are further
 targets."
     (lambda (&optional keymap targets prefix)
       (if (null keymap)
-        (which-key--hide-popup-ignore-command)
+          (which-key--hide-popup-ignore-command)
         (which-key--show-keymap
-          (if (eq (plist-get (car targets) :type) 'embark-become)
-            "Become"
-            (format "Act on %s '%s'%s"
-              (plist-get (car targets) :type)
-              (embark--truncate-target (plist-get (car targets) :target))
-              (if (cdr targets) "…" "")))
-          (if prefix
-            (pcase (lookup-key keymap prefix 'accept-default)
-              ((and (pred keymapp) km) km)
-              (_ (key-binding prefix 'accept-default)))
-            keymap)
-          nil nil t (lambda (binding)
-                      (not (string-suffix-p "-argument" (cdr binding))))))))
+         (if (eq (plist-get (car targets) :type) 'embark-become)
+             "Become"
+           (format "Act on %s '%s'%s"
+		   (plist-get (car targets) :type)
+		   (embark--truncate-target (plist-get (car targets) :target))
+		   (if (cdr targets) "…" "")))
+         (if prefix
+             (pcase (lookup-key keymap prefix 'accept-default)
+               ((and (pred keymapp) km) km)
+               (_ (key-binding prefix 'accept-default)))
+           keymap)
+         nil nil t (lambda (binding)
+                     (not (string-suffix-p "-argument" (cdr binding))))))))
 
   (setq embark-indicators
-    '(mb/embark-which-key-indicator
-       embark-highlight-indicator
-       embark-isearch-highlight-indicator))
+	'(mb/embark-which-key-indicator
+	  embark-highlight-indicator
+	  embark-isearch-highlight-indicator))
 
   (defun mb/embark-hide-which-key-indicator (fn &rest args)
     "Hide the which-key indicator immediately when using the completing-read prompter."
     (which-key--hide-popup-ignore-command)
     (let ((embark-indicators
-            (remq #'mb/embark-which-key-indicator embark-indicators)))
+           (remq #'mb/embark-which-key-indicator embark-indicators)))
       (apply fn args)))
 
   (advice-add #'embark-completing-read-prompter
-    :around #'mb/embark-hide-which-key-indicator))
+	      :around #'mb/embark-hide-which-key-indicator))
 
 
 ;; Rg: search using ripgrep
@@ -261,27 +261,27 @@ targets."
   :diminish company-mode
   :config
   (setq
-    company-idle-delay                0.15
-    company-tooltip-limit             20
-    company-tooltip-align-annotations t
-    company-minimum-prefix-length     1
-    company-echo-delay                0
-    company-selection-wrap-around     t
+   company-idle-delay                0.15
+   company-tooltip-limit             20
+   company-tooltip-align-annotations t
+   company-minimum-prefix-length     1
+   company-echo-delay                0
+   company-selection-wrap-around     t
 
-    company-insertion-triggers        nil
+   company-insertion-triggers        nil
 
-    company-dabbrev-ignore-case       nil
-    company-dabbrev-downcase          nil
+   company-dabbrev-ignore-case       nil
+   company-dabbrev-downcase          nil
 
-    company-require-match             nil
-    company-show-quick-access        'left
-    company-transformers             '(delete-dups)
+   company-require-match             nil
+   company-show-quick-access        'left
+   company-transformers             '(delete-dups)
 
-    company-backends '((company-files
-                         company-keywords
-                         company-capf
-                         company-dabbrev-code
-                         company-dabbrev)))
+   company-backends '((company-files
+                       company-keywords
+                       company-capf
+                       company-dabbrev-code
+                       company-dabbrev)))
 
   (defun mb/use-custom-matching-style (fn &rest args)
     "Use custom completion style specifically for the company-capf."
@@ -292,9 +292,9 @@ targets."
 
   (eval-after-load 'eldoc
     (eldoc-add-command 'company-complete-selection
-      'company-complete-common
-      'company-capf
-      'company-abort))
+		       'company-complete-common
+		       'company-capf
+		       'company-abort))
 
   (global-company-mode 1)
 

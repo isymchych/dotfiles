@@ -12,7 +12,7 @@
 
 
 (if (native-comp-available-p)
-  (message "Native compilation enabled!")
+    (message "Native compilation enabled!")
   (warn "Native compilation not enabled!"))
 
 
@@ -20,17 +20,17 @@
 (require 'use-package)
 
 (add-to-list 'package-archives
-  '("melpa" . "https://melpa.org/packages/") t)
+	     '("melpa" . "https://melpa.org/packages/") t)
 
 (setq package-install-upgrade-built-in t
-  use-package-always-ensure t
-  use-package-verbose t)
+      use-package-always-ensure t
+      use-package-verbose t)
 
 ;; no-littering: organize emacs temporary files
 (use-package no-littering
   :custom
   (treesit-extra-load-path
-    (list (no-littering-expand-var-file-name "tree-sitter/"))))
+   (list (no-littering-expand-var-file-name "tree-sitter/"))))
 
 
 ;; NOTE: the background-color was added in early-init.el but should be removed

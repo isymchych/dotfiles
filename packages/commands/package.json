@@ -1,9 +1,10 @@
 {
-  "name": "accel-os-scripts",
+  "name": "@accel-os/commands",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test scripts/*.test.ts",
+    "test": "node --test bin/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -12,7 +13,6 @@
     "emojilib": "^4.0.3",
     "marked": "^18.0.5",
     "mermaid": "^11.15.0",
-    "typebox": "^1.1.36",
-    "yaml": "^2.9.0"
+    "typebox": "^1.1.36"
   }
 }

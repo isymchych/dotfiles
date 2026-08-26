@@ -61,6 +61,7 @@ export PATH="$HOME/bin:$PATH"
 
 require_command chezmoi
 require_command fnm
+require_command just
 require_command zsh
 
 printf '==> Reviewing pending changes\n'
@@ -91,7 +92,7 @@ chezmoi doctor
 "$HOME/bin/accel-node" --version
 (
   cd "$repository_root"
-  fnm exec --using="$node_version_file" npm run check
+  fnm exec --using="$node_version_file" just check
 )
 "$HOME/bin/ai" help >/dev/null
 
@@ -100,7 +101,10 @@ if [[ "$(uname -s)" == "Linux" && -r /etc/os-release ]]; then
   . /etc/os-release
   if [[ "${ID:-}" == "arch" ]]; then
     printf '\n==> Verifying Arch workstation configuration\n'
-    "$HOME/bin/mb-doctor"
+    (
+      cd "$repository_root"
+      fnm exec --using="$node_version_file" just doctor
+    )
   fi
 fi
 

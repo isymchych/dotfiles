@@ -23,18 +23,18 @@
   :disabled
   :config
   (setq modus-themes-italic-constructs t
-    modus-themes-bold-constructs nil)
+	modus-themes-bold-constructs nil)
 
   (setq modus-themes-common-palette-overrides
-    (append
-      ;; Keep the border but make it the same color as the background of the
-      ;; mode line (thus appearing borderless).  The difference with the
-      ;; above is that this version is a bit thicker because the border are
-      ;; still there.
-      '((border-mode-line-active bg-mode-line-active)
-         (border-mode-line-inactive bg-mode-line-inactive))
+	(append
+	 ;; Keep the border but make it the same color as the background of the
+	 ;; mode line (thus appearing borderless).  The difference with the
+	 ;; above is that this version is a bit thicker because the border are
+	 ;; still there.
+	 '((border-mode-line-active bg-mode-line-active)
+           (border-mode-line-inactive bg-mode-line-inactive))
 
-      modus-themes-preset-overrides-faint)))
+	 modus-themes-preset-overrides-faint)))
 
 
 
@@ -45,10 +45,10 @@
   :config
   (setq darkman-themes (list :light mb-light-theme :dark mb-dark-theme))
   (if (getenv "DBUS_SESSION_BUS_ADDRESS")
-    (condition-case err
-      (darkman-mode)
-      (dbus-error
-        (message "Skipping darkman-mode: %s" (error-message-string err))))
+      (condition-case err
+	  (darkman-mode)
+	(dbus-error
+         (message "Skipping darkman-mode: %s" (error-message-string err))))
     (message "Skipping darkman-mode: DBUS_SESSION_BUS_ADDRESS is unset")))
 
 
@@ -63,9 +63,9 @@
     (fmakunbound 'ns-do-applescript))
   :config
   (setq
-    auto-dark-allow-osascript t
-    auto-dark-dark-theme mb-dark-theme
-    auto-dark-light-theme mb-light-theme)
+   auto-dark-allow-osascript t
+   auto-dark-dark-theme mb-dark-theme
+   auto-dark-light-theme mb-light-theme)
 
   (auto-dark-mode t))
 
@@ -97,10 +97,10 @@
 (use-package doom-modeline
   :config
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project
-    doom-modeline-minor-modes t
-    doom-modeline-hud nil
-    doom-modeline-buffer-encoding nil
-    doom-modeline-env-version nil)
+	doom-modeline-minor-modes t
+	doom-modeline-hud nil
+	doom-modeline-buffer-encoding nil
+	doom-modeline-env-version nil)
 
   (doom-modeline-mode 1))
 
@@ -136,12 +136,12 @@
   :ensure nil
   :diminish which-key-mode
   :bind (("C-h w"            . 'which-key-show-major-mode)
-          ("C-h W"            . 'which-key-show-top-level))
+         ("C-h W"            . 'which-key-show-top-level))
   :init
   (setq
-    which-key-compute-remaps t
-    which-key-allow-multiple-replacements t
-    which-key-sort-order 'which-key-key-order-alpha)
+   which-key-compute-remaps t
+   which-key-allow-multiple-replacements t
+   which-key-sort-order 'which-key-key-order-alpha)
 
   (which-key-mode)
 

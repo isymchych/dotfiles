@@ -8,8 +8,8 @@ import {
   runDoctor,
   type DoctorContext,
   type DoctorDependencies,
-} from "../lib/doctor.ts";
-import { parseResolvedHostState, type ResolvedHostState } from "../lib/host-config.ts";
+} from "./lib/doctor.ts";
+import { parseResolvedHostState, type ResolvedHostState } from "./lib/host-config.ts";
 
 function commandResult(code: number, stdout = "", stderr = ""): CommandResult {
   return { code, stdout, stderr, success: code === 0 };
@@ -137,10 +137,10 @@ function createDependencies(overrides: Partial<DoctorDependencies> = {}): Doctor
     },
     async listFiles(directory) {
       assert.equal(directory, "/repo/dotfiles/bin");
-      return ["executable_mb-doctor"];
+      return ["executable_mb-audio"];
     },
     async isExecutable(filePath) {
-      return filePath === "/home/test/bin/mb-doctor" || filePath === "/home/test/bin/accel-node";
+      return filePath === "/home/test/bin/mb-audio" || filePath === "/home/test/bin/accel-node";
     },
     async runCommand(command, args) {
       if (command === "pacman") {

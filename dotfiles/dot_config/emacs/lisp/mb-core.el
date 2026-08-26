@@ -9,68 +9,68 @@
 
 ;; keep menu bar enabled only on mac since it doesn't take vertical space
 (if (and
-      (fboundp 'menu-bar-mode)
-      mb-is-mac-os)
-  (menu-bar-mode t))
+     (fboundp 'menu-bar-mode)
+     mb-is-mac-os)
+    (menu-bar-mode t))
 
 (setq-default
-  ;; scroll one line at a time (less "jumpy" than defaults)
-  mouse-wheel-scroll-amount '(2 ((shift) . 2))
-  ;; don't accelerate scrolling
-  mouse-wheel-progressive-speed nil
-  ;; scroll window under mouse
-  mouse-wheel-follow-mouse 't)
+ ;; scroll one line at a time (less "jumpy" than defaults)
+ mouse-wheel-scroll-amount '(2 ((shift) . 2))
+ ;; don't accelerate scrolling
+ mouse-wheel-progressive-speed nil
+ ;; scroll window under mouse
+ mouse-wheel-follow-mouse 't)
 
 
 (setq-default
-  frame-title-format '(buffer-file-name "%f" ("%b"))
+ frame-title-format '(buffer-file-name "%f" ("%b"))
 
-  ;; avoid some initial frame resizing to speed up startup
-  frame-inhibit-implied-resize t
+ ;; avoid some initial frame resizing to speed up startup
+ frame-inhibit-implied-resize t
 
-  ;; Don’t compact font caches during GC.
-  inhibit-compacting-font-caches t
+ ;; Don’t compact font caches during GC.
+ inhibit-compacting-font-caches t
 
-  ;; no beep and blinking
-  visible-bell       nil
-  ring-bell-function 'ignore
+ ;; no beep and blinking
+ visible-bell       nil
+ ring-bell-function 'ignore
 
-  ;; keyboard scroll one line at a time
-  scroll-step 1
+ ;; keyboard scroll one line at a time
+ scroll-step 1
 
-  ;; display column numbers in status line
-  column-number-mode t
-  ;; display line numbers in status line
-  line-number-mode t
-  ;; max line number to show
-  line-number-display-limit 999999
-  ;; max line width after which you will see ??? instead of line number
-  line-number-display-limit-width 999999
+ ;; display column numbers in status line
+ column-number-mode t
+ ;; display line numbers in status line
+ line-number-mode t
+ ;; max line number to show
+ line-number-display-limit 999999
+ ;; max line width after which you will see ??? instead of line number
+ line-number-display-limit-width 999999
 
-  ;; draw underline lower
-  x-underline-at-descent-line t
+ ;; draw underline lower
+ x-underline-at-descent-line t
 
-  ;; Show keystrokes in progress
-  echo-keystrokes 0.1
+ ;; Show keystrokes in progress
+ echo-keystrokes 0.1
 
-  ;; hide empty lines after buffer end
-  indicate-empty-lines nil
+ ;; hide empty lines after buffer end
+ indicate-empty-lines nil
 
-  font-lock-maximum-decoration t
+ font-lock-maximum-decoration t
 
-  ;; skip duplicates from the kill-ring to simplify yanking
-  kill-do-not-save-duplicates t
+ ;; skip duplicates from the kill-ring to simplify yanking
+ kill-do-not-save-duplicates t
 
-  ;; Don't prompt for confirmation when we create a new file or buffer (assume the
-  ;; user knows what they're doing).
-  confirm-nonexistent-file-or-buffer nil
+ ;; Don't prompt for confirmation when we create a new file or buffer (assume the
+ ;; user knows what they're doing).
+ confirm-nonexistent-file-or-buffer nil
 
-  ;; middle-click paste at point, not at click
-  mouse-yank-at-point t
+ ;; middle-click paste at point, not at click
+ mouse-yank-at-point t
 
-  ;; do not break line even if its too long
-  truncate-lines t
-  truncate-partial-width-windows t)
+ ;; do not break line even if its too long
+ truncate-lines t
+ truncate-partial-width-windows t)
 
 ;; use keyboard dialogs instead of popups
 (setq use-dialog-box nil)
@@ -84,7 +84,7 @@
 ;; Keep directory-local evaluation behind Emacs' trust prompt.  Safe variables
 ;; can opt in through their `safe-local-variable' properties.
 (setq enable-local-eval 'maybe
-  enable-local-variables t)
+      enable-local-variables t)
 
 ;; Keep warnings visible so package/API breakage is discoverable.
 (setq warning-minimum-level :warning)
@@ -107,30 +107,30 @@
 (put 'narrow-to-region          'disabled nil)
 
 (setq-default
-  ;; start scratch in text mode (usefull to get a faster Emacs load time
-  ;; because it avoids autoloads of elisp modes)
-  initial-major-mode 'text-mode
+ ;; start scratch in text mode (usefull to get a faster Emacs load time
+ ;; because it avoids autoloads of elisp modes)
+ initial-major-mode 'text-mode
 
-  ;; prevent creating backup files
-  make-backup-files nil
-  ;; prevent creating .save files
-  auto-save-list-file-name nil
-  ;; prevent auto saving
-  auto-save-default nil
-  create-lockfiles nil
+ ;; prevent creating backup files
+ make-backup-files nil
+ ;; prevent creating .save files
+ auto-save-list-file-name nil
+ ;; prevent auto saving
+ auto-save-default nil
+ create-lockfiles nil
 
-  ;; Always rescan buffer for imenu
-  imenu-auto-rescan t
-  imenu-flatten t
+ ;; Always rescan buffer for imenu
+ imenu-auto-rescan t
+ imenu-flatten t
 
-  ;; Add ukrainian input method
-  default-input-method "ukrainian-computer"
+ ;; Add ukrainian input method
+ default-input-method "ukrainian-computer"
 
-  ;; set default mode for unknown files
-  major-mode 'text-mode
+ ;; set default mode for unknown files
+ major-mode 'text-mode
 
-  ;; move files to trash when deleting
-  delete-by-moving-to-trash t)
+ ;; move files to trash when deleting
+ delete-by-moving-to-trash t)
 
 ;; Encoding
 (set-language-environment     'utf-8)
@@ -153,26 +153,26 @@
 
 ;; Tabs: use only spaces for indent
 (setq-default
-  indent-tabs-mode  nil
-  tab-always-indent nil
+ indent-tabs-mode  nil
+ tab-always-indent nil
 
-  tab-width          mb-tab-size
-  c-basic-offset     mb-tab-size
-  py-indent-offset   mb-tab-size)
+ tab-width          mb-tab-size
+ c-basic-offset     mb-tab-size
+ py-indent-offset   mb-tab-size)
 
 (setq-default
-  ;; Sentences do not need double spaces to end
-  sentence-end-double-space nil
+ ;; Sentences do not need double spaces to end
+ sentence-end-double-space nil
 
-  ;; lines should be 80 characters wide, not 72
-  fill-column 80)
+ ;; lines should be 80 characters wide, not 72
+ fill-column 80)
 
 
 ;; display margins in terminal emacs
 (unless (display-graphic-p)
   (setq-default
-    right-margin-width 1
-    left-margin-width 1))
+   right-margin-width 1
+   left-margin-width 1))
 
 
 ;; make sure emacs will try to split windows horizontally by default
@@ -222,8 +222,8 @@
 ;; Use rg for grep-find-command
 (with-eval-after-load 'grep
   (grep-apply-setting
-    'grep-find-command
-    '("rg -n -H --no-heading -e '' $(git rev-parse --show-toplevel || pwd)" . 27)))
+   'grep-find-command
+   '("rg -n -H --no-heading -e '' $(git rev-parse --show-toplevel || pwd)" . 27)))
 
 
 
@@ -236,11 +236,11 @@
   "Switch back and forth between current and last buffer in the WINDOW."
   (interactive)
   (cl-destructuring-bind (buf start pos)
-    (or (cl-find (window-buffer window) (window-prev-buffers)
-          :key #'car :test-not #'eq)
-      (list (other-buffer) nil nil))
+      (or (cl-find (window-buffer window) (window-prev-buffers)
+		   :key #'car :test-not #'eq)
+	  (list (other-buffer) nil nil))
     (if (not buf)
-      (message "Last buffer not found.")
+	(message "Last buffer not found.")
       (set-window-buffer-start-and-point window buf start pos))))
 
 
@@ -268,25 +268,25 @@
   (interactive)
   (let ((filename (buffer-file-name)))
     (if (not (and filename (file-exists-p filename)))
-      (message "mb: Buffer is not visiting a file!")
+	(message "mb: Buffer is not visiting a file!")
       (let ((new-name (read-file-name "New name: "
-                        (file-name-directory filename)
-                        nil
-                        nil
-                        (file-name-nondirectory filename))))
+				      (file-name-directory filename)
+				      nil
+				      nil
+				      (file-name-nondirectory filename))))
         (cond
-          ((vc-backend filename) (vc-rename-file filename new-name))
-          (t
-            (rename-file filename new-name t)
-            (set-visited-file-name new-name t t)))))))
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))
 
 (defun mb/delete-current-buffer-file ()
   "Remove file connected to current buffer and kill buffer."
   (interactive)
   (let ((filename (buffer-file-name))
-         (buffer (current-buffer)))
+        (buffer (current-buffer)))
     (if (not (and filename (file-exists-p filename)))
-      (ido-kill-buffer)
+	(ido-kill-buffer)
       (when (yes-or-no-p "Are you sure you want to remove this file? ")
         (delete-file filename)
         (kill-buffer buffer)
@@ -309,10 +309,10 @@ narrowed."
   (interactive "P")
   (declare (interactive-only))
   (cond ((and (buffer-narrowed-p) (not p)) (widen))
-    ((region-active-p)
-      (narrow-to-region (region-beginning) (region-end)))
-    ((derived-mode-p 'org-mode) (org-narrow-to-subtree))
-    (t (narrow-to-defun))))
+	((region-active-p)
+	 (narrow-to-region (region-beginning) (region-end)))
+	((derived-mode-p 'org-mode) (org-narrow-to-subtree))
+	(t (narrow-to-defun))))
 
 (defun mb/display-ansi-colors ()
   "Replace ANSI escape chars with real colors in current buffer."
@@ -334,34 +334,34 @@ narrowed."
   "Preview the current buffer as Markdown with `mb-preview'."
   (interactive)
   (unless (executable-find "mb-preview")
-    (user-error "mb-preview not found in PATH"))
+    (user-error "Mb-preview not found in PATH"))
   (let* ((source-name (or buffer-file-name (buffer-name)))
-          (title (file-name-nondirectory source-name))
-          (base-dir (file-name-as-directory
-                      (expand-file-name
-                        (file-name-directory (or buffer-file-name default-directory)))))
-          (output-buffer (get-buffer-create "*mb-preview*")))
+         (title (file-name-nondirectory source-name))
+         (base-dir (file-name-as-directory
+                    (expand-file-name
+                     (file-name-directory (or buffer-file-name default-directory)))))
+         (output-buffer (get-buffer-create "*mb-preview*")))
     (when (file-remote-p base-dir)
-      (user-error "mb-preview: remote directories are not supported: %s" base-dir))
+      (user-error "Mb-preview: remote directories are not supported: %s" base-dir))
     (with-current-buffer output-buffer
       (erase-buffer))
     (let ((process
-            (make-process
-              :name "mb-preview"
-              :buffer output-buffer
-              :command (list "mb-preview"
-                         "--open"
-                         "--title" title
-                         "--base-dir" base-dir)
-              :connection-type 'pipe
-              :sentinel
-              (lambda (process event)
-                (unless (process-live-p process)
-                  (if (= 0 (process-exit-status process))
+           (make-process
+            :name "mb-preview"
+            :buffer output-buffer
+            :command (list "mb-preview"
+                           "--open"
+                           "--title" title
+                           "--base-dir" base-dir)
+            :connection-type 'pipe
+            :sentinel
+            (lambda (process event)
+              (unless (process-live-p process)
+                (if (= 0 (process-exit-status process))
                     (message "mb-preview: opened preview")
-                    (display-buffer (process-buffer process))
-                    (message "mb-preview failed: %s"
-                      (replace-regexp-in-string "[\n\r]+\\'" "" event))))))))
+                  (display-buffer (process-buffer process))
+                  (message "mb-preview failed: %s"
+			   (replace-regexp-in-string "[\n\r]+\\'" "" event))))))))
       (process-send-region process (point-min) (point-max))
       (process-send-eof process))))
 
@@ -372,7 +372,7 @@ narrowed."
   "Kill the current buffer."
   (interactive)
   (if (window-minibuffer-p)
-    (abort-recursive-edit)
+      (abort-recursive-edit)
     (kill-buffer (current-buffer))))
 
 
@@ -380,14 +380,14 @@ narrowed."
   "Close the current window or quit Emacs if it is the last main window."
   (interactive)
   (if (eq (selected-window) (window-main-window))
-    (save-buffers-kill-emacs)
+      (save-buffers-kill-emacs)
     (delete-window)))
 
 
 (defun mb/get-selected-text ()
   "Return the currently selected text in the current buffer."
   (if (region-active-p)
-    (buffer-substring (region-beginning) (region-end))
+      (buffer-substring (region-beginning) (region-end))
     ""))
 
 
@@ -410,20 +410,20 @@ narrowed."
   (interactive)
   ;; run in a timer so that M-x interface have time to close before font picker is visible
   (run-with-timer
-    0.15
-    nil
-    (lambda ()
-      (when-let* ((new-font (if (fboundp 'x-select-font)
-                              (x-select-font)
-                              (mouse-select-font)))
-                   (new-font-name (font-xlfd-name new-font)))
-        (message "MB selected font: %s" new-font-name)
-        (set-frame-font new-font-name nil t)
-        (customize-save-variable 'mb-font new-font-name)))))
+   0.15
+   nil
+   (lambda ()
+     (when-let* ((new-font (if (fboundp 'x-select-font)
+                               (x-select-font)
+                             (mouse-select-font)))
+                 (new-font-name (font-xlfd-name new-font)))
+       (message "MB selected font: %s" new-font-name)
+       (set-frame-font new-font-name nil t)
+       (customize-save-variable 'mb-font new-font-name)))))
 
 
 (defun mb/invoke-C-c ()
-  "Invoke the active C-c prefix map."
+  "Invoke the active mode-specific command prefix."
   (interactive)
   (setq unread-command-events (listify-key-sequence "\C-c")))
 
@@ -433,9 +433,9 @@ narrowed."
   (interactive)
   (let ((dir default-directory))
     (when (file-remote-p dir)
-      (user-error "xterm: remote directory not supported: %s" dir))
+      (user-error "Xterm: remote directory not supported: %s" dir))
     (unless (executable-find "xterm")
-      (user-error "xterm not found in PATH"))
+      (user-error "Xterm not found in PATH"))
     (let ((cwd (file-name-as-directory (expand-file-name dir))))
       (start-process "xterm" nil "xterm" "open" "--cwd" cwd))))
 
@@ -443,7 +443,7 @@ narrowed."
   "Confirm minibuffer input, otherwise open xterm in current directory."
   (interactive)
   (if (active-minibuffer-window)
-    (exit-minibuffer)
+      (exit-minibuffer)
     (mb/open-xterm-here)))
 
 ;; Fix PATH on Mac
@@ -460,11 +460,11 @@ narrowed."
   :ensure nil
   :config
   (setq uniquify-buffer-name-style 'forward
-    uniquify-separator "/"
-    ;; rename after killing uniquified
-    uniquify-after-kill-buffer-p t
-    ;; don't muck with special buffers
-    uniquify-ignore-buffers-re "^\\*"))
+	uniquify-separator "/"
+	;; rename after killing uniquified
+	uniquify-after-kill-buffer-p t
+	;; don't muck with special buffers
+	uniquify-ignore-buffers-re "^\\*"))
 
 
 
@@ -473,16 +473,16 @@ narrowed."
   :ensure nil
   :config
   (setq recentf-max-menu-items 25
-    recentf-max-saved-items 1000
-    ;; cleanup non-existing files on startup
-    ;; may have problems with remote files
-    recentf-auto-cleanup 'mode)
+	recentf-max-saved-items 1000
+	;; cleanup non-existing files on startup
+	;; may have problems with remote files
+	recentf-auto-cleanup 'mode)
 
   ;; Ignore no-littering files
   (add-to-list 'recentf-exclude
-    (recentf-expand-file-name no-littering-var-directory))
+	       (recentf-expand-file-name no-littering-var-directory))
   (add-to-list 'recentf-exclude
-    (recentf-expand-file-name no-littering-etc-directory))
+	       (recentf-expand-file-name no-littering-etc-directory))
 
   ;; Ignore ephemeral git commit message files
   (add-to-list 'recentf-exclude "/COMMIT_EDITMSG$")
@@ -506,11 +506,11 @@ narrowed."
   :ensure nil
   :config
   (setq savehist-save-minibuffer-history t
-    savehist-autosave-interval nil ; save on kill only
-    savehist-additional-variables
-    '(
-       mark-ring global-mark-ring       ; persist marks
-       search-ring regexp-search-ring)) ; persist searches
+	savehist-autosave-interval nil ; save on kill only
+	savehist-additional-variables
+	'(
+	  mark-ring global-mark-ring       ; persist marks
+	  search-ring regexp-search-ring)) ; persist searches
 
   (savehist-mode t))
 
@@ -530,12 +530,12 @@ narrowed."
   :diminish auto-revert-mode
   :config
   (setq auto-revert-verbose t ; let us know when it happens
-    auto-revert-use-notify nil
-    auto-revert-stop-on-user-input nil
-    ;; Revert Dired and other buffers
-    global-auto-revert-non-file-buffers t
-    ;; Only prompts for confirmation when buffer is unsaved.
-    revert-without-query (list "."))
+	auto-revert-use-notify nil
+	auto-revert-stop-on-user-input nil
+	;; Revert Dired and other buffers
+	global-auto-revert-non-file-buffers t
+	;; Only prompts for confirmation when buffer is unsaved.
+	revert-without-query (list "."))
   (global-auto-revert-mode t))
 
 (provide 'mb-core)

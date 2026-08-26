@@ -15,14 +15,14 @@
 
 
 (if (window-system)
-  (progn
-    ;; zoom in / zoom out in editor
-    (global-set-key [C-mouse-4] 'text-scale-increase)
-    (global-set-key [C-mouse-5] 'text-scale-decrease)
+    (progn
+      ;; zoom in / zoom out in editor
+      (global-set-key [C-mouse-4] 'text-scale-increase)
+      (global-set-key [C-mouse-5] 'text-scale-decrease)
 
-    (when mb-is-mac-os
-      (global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
-      (global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
+      (when mb-is-mac-os
+	(global-set-key (kbd "C-<wheel-up>")   'text-scale-increase)
+	(global-set-key (kbd "C-<wheel-down>") 'text-scale-decrease)))
 
   (progn
     ;; activate mouse-based scrolling

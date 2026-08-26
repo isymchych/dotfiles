@@ -4,8 +4,9 @@
 
 - `firefox/` holds `user.js` prefs; outside chezmoi because profile IDs vary.
 - `docs/` contains platform notes (`docs/linux`, `docs/mac`); keep secrets out and reference `.chezmoidata` instead.
-- `scripts/` holds Node TypeScript CLIs, including desktop hardware helpers,
-  in `scripts/scripts/`, with shared modules in `scripts/lib/`.
+- `scripts/` holds repository checks, formatting helpers, and host verification.
+- `packages/commands/` is the private npm workspace for installed Node
+  TypeScript `mb-*` commands.
 - `ai/` holds skills and automation for coding agents (Codex, Pi).
 
 ### dotfiles/
@@ -24,11 +25,13 @@
 - `chezmoi apply` — sync confirmed updates; pair with `--include`/`--exclude` to scope risky runs.
 - `chezmoi doctor` — verify environment readiness after dependency changes.
 - `chezmoi data` — inspect template inputs before editing `.tmpl` files.
-- `npm run lint` — lint the project after code changes.
-- `npm test` — run the project test suite after code changes.
-- `npm run typecheck` — type-check the project after code changes.
-- `npm run typecheck --workspace scripts` — verify buildless Node TypeScript scripts before changing wrappers.
-- `npm test --workspace scripts` — run script tests.
+- `just check` — run the canonical repository verification suite.
+- `just fmt` / `just fmt-check` — format or verify all supported source formats.
+- `just lint`, `just typecheck`, and `just test` — run targeted repository checks.
+- `just doctor` — verify the declared Arch host configuration.
+- `npm run typecheck --workspace @accel-os/commands` — verify installed Node
+  command implementations before changing wrappers.
+- `npm test --workspace @accel-os/commands` — run installed command tests.
 
 ## Coding Style & Naming Conventions
 
@@ -37,15 +40,21 @@
 - Name executable scripts `executable_<tool>` so chezmoi marks them executable on apply.
 - Keep template variables lowercase snake_case and derive host details from `.chezmoidata`.
 
-## Scripts (Node TypeScript)
+## Repository Scripts and Node Commands
 
-- Store scripts in `scripts/scripts/` and shared modules in `scripts/lib/`.
+- Store repository automation in `scripts/`; keep its cohesive shared modules in
+  `scripts/lib/`.
+- Store installed Node command entry points in `packages/commands/bin/` and
+  command-only shared modules in `packages/commands/lib/`.
 - Run scripts directly with Node's native TypeScript type stripping; do not add a build step unless explicitly needed.
-- Keep `scripts/tsconfig.json` aligned with Node type stripping: `erasableSyntaxOnly`, `verbatimModuleSyntax`, `allowImportingTsExtensions`, and `rewriteRelativeImportExtensions` stay enabled.
+- Keep `scripts/tsconfig.json` and `packages/commands/tsconfig.json` aligned with Node type stripping: `erasableSyntaxOnly`, `verbatimModuleSyntax`, `allowImportingTsExtensions`, and `rewriteRelativeImportExtensions` stay enabled.
 - Avoid TypeScript syntax that Node cannot erase, including enums, parameter properties, runtime namespaces, decorators, import aliases, and path aliases.
 - Use explicit `.ts` extensions for relative imports and `import type` for type-only imports.
-- Wrap each CLI with `dotfiles/bin/executable_mb-<name>`; wrappers call `node "$ACCEL_OS/scripts/scripts/<entrypoint>.ts" "$@"` directly.
-- Add runtime dependencies to `scripts/package.json`; keep shared dev tooling at the root workspace.
+- Wrap each installed CLI with `dotfiles/bin/executable_mb-<name>`; wrappers run
+  `packages/commands/bin/<entrypoint>.ts` through `accel-node`.
+- Add installed-command runtime dependencies to `packages/commands/package.json`.
+  Add dependencies used only by repository scripts to the private root package.
+  Keep shared development tooling at the root workspace.
 
 ## Theme Switching Scripts
 
@@ -58,7 +67,8 @@
 - Run `shellcheck bin/<script>` (or `bash -n`) before committing shell changes.
 - Execute `chezmoi diff` and `chezmoi apply --dry-run` on macOS and Linux when touching OS-conditional templates.
 - For Node shims, invoke the wrapped tool (`npm run lint`, etc.) to confirm path resolution.
-- Store Emacs ERT tests in `dotfiles/dot_config/emacs/tests/`, name them `*-test.el`, and run them with `./scripts/check-emacs`.
+- Store Emacs ERT tests in `dotfiles/dot_config/emacs/tests/`, name them `*-test.el`, and run syntax, Checkdoc, and ERT validation with `./scripts/check-emacs`.
+- Format Emacs Lisp with `./scripts/format-emacs`; use `./scripts/format-emacs --check` for non-mutating verification.
 - Emacs tests must load the actual configuration modules rather than copying their definitions, and must clean up modified global state, windows, buffers, hooks, and temporary files.
 - Document manual verification steps in commit messages when automation is impossible.
 
@@ -94,7 +104,10 @@
 - Keep Zsh completion functions for `mb-*` commands in `dotfiles/bin/completions/`; `~/bin/completions` was added to `fpath` before `compinit` so ChezMoi installs and Zsh discovers them together.
 - Treat `dotfiles/.chezmoidata/packages.yaml` as the source of truth for packages required by tracked Linux desktop configuration; keep `docs/linux/README.md` focused on bootstrap, manual, hardware-specific, and optional setup instead of duplicating that inventory.
 - Keep baseline environment for repo-managed commands in `dotfiles/dot_zshenv_tools`; reserve `dot_zshrc_tools` for interactive shell behavior and `dot_run-sway` for graphical-session configuration.
-- Resolve host features, packages, services, and host-specific settings in `dotfiles/.chezmoitemplates/resolved-host-state`; provisioning templates and `mb-doctor` must consume that canonical resolved state instead of independently interpreting `.chezmoidata`.
+- Resolve host features, packages, services, and host-specific settings in `dotfiles/.chezmoitemplates/resolved-host-state`; provisioning templates and `just doctor` must consume that canonical resolved state instead of independently interpreting `.chezmoidata`.
+- Keep `Justfile` as the canonical interface for repository checks, formatting,
+  tests, and host verification; npm scripts expose JavaScript workspace tooling
+  rather than cross-runtime orchestration.
 
 ## Pi Configuration
 

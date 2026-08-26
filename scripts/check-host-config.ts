@@ -4,10 +4,10 @@ import { fileURLToPath } from "node:url";
 
 import { getErrorMessage } from "@accel-os/shared/guards";
 
-import { readHostConfig, validateHostConfig } from "../lib/host-config.ts";
+import { readHostConfig, validateHostConfig } from "./lib/host-config.ts";
 
 const scriptsDirectory = path.dirname(fileURLToPath(import.meta.url));
-const repositoryRoot = path.resolve(scriptsDirectory, "../..");
+const repositoryRoot = path.resolve(scriptsDirectory, "..");
 const dataDirectory = path.join(repositoryRoot, "dotfiles/.chezmoidata");
 
 try {

@@ -11,6 +11,7 @@ packages:
             - chezmoi # Manage your dotfiles across multiple machines
             - fnm # Install and select the repo-pinned Node runtime
             - git # the fast distributed version control system
+            - just # Canonical repository task runner
             - nodejs # Runtime for repo-managed TypeScript commands
             - npm # Install dependencies for repo-managed TypeScript commands
             - openssh # SSH protocol implementation for remote login, command execution and file transfer
@@ -22,7 +23,6 @@ packages:
               - ripgrep # fast project search
               - fd # ergonomic file finder
               - tokei # code line counts
-              - just # task runner
               - fzf # fuzzy matcher
               - wget # HTTP(S) downloads
               - gitui # TUI for git

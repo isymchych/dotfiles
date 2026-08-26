@@ -8,14 +8,14 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { getErrorMessage } from "@accel-os/shared/guards";
 import { runCommand } from "@accel-os/shared/process";
 
-import { formatDoctorResults, runDoctor, type DoctorDependencies } from "../lib/doctor.ts";
-import { parseResolvedHostState, readHostConfig, validateHostConfig } from "../lib/host-config.ts";
+import { formatDoctorResults, runDoctor, type DoctorDependencies } from "./lib/doctor.ts";
+import { parseResolvedHostState, readHostConfig, validateHostConfig } from "./lib/host-config.ts";
 
 const scriptsDirectory = path.dirname(fileURLToPath(import.meta.url));
-const repositoryRoot = path.resolve(scriptsDirectory, "../..");
+const repositoryRoot = path.resolve(scriptsDirectory, "..");
 const dataDirectory = path.join(repositoryRoot, "dotfiles/.chezmoidata");
 
-const usage = `Usage: mb-doctor
+const usage = `Usage: just doctor
 
 Verify that this host satisfies its declared accel-os configuration.
 The command is read-only; use chezmoi apply to repair reported drift.
