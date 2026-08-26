@@ -46,6 +46,13 @@
 (require 'mb-development)
 (require 'mb-bindings)
 
+(defun mb-enable-image-toggle-for-svg ()
+  "Enable switching SVG buffers between source and rendered image views."
+  (when (string-match-p "\\.svg\\'" (or buffer-file-name ""))
+    (image-minor-mode 1)))
+
+(add-hook 'nxml-mode-hook #'mb-enable-image-toggle-for-svg)
+
 (message "EDITOR MODE: %s" mb-editor)
 (pcase mb-editor
   ('evil (require 'mb-modal-evil))

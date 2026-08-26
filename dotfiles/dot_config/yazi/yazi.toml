@@ -5,19 +5,19 @@ ratio = [2, 4, 2]
 
 [opener]
 imv = [
-  { run = 'imv-dir "$@"', desc = "Open image in imv-dir", orphan = true, for = "linux" },
+  { run = "imv-dir %s", desc = "Open image in imv-dir", orphan = true, for = "linux" },
 ]
 mpv = [
-  { run = 'mpv "$@"', desc = "Open video in mpv", orphan = true, for = "linux" },
+  { run = "mpv %s", desc = "Open video in mpv", orphan = true, for = "linux" },
 ]
 nvim = [
-  { run = 'nvim "$@"', desc = "Open in Neovim", block = true }
+  { run = "nvim %s", desc = "Open in Neovim", block = true }
 ]
 md-preview = [
   { run = 'mb-preview --open --base-dir %d1 %s1', desc = "Preview Markdown in browser", for = "unix" },
 ]
 emacs = [
-  { run = 'emacs "$@"', desc = 'Open in Emacs GUI', orphan = true }
+  { run = "emacs %s", desc = "Open in Emacs GUI", orphan = true }
 ]
 
 [open]
