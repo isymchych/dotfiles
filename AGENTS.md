@@ -58,6 +58,8 @@
 - Run `shellcheck bin/<script>` (or `bash -n`) before committing shell changes.
 - Execute `chezmoi diff` and `chezmoi apply --dry-run` on macOS and Linux when touching OS-conditional templates.
 - For Node shims, invoke the wrapped tool (`npm run lint`, etc.) to confirm path resolution.
+- Store Emacs ERT tests in `dotfiles/dot_config/emacs/tests/`, name them `*-test.el`, and run them with `./scripts/check-emacs`.
+- Emacs tests must load the actual configuration modules rather than copying their definitions, and must clean up modified global state, windows, buffers, hooks, and temporary files.
 - Document manual verification steps in commit messages when automation is impossible.
 
 ## Commit & Pull Request Guidelines
@@ -79,6 +81,7 @@
 - When inspecting installed Pi package APIs in this repo, start from root-level `node_modules/@earendil-works/*/dist/*.d.ts` and exclude `*.map` from code searches because workspace dependencies are hoisted and sourcemaps make compiled output noisy.
 - When changing dotfiles behavior that introduces or depends on installed tools, update the relevant platform docs so fresh-host setup stays reproducible.
 - Before formatting files, inspect the repository's declared formatter and scripts, then use that formatter directly; do not invoke an undeclared formatter through `npx` because it can produce incompatible output or download untracked tooling.
+- When debugging behavior in a live Emacs session, suggest running `M-x server-start` so `emacsclient` can inspect the actual buffers, windows, modes, and effective keybindings.
 
 ## Intent Ledger
 

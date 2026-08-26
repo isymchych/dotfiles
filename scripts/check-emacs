@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+test_dir="$repo_root/dotfiles/dot_config/emacs/tests"
+
+shopt -s nullglob
+test_files=("$test_dir"/*-test.el)
+
+if (( ${#test_files[@]} == 0 )); then
+  printf 'No Emacs tests found in %s\n' "$test_dir" >&2
+  exit 1
+fi
+
+emacs_args=(--batch -Q)
+for test_file in "${test_files[@]}"; do
+  emacs_args+=(--load "$test_file")
+done
+
+exec emacs "${emacs_args[@]}" --funcall ert-run-tests-batch-and-exit

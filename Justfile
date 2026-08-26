@@ -22,5 +22,8 @@ lint:
 test:
   npm run test
 
+check-emacs:
+  ./scripts/check-emacs
+
 check:
   npm run check

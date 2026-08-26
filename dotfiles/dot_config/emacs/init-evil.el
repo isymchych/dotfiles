@@ -178,11 +178,23 @@
               (evil-collection-define-key 'normal 'image-mode-map
                 " " 'nil)))
 
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'mb/dired-up-directory
-    "l" 'dired-find-file
-    (kbd "RET") 'dired-find-alternate-file
-    " " 'nil))
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'mb/dired-up-directory
+      "l" 'dired-find-file
+      (kbd "RET") 'dired-find-alternate-file
+      " " 'nil)
+
+    (with-eval-after-load 'evil-collection-speedbar
+      (evil-collection-define-key 'normal 'speedbar-mode-map
+        "h" 'speedbar-contract-line
+        "l" 'mb/speedbar-open-in-active-window
+        "L" 'speedbar-edit-line
+        "q" 'mb/speedbar-dwim
+        "?" 'mb/speedbar-help)
+
+      (evil-collection-define-key 'normal 'speedbar-file-key-map
+        "H" 'speedbar-up-directory
+        "L" 'speedbar-edit-line)))
 
 
 ;; match visual selection with * and #

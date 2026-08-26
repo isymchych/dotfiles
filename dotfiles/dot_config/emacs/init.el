@@ -437,9 +437,9 @@ narrowed."
 
 
 (defun mb/kill-window-or-quit ()
-  "Close the current window or quit Emacs if it's the last window."
+  "Close the current window or quit Emacs if it is the last main window."
   (interactive)
-  (if (one-window-p)
+  (if (eq (selected-window) (window-main-window))
     (save-buffers-kill-emacs)
     (delete-window)))
 
@@ -480,6 +480,12 @@ narrowed."
         (message "MB selected font: %s" new-font-name)
         (set-frame-font new-font-name nil t)
         (customize-save-variable 'mb-font new-font-name)))))
+
+
+(defun mb/invoke-C-c ()
+  "Invoke the active C-c prefix map."
+  (interactive)
+  (setq unread-command-events (listify-key-sequence "\C-c")))
 
 
 (defun mb/open-xterm-here ()
@@ -587,6 +593,11 @@ narrowed."
       (cons 'transient (expand-file-name root))))
 
   (add-to-list 'project-find-functions #'project-find-root))
+
+
+
+;; Speedbar: file and tag browser
+(load (expand-file-name "init-speedbar" user-emacs-directory))
 
 
 
@@ -2268,6 +2279,7 @@ targets."
 (defvar-keymap mb/toggle-map
   :doc "mb prefix map for toggling things"
   "a" 'apheleia-mode
+  "b" 'mb/speedbar-dwim
   "c" 'rainbow-mode
   "e" 'mb/toggle-flyckeck-errors-list
   "f" 'mb/toggle-auto-fill-mode
