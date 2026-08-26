@@ -1,10 +1,22 @@
 import assert from "node:assert/strict";
-import type { ChildProcessWithoutNullStreams } from "node:child_process";
+import { execFile, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { EventEmitter } from "node:events";
+import { mkdtemp, readFile, rm, truncate, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { PassThrough } from "node:stream";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
 
-import { prepareMarkdown, renderDocument, renderGraphvizToSvg } from "./mb-preview.ts";
+import {
+  parseCliArgs,
+  prepareMarkdown,
+  renderDocument,
+  renderGraphvizToSvg,
+} from "./mb-preview.ts";
+
+const execFileAsync = promisify(execFile);
 
 class FakeGraphvizChild extends EventEmitter {
   public readonly stdin = new PassThrough();
@@ -25,13 +37,12 @@ class FakeGraphvizChild extends EventEmitter {
 test("prepareMarkdown pre-renders graphviz fences and leaves browser rendering to marked", async () => {
   const calls: string[] = [];
 
-  const prepared = await prepareMarkdown(
-    "before\n\n```dot\ndigraph { a -> b }\n```\n\nafter",
-    async (dot) => {
+  const prepared = await prepareMarkdown("before\n\n```dot\ndigraph { a -> b }\n```\n\nafter", {
+    renderGraphviz: async (dot) => {
       calls.push(dot);
       return { ok: true, svg: "<svg>diagram</svg>" };
     },
-  );
+  });
 
   assert.deepEqual(calls, ["digraph { a -> b }"]);
   assert.equal(prepared.hasMermaid, false);
@@ -50,10 +61,12 @@ test("prepareMarkdown pre-renders graphviz fences and leaves browser rendering t
 });
 
 test("prepareMarkdown stores graphviz failures for browser-side error rendering", async () => {
-  const prepared = await prepareMarkdown("```graphviz\ndigraph { a -> }\n```", async () => ({
-    ok: false,
-    error: "syntax <bad>",
-  }));
+  const prepared = await prepareMarkdown("```graphviz\ndigraph { a -> }\n```", {
+    renderGraphviz: async () => ({
+      ok: false,
+      error: "syntax <bad>",
+    }),
+  });
 
   assert.equal(prepared.hasGraphviz, false);
   assert.equal(prepared.hasDiagrams, false);
@@ -68,8 +81,10 @@ test("prepareMarkdown stores graphviz failures for browser-side error rendering"
 
 test("prepareMarkdown detects mermaid fences without invoking graphviz", async () => {
   const markdown = "```mermaid\ngraph TD; A-->B\n```";
-  const prepared = await prepareMarkdown(markdown, async () => {
-    throw new Error("graphviz renderer should not be called");
+  const prepared = await prepareMarkdown(markdown, {
+    renderGraphviz: async () => {
+      throw new Error("graphviz renderer should not be called");
+    },
   });
 
   assert.equal(prepared.markdown, markdown);
@@ -81,8 +96,10 @@ test("prepareMarkdown detects mermaid fences without invoking graphviz", async (
 
 test("prepareMarkdown preserves normal code fence info strings", async () => {
   const markdown = "```ts title=example.ts\nconst x = 1;\n```";
-  const prepared = await prepareMarkdown(markdown, async () => {
-    throw new Error("graphviz renderer should not be called");
+  const prepared = await prepareMarkdown(markdown, {
+    renderGraphviz: async () => {
+      throw new Error("graphviz renderer should not be called");
+    },
   });
 
   assert.equal(prepared.markdown, markdown);
@@ -92,7 +109,12 @@ test("prepareMarkdown preserves normal code fence info strings", async () => {
 test("renderDocument embeds marked, DOMPurify, and escaped preview data", async () => {
   const prepared = await prepareMarkdown(
     "# Hello\n\n<script>alert(1)</script>\n\n<img src=x onerror=alert(1)>\n\n```dot\ndigraph { a -> b }\n```",
-    async () => ({ ok: true, svg: "<svg><script>alert(1)</script></svg>" }),
+    {
+      renderGraphviz: async () => ({
+        ok: true,
+        svg: "<svg><script>alert(1)</script></svg>",
+      }),
+    },
   );
 
   const html = await renderDocument(prepared, "unsafe </title>", null);
@@ -105,6 +127,118 @@ test("renderDocument embeds marked, DOMPurify, and escaped preview data", async 
   assert.match(html, /"markdown":"# Hello/u);
   assert.match(html, /\\u003Cscript\\u003Ealert\(1\)\\u003C\/script\\u003E/u);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/u);
+});
+
+test("parseCliArgs enables local image embedding", () => {
+  const args = parseCliArgs(["--embed-images", "notes.md"]);
+
+  assert.equal(args.embedImages, true);
+  assert.equal(args.inputPath, "notes.md");
+});
+
+test("only an explicit base directory sets the document base URL", async (context) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "mb-preview-test-"));
+  context.after(async () => {
+    await rm(directory, { recursive: true, force: true });
+  });
+  const inputPath = path.join(directory, "notes.md");
+  const outputPath = path.join(directory, "preview.html");
+  const explicitOutputPath = path.join(directory, "preview-explicit.html");
+  await writeFile(inputPath, "# Section\n\n[Section](#section)\n");
+
+  await execFileAsync(process.execPath, [
+    path.join(import.meta.dirname, "mb-preview.ts"),
+    "--out",
+    outputPath,
+    inputPath,
+  ]);
+
+  const html = await readFile(outputPath, "utf8");
+  assert.doesNotMatch(html, /<base href=/u);
+
+  await execFileAsync(process.execPath, [
+    path.join(import.meta.dirname, "mb-preview.ts"),
+    "--base-dir",
+    directory,
+    "--out",
+    explicitOutputPath,
+    inputPath,
+  ]);
+
+  const explicitHtml = await readFile(explicitOutputPath, "utf8");
+  assert.ok(
+    explicitHtml.includes(`<base href="${pathToFileURL(`${directory}${path.sep}`).href}">`),
+  );
+});
+
+test("prepareMarkdown embeds inline and reference-style local images", async (context) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "mb-preview-test-"));
+  context.after(async () => {
+    await rm(directory, { recursive: true, force: true });
+  });
+  await writeFile(path.join(directory, "inline.png"), Buffer.from([0, 1, 2]));
+  await writeFile(path.join(directory, "reference.svg"), "<svg></svg>");
+  await writeFile(path.join(directory, "100%.png"), Buffer.from([3, 4, 5]));
+  await writeFile(path.join(directory, "a&b.png"), Buffer.from([6, 7, 8]));
+  await writeFile(path.join(directory, "space name.png"), Buffer.from([9, 10, 11]));
+
+  const prepared = await prepareMarkdown(
+    [
+      "![inline](inline.png)",
+      "![reference][diagram]",
+      "![percent](100%.png)",
+      "![entity](a&amp;b.png)",
+      "![decimal entity](a&#38;b.png)",
+      "![hex entity](a&#x26;b.png)",
+      "![encoded](space%20name.png#focus)",
+      "![remote](https://example.com/image.png)",
+      "",
+      "[diagram]: reference.svg#shape",
+    ].join("\n"),
+    { embedImagesBaseDir: directory },
+  );
+
+  assert.deepEqual(prepared.embeddedImages, {
+    "inline.png": "data:image/png;base64,AAEC",
+    "reference.svg#shape": `data:image/svg+xml;base64,${Buffer.from("<svg></svg>").toString("base64")}#shape`,
+    "100%.png": "data:image/png;base64,AwQF",
+    "a&amp;b.png": "data:image/png;base64,BgcI",
+    "a&#38;b.png": "data:image/png;base64,BgcI",
+    "a&#x26;b.png": "data:image/png;base64,BgcI",
+    "space%20name.png#focus": "data:image/png;base64,CQoL#focus",
+  });
+});
+
+test("prepareMarkdown rejects missing and unsupported local images", async (context) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "mb-preview-test-"));
+  context.after(async () => {
+    await rm(directory, { recursive: true, force: true });
+  });
+  await writeFile(path.join(directory, "image.txt"), "not an image");
+
+  await assert.rejects(
+    prepareMarkdown("![missing](missing.png)", { embedImagesBaseDir: directory }),
+    /Cannot embed image "missing\.png"/u,
+  );
+  await assert.rejects(
+    prepareMarkdown("![unsupported](image.txt)", { embedImagesBaseDir: directory }),
+    /unsupported image format/u,
+  );
+});
+
+test("prepareMarkdown enforces the per-image size limit", async (context) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "mb-preview-test-"));
+  context.after(async () => {
+    await rm(directory, { recursive: true, force: true });
+  });
+  const imagePath = path.join(directory, "large.png");
+  await writeFile(imagePath, "");
+  await truncate(imagePath, 16 * 1024 * 1024 + 1);
+
+  await assert.rejects(
+    prepareMarkdown("![large](large.png)", { embedImagesBaseDir: directory }),
+    /file exceeds 16384KiB/u,
+  );
 });
 
 test("renderGraphvizToSvg spawns dot and writes dot input to stdin", async () => {

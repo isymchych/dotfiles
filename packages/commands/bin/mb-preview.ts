@@ -1,27 +1,36 @@
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { fstatSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 
+import { marked, type Token, type Tokens } from "marked";
+
 interface PreviewArgs {
   readonly inputPath: string | null;
   readonly outputPath: string | null;
   readonly title: string | null;
   readonly baseDir: string | null;
+  readonly embedImages: boolean;
   readonly open: boolean;
   readonly help: boolean;
 }
 
 interface PreparedMarkdown {
   readonly markdown: string;
+  readonly embeddedImages: Readonly<Record<string, string>>;
   readonly hasMermaid: boolean;
   readonly hasGraphviz: boolean;
   readonly hasDiagrams: boolean;
   readonly graphvizBlocks: readonly BrowserGraphvizBlock[];
+}
+
+interface PrepareMarkdownOptions {
+  readonly renderGraphviz?: GraphvizRenderer;
+  readonly embedImagesBaseDir?: string | null;
 }
 
 interface BrowserGraphvizBlock {
@@ -55,6 +64,21 @@ const graphvizLanguages = new Set(["dot", "graphviz", "gv"]);
 const graphvizInputMaxBytes = 256 * 1024;
 const graphvizOutputMaxBytes = 2 * 1024 * 1024;
 const graphvizTimeoutMs = 5_000;
+const imageInputMaxBytes = 16 * 1024 * 1024;
+const imageInputTotalMaxBytes = 64 * 1024 * 1024;
+
+const imageMimeTypes = new Map([
+  [".apng", "image/apng"],
+  [".avif", "image/avif"],
+  [".bmp", "image/bmp"],
+  [".gif", "image/gif"],
+  [".ico", "image/x-icon"],
+  [".jpeg", "image/jpeg"],
+  [".jpg", "image/jpeg"],
+  [".png", "image/png"],
+  [".svg", "image/svg+xml"],
+  [".webp", "image/webp"],
+]);
 
 const usage = `Usage: mb-preview [--open] [--out <file>] [--title <title>] [--base-dir <dir>] [file.md]
 
@@ -65,6 +89,7 @@ Options:
   --out, -o <file>  Write HTML to this path instead of a temp file
   --title <title>   Set the HTML document title
   --base-dir <dir>  Resolve relative local assets from this directory
+  --embed-images    Embed local Markdown images in the generated HTML
   --help, -h        Show this help
 
 Input:
@@ -81,9 +106,15 @@ export async function main(): Promise<void> {
 
   const sourceName = args.inputPath === null ? "stdin" : path.basename(args.inputPath);
   const title = args.title ?? sourceName;
+  const imageBaseDir = resolveImageBaseDirectory(args.inputPath, args.baseDir);
+  if (args.embedImages && imageBaseDir === null) {
+    throw new Error("--embed-images requires --base-dir when reading Markdown from stdin.");
+  }
   const baseHref = args.baseDir === null ? null : baseHrefForDirectory(args.baseDir);
   const markdown = await readInput(args.inputPath);
-  const prepared = await prepareMarkdown(markdown);
+  const prepared = await prepareMarkdown(markdown, {
+    embedImagesBaseDir: args.embedImages ? imageBaseDir : null,
+  });
   const html = await renderDocument(prepared, title, baseHref);
   const outputPath = args.outputPath ?? (await defaultOutputPath(args.title ?? sourceName));
 
@@ -106,6 +137,7 @@ export function parseCliArgs(args: string[]): PreviewArgs {
       out: { type: "string", short: "o" },
       title: { type: "string" },
       "base-dir": { type: "string" },
+      "embed-images": { type: "boolean" },
     },
   });
 
@@ -122,9 +154,20 @@ export function parseCliArgs(args: string[]): PreviewArgs {
     outputPath: parsed.values.out ?? null,
     title: parsed.values.title ?? null,
     baseDir: parsed.values["base-dir"] ?? null,
+    embedImages: parsed.values["embed-images"] === true,
     open: parsed.values.open === true,
     help: parsed.values.help === true,
   };
+}
+
+function resolveImageBaseDirectory(
+  inputPath: string | null,
+  explicitBaseDir: string | null,
+): string | null {
+  if (explicitBaseDir !== null) {
+    return path.resolve(explicitBaseDir);
+  }
+  return inputPath === null ? null : path.dirname(path.resolve(inputPath));
 }
 
 async function readInput(inputPath: string | null): Promise<string> {
@@ -160,11 +203,12 @@ async function readStream(stream: NodeJS.ReadableStream): Promise<string> {
 
 export async function prepareMarkdown(
   markdown: string,
-  renderGraphviz: GraphvizRenderer = renderGraphvizToSvg,
+  options: PrepareMarkdownOptions = {},
 ): Promise<PreparedMarkdown> {
   let hasGraphviz = false;
   const replaced = replaceGraphvizFences(markdown);
   const graphvizBlocks: BrowserGraphvizBlock[] = [];
+  const renderGraphviz = options.renderGraphviz ?? renderGraphvizToSvg;
 
   for (const block of replaced.graphvizSources) {
     const rendered = await renderGraphviz(block.source);
@@ -176,11 +220,147 @@ export async function prepareMarkdown(
 
   return {
     markdown: replaced.markdown,
+    embeddedImages:
+      options.embedImagesBaseDir === undefined || options.embedImagesBaseDir === null
+        ? {}
+        : await embedMarkdownImages(replaced.markdown, options.embedImagesBaseDir),
     hasMermaid: replaced.hasMermaid,
     hasGraphviz,
     hasDiagrams: replaced.hasMermaid || hasGraphviz,
     graphvizBlocks,
   };
+}
+
+async function embedMarkdownImages(
+  markdown: string,
+  baseDir: string,
+): Promise<Readonly<Record<string, string>>> {
+  const hrefs = new Set<string>();
+  const tokens = marked.lexer(markdown, { gfm: true });
+
+  void marked.walkTokens(tokens, (token) => {
+    if (isImageToken(token)) {
+      hrefs.add(token.href);
+    }
+  });
+
+  const embeddedImages: Record<string, string> = {};
+  let totalBytes = 0;
+
+  for (const href of hrefs) {
+    const localImage = resolveLocalImage(href, baseDir);
+    if (localImage === null) {
+      continue;
+    }
+
+    const mimeType = imageMimeTypes.get(path.extname(localImage.filePath).toLowerCase());
+    if (mimeType === undefined) {
+      throw new Error(`Cannot embed image "${href}": unsupported image format.`);
+    }
+
+    let fileStats;
+    try {
+      fileStats = await stat(localImage.filePath);
+    } catch (error) {
+      throw new Error(
+        `Cannot embed image "${href}" from ${localImage.filePath}: ${errorMessage(error)}`,
+        { cause: error },
+      );
+    }
+
+    if (!fileStats.isFile()) {
+      throw new Error(`Cannot embed image "${href}": ${localImage.filePath} is not a file.`);
+    }
+    if (fileStats.size > imageInputMaxBytes) {
+      throw new Error(
+        `Cannot embed image "${href}": file exceeds ${formatBytes(imageInputMaxBytes)}.`,
+      );
+    }
+    if (totalBytes + fileStats.size > imageInputTotalMaxBytes) {
+      throw new Error(
+        `Cannot embed images: total size exceeds ${formatBytes(imageInputTotalMaxBytes)}.`,
+      );
+    }
+
+    const contents = await readFile(localImage.filePath);
+    if (contents.byteLength > imageInputMaxBytes) {
+      throw new Error(
+        `Cannot embed image "${href}": file exceeds ${formatBytes(imageInputMaxBytes)}.`,
+      );
+    }
+    if (totalBytes + contents.byteLength > imageInputTotalMaxBytes) {
+      throw new Error(
+        `Cannot embed images: total size exceeds ${formatBytes(imageInputTotalMaxBytes)}.`,
+      );
+    }
+
+    totalBytes += contents.byteLength;
+    embeddedImages[href] =
+      `data:${mimeType};base64,${contents.toString("base64")}${localImage.fragment}`;
+  }
+
+  return embeddedImages;
+}
+
+interface LocalImage {
+  readonly filePath: string;
+  readonly fragment: string;
+}
+
+function resolveLocalImage(href: string, baseDir: string): LocalImage | null {
+  // Mirror browser HTML/URL processing: decode supported character references,
+  // then escape only bare percent signs before Node parses the file URL.
+  const browserHref = decodeImageHrefReferences(href);
+  if (browserHref.startsWith("//")) {
+    return null;
+  }
+
+  let url: URL;
+  try {
+    const normalizedHref = browserHref.replaceAll(/%(?![0-9A-Fa-f]{2})/gu, "%25");
+    url = new URL(normalizedHref, baseHrefForDirectory(baseDir));
+  } catch {
+    throw new Error(`Cannot embed image "${href}": invalid image URL.`);
+  }
+
+  if (url.protocol !== "file:") {
+    return null;
+  }
+
+  const fragment = url.hash;
+  url.hash = "";
+  url.search = "";
+
+  try {
+    return { filePath: fileURLToPath(url), fragment };
+  } catch (error) {
+    throw new Error(`Cannot embed image "${href}": ${errorMessage(error)}`, { cause: error });
+  }
+}
+
+function decodeImageHrefReferences(href: string): string {
+  return href.replace(
+    /&(?:amp;|#([0-9]+);|#x([0-9A-Fa-f]+);)/gu,
+    (reference, decimal: string | undefined, hexadecimal: string | undefined) => {
+      if (decimal === undefined && hexadecimal === undefined) {
+        return "&";
+      }
+
+      const digits = decimal ?? hexadecimal;
+      if (digits === undefined) {
+        return reference;
+      }
+      const codePoint = Number.parseInt(digits, decimal === undefined ? 16 : 10);
+      if (codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)) {
+        return reference;
+      }
+      return String.fromCodePoint(codePoint);
+    },
+  );
+}
+
+function isImageToken(token: Token): token is Tokens.Image {
+  return token.type === "image" && "href" in token && typeof token.href === "string";
 }
 
 interface GraphvizSource {
@@ -398,6 +578,7 @@ export async function renderDocument(
   const previewScript = await previewInitializerScript(prepared.hasMermaid);
   const baseElement = baseHref === null ? "" : `  <base href="${escapeHtml(baseHref)}">\n`;
   const previewData = jsonScriptContent({
+    embeddedImages: prepared.embeddedImages,
     graphvizBlocks: prepared.graphvizBlocks,
     markdown: prepared.markdown,
   });
@@ -577,12 +758,20 @@ const previewRendererJs = `(() => {
   const graphvizBlocks = new Map(
     (Array.isArray(previewData.graphvizBlocks) ? previewData.graphvizBlocks : []).map((block) => [block.id, block]),
   );
+  const embeddedImages = new Map(
+    Object.entries(
+      previewData.embeddedImages !== null && typeof previewData.embeddedImages === "object"
+        ? previewData.embeddedImages
+        : {},
+    ),
+  );
   globalThis.mbPreviewGraphvizBlocks = graphvizBlocks;
 
   const markedApi = globalThis.marked;
   const markedFn = typeof markedApi.marked === "function" ? markedApi.marked : markedApi;
   const renderer = new markedApi.Renderer();
   const defaultCodeRenderer = renderer.code.bind(renderer);
+  const defaultImageRenderer = renderer.image.bind(renderer);
 
   const escapeHtml = (value) => String(value)
     .replaceAll("&", "&amp;")
@@ -668,6 +857,13 @@ const previewRendererJs = `(() => {
     }
 
     return defaultCodeRenderer(token);
+  };
+
+  renderer.image = (token) => {
+    const embeddedHref = embeddedImages.get(token.href);
+    return defaultImageRenderer(
+      embeddedHref === undefined ? token : { ...token, href: embeddedHref },
+    );
   };
 
   const rawHtml = markedFn(previewData.markdown ?? "", { async: false, gfm: true, renderer });
@@ -1245,6 +1441,10 @@ function formatBytes(bytes: number): string {
     return `${bytes / 1024}KiB`;
   }
   return `${bytes} bytes`;
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {

@@ -6,6 +6,7 @@ _mb-preview() {
     '(-o --out)'{-o,--out}'[write HTML to a file]:output file:_files' \
     '--title=[set the HTML document title]:title:' \
     '--base-dir=[resolve relative assets from a directory]:directory:_directories' \
+    '--embed-images[embed local Markdown images in the generated HTML]' \
     '(-h --help)'{-h,--help}'[show help]' \
     '1:Markdown input file:_files -g "*.md"'
 }
