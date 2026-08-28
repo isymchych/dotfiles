@@ -11,7 +11,10 @@
     "./skills"
   ],
   "packages": [
-    "../../../../node_modules/pi-mcp-adapter"
+    {
+      "source": "../../../../node_modules/pi-mcp-adapter",
+      "skills": []
+    }
   ],
   "extensions": [
     "./extensions/apply-patch/index.ts",

@@ -26,15 +26,17 @@ import {
   writeActiveProfileName,
 } from "./runtime/account-profiles.ts";
 
-const usage = `ai [account] [-- <pi args...>]
+const usage = `ai [account] [mcp] [-- <pi args...>]
 
 Examples:
   ai
   ai account
+  ai mcp
   ai -- --help
 
 Notes:
   - By default, ai appends ai/SYSTEM.md.
+  - \`mcp\` enables the MCP proxy tool for this run.
   - \`account\` selects an isolated OpenAI Codex credential profile and then opens Pi.
   - Each profile has its own auth.json, so changing accounts does not affect existing chats.
   - Use \`ai -- --help\` to show Pi CLI docs.`;
@@ -54,7 +56,6 @@ const defaultToolNames = [
   "bash",
   "apply_patch",
   "write_file",
-  "mcp",
   "tilth_read",
   "tilth_search",
   "tilth_files",
@@ -94,10 +95,11 @@ const hasExplicitToolSelection = (args: readonly string[]): boolean => {
   );
 };
 
-const buildAppendArgs = (passthrough: readonly string[]): string[] => {
+const buildAppendArgs = (passthrough: readonly string[], useMcp: boolean): string[] => {
   const appendArgs = ["--append-system-prompt", appendSystemPromptPath];
   if (!hasExplicitToolSelection(passthrough)) {
-    appendArgs.push("--tools", defaultToolNames.join(","));
+    const toolNames = useMcp ? [...defaultToolNames, "mcp"] : defaultToolNames;
+    appendArgs.push("--tools", toolNames.join(","));
   }
   return appendArgs;
 };
@@ -335,6 +337,7 @@ const passthrough: string[] = [];
 let parseModifiers = true;
 let showHelp = false;
 let useAccountSwitcher = false;
+let useMcp = false;
 
 for (const arg of process.argv.slice(2)) {
   if (!parseModifiers) {
@@ -352,6 +355,10 @@ for (const arg of process.argv.slice(2)) {
   }
   if (arg === "account") {
     useAccountSwitcher = true;
+    continue;
+  }
+  if (arg === "mcp") {
+    useMcp = true;
     continue;
   }
   passthrough.push(arg);
@@ -376,6 +383,6 @@ process.chdir(cwd);
 process.env["PI_CODING_AGENT_DIR"] = profile.directory;
 process.env["PI_CODING_AGENT_SESSION_DIR"] = path.join(configDir, "sessions");
 
-const appendArgs = buildAppendArgs(passthrough);
+const appendArgs = buildAppendArgs(passthrough, useMcp);
 const { main } = await import("@earendil-works/pi-coding-agent");
 await main([...appendArgs, ...passthrough]);
