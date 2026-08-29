@@ -16,13 +16,11 @@ type CommitOptions = {
 class UsageError extends Error {}
 
 export function normalizeMessage(message: string): string {
-  const lines = message.split(/\r?\n/);
-  if (lines.length === 0) throw new Error("empty commit message");
-
-  const subject = lines[0]?.trimEnd() ?? "";
+  const lines = message.trim().split(/\r?\n/);
+  const subject = lines[0]?.trim() ?? "";
   if (!subject) throw new Error("empty commit subject");
 
-  const bodySource = lines.length > 1 && lines[1] === "" ? lines.slice(2) : lines.slice(1);
+  const bodySource = lines[1]?.trim() === "" ? lines.slice(2) : lines.slice(1);
   const bodyLines: string[] = [];
   for (const line of bodySource) bodyLines.push(...wrapLine(line.trimEnd()));
 

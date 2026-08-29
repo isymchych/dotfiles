@@ -71,7 +71,8 @@ emit_status() {
 
   append_scope_tooltip system 'System' "${system_units[@]}"
   append_scope_tooltip user 'User' "${user_units[@]}"
-  tooltip+=$'\n\nLeft-click: open statuses and recent logs'
+  tooltip+=$'\n\nLeft-click: inspect failed units and recent logs'
+  tooltip+=$'\nRight-click: open systemd manager'
   tooltip+=$'\n\nManual workflow:'
   tooltip+=$'\n1. systemctl --failed'
   tooltip+=$'\n2. systemctl status <unit>'

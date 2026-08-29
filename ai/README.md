@@ -14,6 +14,13 @@
   - SOUL.md like in https://hermes-agent.nousresearch.com/docs/user-guide/features/personality
 - EARS specifications
 - personal memory system https://ericmjl.github.io/blog/2026/6/16/my-coding-agent-learned-a-lesson/
+- plugin to ask user a question
+- prompt snippets - to insert snippets into prompts
+- observational memory - extract atomic observations, later offload/consolidate them into markdown docs
+- subagents that may communicate with each other (child asks questions to parent), also they are panes in tmux
+- pi-extensible-workflows
+
+? how codex @visualize skill works?
 
 add to sysprompt:
 

@@ -13,7 +13,6 @@ import {
   stat,
   writeFile,
 } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { pipeline } from "node:stream/promises";
@@ -131,7 +130,8 @@ async function createPaths(): Promise<Paths> {
   await mkdir(thumbnailDir, { recursive: true, mode: 0o700 });
   await Promise.all([chmod(cacheDir, 0o700), chmod(thumbnailDir, 0o700)]);
 
-  const runtimeDir = await mkdtemp(path.join(tmpdir(), "mb-clipboard-"));
+  // Cache updates use atomic rename, so temporary files must share their filesystem.
+  const runtimeDir = await mkdtemp(path.join(cacheDir, ".runtime-"));
   await chmod(runtimeDir, 0o700);
 
   return {

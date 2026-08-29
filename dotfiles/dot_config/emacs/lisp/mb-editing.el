@@ -135,7 +135,7 @@
 
 
 
-;; sync emacs input mode with OS keyboard layout
+;; Translate Ukrainian OS-layout keys to their corresponding Emacs bindings
 (use-package reverse-im
   :custom
   (reverse-im-input-methods '("ukrainian-computer"))
