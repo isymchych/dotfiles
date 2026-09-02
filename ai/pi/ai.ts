@@ -25,18 +25,22 @@ import {
   readActiveProfileName,
   writeActiveProfileName,
 } from "./runtime/account-profiles.ts";
+import { parseLauncherArgs } from "./runtime/launcher-args.ts";
 
-const usage = `ai [account] [mcp] [-- <pi args...>]
+const usage = `ai [account] [mcp] [tilth] [-- <pi args...>]
 
 Examples:
   ai
   ai account
   ai mcp
+  ai tilth
+  ai tilth mcp
   ai -- --help
 
 Notes:
   - By default, ai appends ai/SYSTEM.md.
   - \`mcp\` enables the MCP proxy tool for this run.
+  - \`tilth\` enables the Tilth extension and tools for this run.
   - \`account\` selects an isolated OpenAI Codex credential profile and then opens Pi.
   - Each profile has its own auth.json, so changing accounts does not affect existing chats.
   - Use \`ai -- --help\` to show Pi CLI docs.`;
@@ -49,23 +53,14 @@ if (accelOs === undefined || accelOs.length === 0) {
 
 const configDir = path.join(accelOs, "ai", "pi");
 const appendSystemPromptPath = path.join(accelOs, "ai", "SYSTEM.md");
+const tilthExtensionPath = path.join(configDir, "extensions", "tilth-cli", "index.ts");
+const mcpAdapterPath = path.join(accelOs, "node_modules", "pi-mcp-adapter");
 const accountUsageTimeoutMs = 20_000;
 const authFileSchema = Type.Record(Type.String(), Type.Unknown());
 
-const defaultToolNames = [
-  "bash",
-  "apply_patch",
-  "write_file",
-  "tilth_read",
-  "tilth_search",
-  "tilth_files",
-  "tilth_deps",
-  "tilth_grok",
-  "read",
-  // "grep",
-  // "find",
-  // "ls",
-];
+const defaultToolNames = ["bash", "apply_patch", "write_file", "read", "grep", "find", "ls"];
+
+const tilthToolNames = ["tilth_read", "tilth_search", "tilth_files", "tilth_deps", "tilth_grok"];
 
 type AccountInfo = {
   id: string;
@@ -91,14 +86,36 @@ const writeStderr = (message: string): void => {
 
 const hasExplicitToolSelection = (args: readonly string[]): boolean => {
   return args.some(
-    (arg) => arg === "--tools" || arg.startsWith("--tools=") || arg === "--no-tools",
+    (arg) =>
+      arg === "--tools" ||
+      arg.startsWith("--tools=") ||
+      arg === "-t" ||
+      arg.startsWith("-t=") ||
+      arg === "--no-tools" ||
+      arg === "-nt" ||
+      arg === "--no-builtin-tools" ||
+      arg === "-nbt",
   );
 };
 
-const buildAppendArgs = (passthrough: readonly string[], useMcp: boolean): string[] => {
+const buildAppendArgs = (
+  passthrough: readonly string[],
+  useMcp: boolean,
+  useTilth: boolean,
+): string[] => {
   const appendArgs = ["--append-system-prompt", appendSystemPromptPath];
+  if (useTilth) {
+    appendArgs.push("--extension", tilthExtensionPath);
+  }
+  if (useMcp) {
+    appendArgs.push("--extension", mcpAdapterPath);
+  }
   if (!hasExplicitToolSelection(passthrough)) {
-    const toolNames = useMcp ? [...defaultToolNames, "mcp"] : defaultToolNames;
+    const toolNames = [
+      ...defaultToolNames,
+      ...(useTilth ? tilthToolNames : []),
+      ...(useMcp ? ["mcp"] : []),
+    ];
     appendArgs.push("--tools", toolNames.join(","));
   }
   return appendArgs;
@@ -333,36 +350,9 @@ async function runAccountSwitcher(): Promise<AccountProfile> {
   return selected.account.profile;
 }
 
-const passthrough: string[] = [];
-let parseModifiers = true;
-let showHelp = false;
-let useAccountSwitcher = false;
-let useMcp = false;
-
-for (const arg of process.argv.slice(2)) {
-  if (!parseModifiers) {
-    passthrough.push(arg);
-    continue;
-  }
-  if (arg === "--") {
-    parseModifiers = false;
-    passthrough.push(arg);
-    continue;
-  }
-  if (arg === "help") {
-    showHelp = true;
-    continue;
-  }
-  if (arg === "account") {
-    useAccountSwitcher = true;
-    continue;
-  }
-  if (arg === "mcp") {
-    useMcp = true;
-    continue;
-  }
-  passthrough.push(arg);
-}
+const { passthrough, showHelp, useAccountSwitcher, useMcp, useTilth } = parseLauncherArgs(
+  process.argv.slice(2),
+);
 
 if (showHelp) {
   writeStdout(usage);
@@ -383,6 +373,6 @@ process.chdir(cwd);
 process.env["PI_CODING_AGENT_DIR"] = profile.directory;
 process.env["PI_CODING_AGENT_SESSION_DIR"] = path.join(configDir, "sessions");
 
-const appendArgs = buildAppendArgs(passthrough, useMcp);
+const appendArgs = buildAppendArgs(passthrough, useMcp, useTilth);
 const { main } = await import("@earendil-works/pi-coding-agent");
 await main([...appendArgs, ...passthrough]);

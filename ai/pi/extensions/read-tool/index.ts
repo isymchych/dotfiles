@@ -297,7 +297,7 @@ export default function readToolExtension(pi: ExtensionAPI): void {
       "Use read for one or more known file or directory paths instead of cat, sed, or ls.",
       "Put path, offset, and limit inside each targets item; never send path, offset, or limit at the root.",
       "Use read with show_line_numbers=true when exact file line references matter.",
-      "Use read recursive directory listing only when the directory tree itself is needed; use Tilth for repository discovery and structural code exploration.",
+      "Use read recursive directory listing only when the directory tree itself is needed; use grep or find for repository discovery.",
     ],
     parameters: readToolSchema,
     renderShell: "self",

@@ -1,6 +1,6 @@
 {
   "theme": "light/dark",
-  "lastChangelogVersion": "0.84.3",
+  "lastChangelogVersion": "0.84.4",
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "defaultProvider": "openai-codex",
@@ -10,15 +10,8 @@
   "skills": [
     "./skills"
   ],
-  "packages": [
-    {
-      "source": "../../../../node_modules/pi-mcp-adapter",
-      "skills": []
-    }
-  ],
   "extensions": [
     "./extensions/apply-patch/index.ts",
-    "./extensions/collapse-tool-calls/index.ts",
     "./extensions/read-tool/index.ts",
     "./extensions/compact-tool-output/index.ts",
     "./extensions/context/index.ts",
@@ -31,7 +24,6 @@
     "./extensions/response-status/index.ts",
     "./extensions/waybar-agent-status/index.ts",
     "./extensions/shell-tool/index.ts",
-    "./extensions/tilth-cli/index.ts",
     "./extensions/handoff-summary/index.ts",
     "./extensions/write-file/index.ts"
   ],
