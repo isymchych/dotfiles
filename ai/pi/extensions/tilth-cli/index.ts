@@ -53,7 +53,7 @@ const TILTH_GUIDANCE = `## Tilth CLI workflow
 
 - Use Tilth for bounded repository exploration; stop discovery once the owner file, invariant, and affected tests are identified.
 - Prefer \`tilth_search\` for code exploration before shell discovery, but keep it narrow with \`scope\`, \`glob\`, and default expansion.
-- Use \`tilth_search\` with \`mode=auto\` for symbol and concept lookup, \`mode=literal\` for exact text, and \`mode=callers\` for call sites.
+- Use \`tilth_search\` with \`mode=auto\` for symbol and concept lookup, \`mode=literal\` for exact text, and \`mode=callers\` for call sites; callers mode accepts up to five comma-separated symbols.
 - Use \`tilth_read\` with \`section\` for focused follow-up reads by line range or heading; avoid whole-file reads when a section is enough.
 - Omit \`budget\` by default. Large budgets directly increase conversation context; only raise them after a smaller scoped call is insufficient.
 - Avoid \`full\` unless the full file is the actual artifact under review.
@@ -108,7 +108,7 @@ export default function tilthCliExtension(pi: ExtensionAPI): void {
         "Use tilth_search first when you need to find where code, symbols, concepts, or text live before reading files.",
         "Keep tilth_search narrow with scope, glob, and default expansion; avoid broad searches once the owner file is known.",
         "Use tilth_search with mode=literal for exact text and mode=regex for pattern searches.",
-        "Use tilth_search with mode=callers when you need call sites for a known symbol.",
+        "Use tilth_search with mode=callers when you need call sites for one known symbol or up to five comma-separated symbols.",
       ],
       parameters: tilthSearchSchema,
       renderShell: "self",

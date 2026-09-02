@@ -6,26 +6,16 @@
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-terra",
   "defaultThinkingLevel": "medium",
+  "defaultTools": [
+    "bash",
+    "read",
+    "grep",
+    "find",
+    "ls"
+  ],
   "autocompleteMaxVisible": 16,
   "skills": [
     "./skills"
-  ],
-  "extensions": [
-    "./extensions/apply-patch/index.ts",
-    "./extensions/read-tool/index.ts",
-    "./extensions/compact-tool-output/index.ts",
-    "./extensions/context/index.ts",
-    "./extensions/fuzzy-at-file-autocomplete/index.ts",
-    "./extensions/model-slots/index.ts",
-    "./extensions/draft-stash/index.ts",
-    "./extensions/openai-codex/index.ts",
-    "./extensions/personal-context/index.ts",
-    "./extensions/preview/index.ts",
-    "./extensions/response-status/index.ts",
-    "./extensions/waybar-agent-status/index.ts",
-    "./extensions/shell-tool/index.ts",
-    "./extensions/handoff-summary/index.ts",
-    "./extensions/write-file/index.ts"
   ],
   "prompts": [
     "./prompts"

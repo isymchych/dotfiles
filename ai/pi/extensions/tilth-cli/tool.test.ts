@@ -67,6 +67,13 @@ test("buildSearchArgs supports callers mode without losing default expansion", (
   );
 });
 
+test("buildSearchArgs forwards multi-target caller queries", () => {
+  assert.deepEqual(
+    buildSearchArgs({ query: "handleAuth,authorize,loadUser", mode: "callers" }, "/repo"),
+    ["--budget", "10000", "--callers", "--expand=2", "handleAuth,authorize,loadUser"],
+  );
+});
+
 test("buildFilesArgs keeps the glob as the trailing query", () => {
   assert.deepEqual(buildFilesArgs({ pattern: "src/**/*.ts", budget: 200 }, "/repo"), [
     "--budget",

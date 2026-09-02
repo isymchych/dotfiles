@@ -11,7 +11,7 @@
   ],
   "allowScripts": {
     "koffi@2.16.2": true,
-    "tilth@0.9.0": true
+    "tilth@0.10.1": true
   },
   "scripts": {
     "fmt": "oxfmt ai/pi ai/skills packages scripts",

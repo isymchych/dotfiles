@@ -1,6 +1,7 @@
 ---
 name: planning
-description: Compact planning workflow for code work. Use when the user asks for a plan, or explicitly invokes planning. Produces concise inline plans by default, with optional short `plans/<slug>.md` artifacts for larger, risky, or user-requested work.
+description: Compact planning workflow for code work. Produces concise inline plans by default, with optional short `plans/<slug>.md` artifacts for larger, risky, or user-requested work.
+disable-model-invocation: true
 ---
 
 # Planning

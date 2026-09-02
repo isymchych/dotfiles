@@ -58,12 +58,13 @@ export const tilthReadSchema = Type.Object(
 export const tilthSearchSchema = Type.Object(
   {
     query: Type.String({
-      description: "Symbol, concept, exact text, or regex to search for.",
+      description:
+        "Symbol, concept, exact text, or regex to search for. Callers mode accepts up to five comma-separated symbols.",
     }),
     mode: Type.Optional(
       StringEnum(["auto", "literal", "regex", "callers"] as const, {
         description:
-          "Search mode. auto lets Tilth classify the query, literal forces exact text search, regex forces regex search, callers finds call sites.",
+          "Search mode. auto lets Tilth classify the query, literal forces exact text search, regex forces regex search, callers finds call sites for one symbol or up to five comma-separated symbols.",
       }),
     ),
     scope: Type.Optional(

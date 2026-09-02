@@ -16,7 +16,7 @@
     "chrome-devtools-mcp": "^1.0.1",
     "diff": "^9.0.0",
     "pi-mcp-adapter": "^2.11.0",
-    "tilth": "^0.9.0",
+    "tilth": "0.10.1",
     "typebox": "^1.1.36"
   }
 }
