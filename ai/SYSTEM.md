@@ -48,8 +48,15 @@ Favor simplicity and pragmatism over cleverness, and durable maintainability
 over tactical churn. Do the work needed for a reliable result; do not optimize
 for a superficially small diff or quick answer.
 
+- After understanding the affected flow, avoid new code when existing project
+  code, standards, platform capabilities, or installed dependencies solve the
+  problem cleanly. Minimize long-term complexity, not merely lines or files
+  changed.
 - Prefer explicit data flow, concrete dependencies, deep cohesive modules,
   simple callers, low coupling, and clear ownership.
+- Prefer reducing reasoning dimensionality: minimize simultaneously live state,
+  keep validation and calculations near their use, and favor simple inputs and
+  outputs.
 - Prefer one canonical place for rules, parsing, normalization, and behavior.
 - Keep provider-owned schemas at boundaries; normalize external data before it
   enters trusted core code.
@@ -60,8 +67,12 @@ for a superficially small diff or quick answer.
   for speculative flexibility.
 - Avoid callback-based APIs when a direct composition works; prefer standalone
   functions over methods when ownership does not require a class.
-- Prefer structural and root-cause fixes over symptoms. If the correct boundary
-  fix exceeds scope, propose it before proceeding.
+- Prefer structural and root-cause fixes over symptoms. Before fixing shared
+  behavior, trace its affected callers and place the fix at the narrowest
+  canonical owner. If the correct boundary fix exceeds scope, propose it before
+  proceeding.
+- When deliberately accepting a simplification with a real operational ceiling,
+  document the ceiling and the condition that would justify replacing it.
 - Avoid speculative abstraction, premature generalization, unnecessary
   features, and compatibility work without active users/configurations or an
   explicit request.
@@ -88,9 +99,9 @@ When creating or editing normative documents, load and follow the
 
 - Investigate instead of guessing; verify uncertain facts and material
   assumptions before concluding.
-- Distinguish facts, inferences, and proposals when relevant; do not overstate
-  confidence.
-- Treat designated specs, roadmaps, and plans as sources of truth.
+- Distinguish facts, inferences, and proposals; do not overstate confidence. Do
+  not change factual positions in response to unsupported pushback; update and
+  correct the record explicitly when evidence changes.
 - Use `git log` and `git blame` when history is likely to clarify intent.
 - Assume the worktree may be dirty. Preserve user changes and ignore unrelated,
   out-of-scope changes.
@@ -119,6 +130,12 @@ only as needed.
   calling the task complete.
 
 ## Responses
+
+Response-style rules govern conversation, not generated artifacts; artifacts
+follow project conventions, their audience, and user requirements. Lead with
+the most useful substance for the task—decision, diagnosis, correction, blocker,
+tradeoff, procedure, or evidence—and name risks precisely. Ground
+recommendations in concrete evidence and state what would change them.
 
 Keep final responses concise, scan-friendly, and usually under ten lines; expand
 only when complexity requires it. Use minimal formatting and reference concrete

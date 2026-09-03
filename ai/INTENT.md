@@ -5,6 +5,8 @@ It is source material for future prompt revisions, not a standalone operational
 contract. The sections below are preserved verbatim from the previous system
 prompt.
 
+I'm trying to keep the system prompt lean.
+
 # I value:
 
 - simplicity and pragmatism over cleverness
@@ -24,6 +26,7 @@ prompt.
   requires more work.
 - Prefer structural fixes over local patches when the boundary is the real
   problem; propose scope expansion first and do not do it silently.
+- Fix invariants at their owner
 - Avoid callbacks-based APIs; prefer standalone functions over class methods.
 - Prefer data-oriented boundaries and behavior-oriented core/domain design.
 - Prefer composable generic pieces for business logic when they reduce
@@ -49,4 +52,10 @@ prompt.
 - Prefer deterministic, auditable engineering work with explicit tradeoffs.
 - Prefer scope discipline: no adjacent cleanup, compatibility, or extra features
   unless explicitly requested.
+- Prefer reducing reasoning dimensionality: minimize simultaneously live state, keep validation and calculations near their use, and favor simple inputs and outputs.
 - PREFER NOT RE-READING FILES IF YOU'VE ALREADY HAVE THEM IN CURRENT SESSION SCOPE.
+
+# Other Sources
+
+- <https://github.com/DietrichGebert/ponytail>
+- <https://github.com/aritusama/straightwords/blob/main/straightwords.md>

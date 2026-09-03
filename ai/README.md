@@ -134,6 +134,7 @@ Makes targeted fixes based on evidence
 - Put the rationale where the agent can read it, especially for decisions that would be expensive to get wrong.
 - prompts/skills/docs shouldn't be unnecessarily rigid; avoid forced limitations (i.e. 'provide 2-3 options')
 - > The most effective AI-assisted learning relies on established learning science: retrieval practice, spaced repetition, testing, desirable difficulty, Socratic questioning, and teaching concepts back in your own words. AI’s advantage is that it can personalize these techniques cheaply and continuously for an individual learner.
+- keep INTENT.md with human input, then generate artifacts based on it
 
 # USEFUL QUESTIONS
 
