@@ -33,6 +33,16 @@ The canonical declarations are
 repository to verify that the host matches its declaration and `chezmoi apply`
 to repair drift.
 
+### External tools
+
+Tools unavailable from the official repositories or AUR live in the
+`external_tools` section of `dotfiles/.chezmoidata/packages.yaml`. Pin each
+GitHub release artifact by its HTTPS URL, archive SHA-256, installed binary
+name, and binary SHA-256. Chezmoi validates unique binary targets, then
+downloads, verifies, and atomically installs missing or drifted binaries in
+`~/.local/bin` after package installation; `just doctor` verifies the installed
+checksum.
+
 ## Install Arch
 
 ### Boot and partitioning

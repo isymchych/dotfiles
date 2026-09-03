@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import type { CommandResult } from "@accel-os/shared/process";
 
@@ -9,7 +11,16 @@ import {
   type DoctorContext,
   type DoctorDependencies,
 } from "./lib/doctor.ts";
-import { parseResolvedHostState, type ResolvedHostState } from "./lib/host-config.ts";
+import {
+  parseResolvedExternalTools,
+  parseResolvedHostState,
+  readHostConfig,
+  type ResolvedHostState,
+  validateHostConfig,
+} from "./lib/host-config.ts";
+
+const scriptsDirectory = path.dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = path.resolve(scriptsDirectory, "..");
 
 function commandResult(code: number, stdout = "", stderr = ""): CommandResult {
   return { code, stdout, stderr, success: code === 0 };
@@ -33,6 +44,7 @@ const state: ResolvedHostState = {
 
 const context: DoctorContext = {
   state,
+  externalTools: [],
   repositoryRoot: "/repo",
   homeDirectory: "/home/test",
   username: "test",
@@ -121,6 +133,42 @@ service\tuser\tdisabled\tbase-disabled-user.service
   );
 });
 
+test("parseResolvedExternalTools reads the canonical external-tool state", () => {
+  assert.deepEqual(
+    parseResolvedExternalTools(
+      "external_tool\tsnip\thttps://example.com/snip.tar.gz\t1111111111111111111111111111111111111111111111111111111111111111\tsnip\t2222222222222222222222222222222222222222222222222222222222222222\n",
+    ),
+    [
+      {
+        name: "snip",
+        url: "https://example.com/snip.tar.gz",
+        archiveSha256: "1111111111111111111111111111111111111111111111111111111111111111",
+        binary: "snip",
+        binarySha256: "2222222222222222222222222222222222222222222222222222222222222222",
+      },
+    ],
+  );
+});
+
+test("validateHostConfig rejects external tools that install the same binary", async () => {
+  const dataDirectory = path.join(repositoryRoot, "dotfiles/.chezmoidata");
+  const config = await readHostConfig({
+    packages: path.join(dataDirectory, "packages.yaml"),
+    services: path.join(dataDirectory, "services.yaml"),
+    hosts: path.join(dataDirectory, "hosts.yaml"),
+    tlp: path.join(dataDirectory, "tlp.yaml"),
+  });
+  const tools = config.packages.external_tools.linux.arch.github_release.base["ai"];
+  assert.ok(tools);
+  const original = tools[0];
+  assert.ok(original);
+  tools.push({ ...original, name: "another-snip" });
+
+  assert.deepEqual(validateHostConfig(config), [
+    'External tool binary "snip" is declared more than once: external_tools.github_release.base.ai[0].binary, external_tools.github_release.base.ai[1].binary',
+  ]);
+});
+
 function createDependencies(overrides: Partial<DoctorDependencies> = {}): DoctorDependencies {
   const dependencies: DoctorDependencies = {
     async readText(filePath) {
@@ -141,6 +189,9 @@ function createDependencies(overrides: Partial<DoctorDependencies> = {}): Doctor
     },
     async isExecutable(filePath) {
       return filePath === "/home/test/bin/mb-audio" || filePath === "/home/test/bin/accel-node";
+    },
+    async sha256File() {
+      return null;
     },
     async runCommand(command, args) {
       if (command === "pacman") {
@@ -192,6 +243,7 @@ test("runDoctor passes when the declared host state is satisfied", async () => {
     [
       { id: "host", status: "pass" },
       { id: "packages", status: "pass" },
+      { id: "external-tools", status: "pass" },
       { id: "user-account", status: "pass" },
       { id: "system-services", status: "pass" },
       { id: "user-services", status: "pass" },
@@ -229,6 +281,90 @@ test("runDoctor aggregates missing packages and managed configuration drift", as
   assert.ok(managedConfig);
   assert.equal(managedConfig.status, "fail");
   assert.match(managedConfig.details?.join("\n") ?? "", /80-accel-os\.conf: missing/u);
+});
+
+test("runDoctor verifies pinned external tools without executing them", async () => {
+  const externalTool = {
+    name: "snip",
+    url: "https://example.com/snip.tar.gz",
+    archiveSha256: "1".repeat(64),
+    binary: "snip",
+    binarySha256: "2".repeat(64),
+  };
+  const externalToolContext: DoctorContext = {
+    ...context,
+    externalTools: [externalTool],
+  };
+  const dependencies = createDependencies({
+    async isExecutable(filePath) {
+      return (
+        filePath === "/home/test/.local/bin/snip" ||
+        filePath === "/home/test/bin/mb-audio" ||
+        filePath === "/home/test/bin/accel-node"
+      );
+    },
+    async sha256File(filePath) {
+      assert.equal(filePath, "/home/test/.local/bin/snip");
+      return externalTool.binarySha256;
+    },
+  });
+
+  const results = await runDoctor(externalToolContext, dependencies);
+
+  assert.deepEqual(
+    results.find((result) => result.id === "external-tools"),
+    {
+      id: "external-tools",
+      status: "pass",
+      summary: "1 pinned external tool installed",
+    },
+  );
+});
+
+test("runDoctor reports missing and modified external tools", async () => {
+  const externalTools = [
+    {
+      name: "missing",
+      url: "https://example.com/missing.tar.gz",
+      archiveSha256: "1".repeat(64),
+      binary: "missing",
+      binarySha256: "2".repeat(64),
+    },
+    {
+      name: "modified",
+      url: "https://example.com/modified.tar.gz",
+      archiveSha256: "3".repeat(64),
+      binary: "modified",
+      binarySha256: "4".repeat(64),
+    },
+  ];
+  const externalToolContext: DoctorContext = {
+    ...context,
+    externalTools,
+  };
+  const dependencies = createDependencies({
+    async isExecutable(filePath) {
+      return (
+        filePath === "/home/test/.local/bin/modified" ||
+        filePath === "/home/test/bin/mb-audio" ||
+        filePath === "/home/test/bin/accel-node"
+      );
+    },
+    async sha256File(filePath) {
+      assert.equal(filePath, "/home/test/.local/bin/modified");
+      return "5".repeat(64);
+    },
+  });
+
+  const results = await runDoctor(externalToolContext, dependencies);
+  const externalToolsResult = results.find((result) => result.id === "external-tools");
+
+  assert.ok(externalToolsResult);
+  assert.equal(externalToolsResult.status, "fail");
+  assert.deepEqual(externalToolsResult.details, [
+    "missing: /home/test/.local/bin/missing is missing or not executable",
+    "modified: binary checksum differs from the pinned release",
+  ]);
 });
 
 test("runDoctor skips user services when the user manager is unavailable", async () => {

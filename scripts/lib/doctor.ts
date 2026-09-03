@@ -2,7 +2,7 @@ import path from "node:path";
 
 import type { CommandResult, RunCommandOptions } from "@accel-os/shared/process";
 
-import type { ResolvedHostState } from "./host-config.ts";
+import type { ResolvedExternalTool, ResolvedHostState } from "./host-config.ts";
 
 export type DoctorStatus = "pass" | "fail" | "skip";
 
@@ -27,11 +27,13 @@ export type DoctorDependencies = {
   inspectPath(path: string): Promise<FileMetadata | null>;
   listFiles(path: string): Promise<readonly string[]>;
   isExecutable(path: string): Promise<boolean>;
+  sha256File(path: string): Promise<string | null>;
   runCommand(command: string, args: string[], options?: RunCommandOptions): Promise<CommandResult>;
 };
 
 export type DoctorContext = {
   state: ResolvedHostState;
+  externalTools: readonly ResolvedExternalTool[];
   repositoryRoot: string;
   homeDirectory: string;
   username: string;
@@ -127,6 +129,37 @@ async function checkPackages(
   }
 
   return pass("packages", `${String(state.packages.length)} required packages installed`);
+}
+
+async function checkExternalTools(
+  context: DoctorContext,
+  dependencies: DoctorDependencies,
+): Promise<DoctorResult> {
+  const problems: string[] = [];
+
+  for (const tool of context.externalTools) {
+    const toolPath = path.join(context.homeDirectory, ".local", "bin", tool.binary);
+    if (!(await dependencies.isExecutable(toolPath))) {
+      problems.push(`${tool.name}: ${toolPath} is missing or not executable`);
+      continue;
+    }
+
+    const actualSha256 = await dependencies.sha256File(toolPath);
+    if (actualSha256 === null) {
+      problems.push(`${tool.name}: ${toolPath} is missing`);
+    } else if (actualSha256 !== tool.binarySha256) {
+      problems.push(`${tool.name}: binary checksum differs from the pinned release`);
+    }
+  }
+
+  if (problems.length > 0) {
+    return fail("external-tools", `${String(problems.length)} external tool problem(s)`, problems);
+  }
+
+  return pass(
+    "external-tools",
+    `${String(context.externalTools.length)} pinned external tool${context.externalTools.length === 1 ? "" : "s"} installed`,
+  );
 }
 
 async function checkUserAccount(
@@ -633,6 +666,7 @@ export async function runDoctor(
   return Promise.all([
     protectCheck("host", async () => checkHost(context, dependencies)),
     protectCheck("packages", async () => checkPackages(context.state, dependencies)),
+    protectCheck("external-tools", async () => checkExternalTools(context, dependencies)),
     protectCheck("user-account", async () => checkUserAccount(context, dependencies)),
     protectCheck("system-services", async () =>
       checkServiceScope("system", context.state, dependencies),

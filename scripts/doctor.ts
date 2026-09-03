@@ -1,4 +1,5 @@
-import { constants } from "node:fs";
+import { createHash } from "node:crypto";
+import { constants, createReadStream } from "node:fs";
 import { access, lstat, readFile, readdir, stat } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -9,7 +10,12 @@ import { getErrorMessage } from "@accel-os/shared/guards";
 import { runCommand } from "@accel-os/shared/process";
 
 import { formatDoctorResults, runDoctor, type DoctorDependencies } from "./lib/doctor.ts";
-import { parseResolvedHostState, readHostConfig, validateHostConfig } from "./lib/host-config.ts";
+import {
+  parseResolvedExternalTools,
+  parseResolvedHostState,
+  readHostConfig,
+  validateHostConfig,
+} from "./lib/host-config.ts";
 
 const scriptsDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptsDirectory, "..");
@@ -45,6 +51,26 @@ async function isExecutable(filePath: string): Promise<boolean> {
   }
 }
 
+async function sha256File(filePath: string): Promise<string | null> {
+  try {
+    const hash = createHash("sha256");
+    await new Promise<void>((resolve, reject) => {
+      const stream = createReadStream(filePath);
+      stream.on("data", (chunk: string | Buffer) => {
+        hash.update(chunk);
+      });
+      stream.once("error", reject);
+      stream.once("end", resolve);
+    });
+    return hash.digest("hex");
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
 const dependencies: DoctorDependencies = {
   readText,
   async inspectPath(filePath) {
@@ -73,6 +99,7 @@ const dependencies: DoctorDependencies = {
     return readdir(directory);
   },
   isExecutable,
+  sha256File,
   runCommand,
 };
 
@@ -96,16 +123,28 @@ async function main(args: readonly string[]): Promise<void> {
     throw new Error(`Invalid host configuration:\n${configErrors.join("\n")}`);
   }
 
-  const resolvedState = await runCommand(
-    "chezmoi",
-    [
-      "--source",
-      path.join(repositoryRoot, "dotfiles"),
-      "execute-template",
-      '{{ template "resolved-host-state" . }}',
-    ],
-    { env: process.env },
-  );
+  const [resolvedState, resolvedExternalTools] = await Promise.all([
+    runCommand(
+      "chezmoi",
+      [
+        "--source",
+        path.join(repositoryRoot, "dotfiles"),
+        "execute-template",
+        '{{ template "resolved-host-state" . }}',
+      ],
+      { env: process.env },
+    ),
+    runCommand(
+      "chezmoi",
+      [
+        "--source",
+        path.join(repositoryRoot, "dotfiles"),
+        "execute-template",
+        '{{ template "resolved-external-tools" . }}',
+      ],
+      { env: process.env },
+    ),
+  ]);
   if (!resolvedState.success) {
     throw new Error(
       `Failed to resolve host configuration: ${
@@ -113,10 +152,19 @@ async function main(args: readonly string[]): Promise<void> {
       }`,
     );
   }
+  if (!resolvedExternalTools.success) {
+    throw new Error(
+      `Failed to resolve external tools: ${
+        resolvedExternalTools.stderr ||
+        `chezmoi exited with status ${String(resolvedExternalTools.code)}`
+      }`,
+    );
+  }
 
   const results = await runDoctor(
     {
       state: parseResolvedHostState(resolvedState.stdout),
+      externalTools: parseResolvedExternalTools(resolvedExternalTools.stdout),
       repositoryRoot,
       homeDirectory: os.homedir(),
       username: os.userInfo().username,

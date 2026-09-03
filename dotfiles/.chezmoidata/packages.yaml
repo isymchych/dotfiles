@@ -15,6 +15,7 @@ packages:
             - nodejs # Runtime for repo-managed TypeScript commands
             - npm # Install dependencies for repo-managed TypeScript commands
             - openssh # SSH protocol implementation for remote login, command execution and file transfer
+            - wget # HTTP(S) downloads for verified external-tool installation
             - zsh # A very advanced and programmable command interpreter (shell) for UNIX
 
         features:
@@ -24,7 +25,6 @@ packages:
               - fd # ergonomic file finder
               - tokei # code line counts
               - fzf # fuzzy matcher
-              - wget # HTTP(S) downloads
               - gitui # TUI for git
               - git-delta # git diff viewer
               - difftastic # syntax-aware diffs
@@ -225,3 +225,18 @@ packages:
               - downgrade # Bash script for downgrading one or more packages to a version in your cache or the A.L.A
             containers:
               - docker-rootless-extras # Extras to run docker as non-root
+
+# Tools distributed outside Arch repositories. Each artifact is pinned by URL
+# and checksums; the installer verifies both the downloaded archive and binary.
+external_tools:
+  linux:
+    arch:
+      github_release:
+        base:
+          ai:
+            - name: snip
+              url: https://github.com/edouard-claude/snip/releases/download/v0.25.0/snip_0.25.0_linux_amd64.tar.gz
+              archive_sha256: 3fc735016e99622dedffd3650a54bbe5f326bdf962ca73be24a4086456f1d646
+              binary: snip
+              binary_sha256: c5d58a58839d1b5e86692d8a8d0ded6a8084372b1358b0cea8f289e3d3b6ce1b
+        features: {}

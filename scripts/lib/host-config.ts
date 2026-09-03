@@ -14,6 +14,41 @@ const packageProviderSchema = Type.Object(
   },
   { additionalProperties: false },
 );
+const sha256Schema = Type.String({ pattern: "^[a-f0-9]{64}$" });
+const externalToolSchema = Type.Object(
+  {
+    name: Type.String({ pattern: "^[a-z0-9][a-z0-9-]*$" }),
+    url: Type.String({ pattern: "^https://[^\\t\\n]+\\.tar\\.gz$" }),
+    archive_sha256: sha256Schema,
+    binary: Type.String({ pattern: "^[A-Za-z0-9][A-Za-z0-9._-]*$" }),
+    binary_sha256: sha256Schema,
+  },
+  { additionalProperties: false },
+);
+const externalToolGroupsSchema = Type.Record(Type.String(), Type.Array(externalToolSchema));
+const externalToolFeaturesSchema = Type.Record(Type.String(), externalToolGroupsSchema);
+const externalToolsSchema = Type.Object(
+  {
+    linux: Type.Object(
+      {
+        arch: Type.Object(
+          {
+            github_release: Type.Object(
+              {
+                base: externalToolGroupsSchema,
+                features: externalToolFeaturesSchema,
+              },
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      },
+      { additionalProperties: false },
+    ),
+  },
+  { additionalProperties: false },
+);
 const packagesSchema = Type.Object(
   {
     packages: Type.Object(
@@ -33,6 +68,7 @@ const packagesSchema = Type.Object(
       },
       { additionalProperties: false },
     ),
+    external_tools: externalToolsSchema,
   },
   { additionalProperties: false },
 );
@@ -165,6 +201,14 @@ export type ResolvedHostState = {
       stop: number;
     };
   };
+};
+
+export type ResolvedExternalTool = {
+  name: string;
+  url: string;
+  archiveSha256: string;
+  binary: string;
+  binarySha256: string;
 };
 
 type MutableResolvedHostState = {
@@ -335,6 +379,23 @@ function parseTlpRecord(
   };
 }
 
+function parseExternalToolRecord(
+  tools: ResolvedExternalTool[],
+  fields: readonly string[],
+  location: string,
+): void {
+  if (fields.length !== 6) {
+    throw new Error(`${location} has an invalid external tool record`);
+  }
+  tools.push({
+    name: fields[1] ?? "",
+    url: fields[2] ?? "",
+    archiveSha256: fields[3] ?? "",
+    binary: fields[4] ?? "",
+    binarySha256: fields[5] ?? "",
+  });
+}
+
 function parseResolvedRecord(
   state: MutableResolvedHostState,
   fields: readonly string[],
@@ -414,6 +475,29 @@ export function parseResolvedHostState(contents: string): ResolvedHostState {
   };
 }
 
+export function parseResolvedExternalTools(contents: string): ResolvedExternalTool[] {
+  const tools: ResolvedExternalTool[] = [];
+
+  for (const [index, line] of contents.split("\n").entries()) {
+    if (line === "") {
+      continue;
+    }
+
+    const fields = line.split("\t");
+    const location = `resolved external tools line ${String(index + 1)}`;
+    if (fields.some((field) => field === "")) {
+      throw new Error(`${location} contains an empty field`);
+    }
+    if (fields[0] !== "external_tool") {
+      throw new Error(`${location} has unknown record type ${JSON.stringify(fields[0])}`);
+    }
+
+    parseExternalToolRecord(tools, fields, location);
+  }
+
+  return [...tools].sort((left, right) => left.name.localeCompare(right.name));
+}
+
 function findDuplicateDeclarations(
   declarations: readonly Declaration[],
   description: string,
@@ -468,6 +552,38 @@ function collectPackages(config: HostConfig): {
   return { declarations, features };
 }
 
+function collectExternalTools(config: HostConfig): {
+  names: Declaration[];
+  binaries: Declaration[];
+  features: Set<string>;
+} {
+  const names: Declaration[] = [];
+  const binaries: Declaration[] = [];
+  const features = new Set<string>();
+  const tools = config.packages.external_tools.linux.arch.github_release;
+
+  for (const [group, groupTools] of Object.entries(tools.base)) {
+    for (const [index, tool] of groupTools.entries()) {
+      const path = `external_tools.github_release.base.${group}[${String(index)}]`;
+      names.push({ value: tool.name, path: `${path}.name` });
+      binaries.push({ value: tool.binary, path: `${path}.binary` });
+    }
+  }
+
+  for (const [feature, groups] of Object.entries(tools.features)) {
+    features.add(feature);
+    for (const [group, groupTools] of Object.entries(groups)) {
+      for (const [index, tool] of groupTools.entries()) {
+        const path = `external_tools.github_release.features.${feature}.${group}[${String(index)}]`;
+        names.push({ value: tool.name, path: `${path}.name` });
+        binaries.push({ value: tool.binary, path: `${path}.binary` });
+      }
+    }
+  }
+
+  return { names, binaries, features };
+}
+
 function collectServices(config: HostConfig): {
   enabled: Record<"system" | "user", Declaration[]>;
   disabled: Record<"system" | "user", Declaration[]>;
@@ -501,11 +617,18 @@ function collectServices(config: HostConfig): {
 export function validateHostConfig(config: HostConfig): string[] {
   const errors: string[] = [];
   const packages = collectPackages(config);
+  const externalTools = collectExternalTools(config);
   const services = collectServices(config);
-  const knownFeatures = new Set([...packages.features, ...services.features]);
+  const knownFeatures = new Set([
+    ...packages.features,
+    ...externalTools.features,
+    ...services.features,
+  ]);
   const hosts = config.hosts.hosts;
 
   errors.push(...findDuplicateDeclarations(packages.declarations, "Package"));
+  errors.push(...findDuplicateDeclarations(externalTools.names, "External tool"));
+  errors.push(...findDuplicateDeclarations(externalTools.binaries, "External tool binary"));
 
   for (const scope of ["system", "user"] as const) {
     const enabled = new Map(
