@@ -53,9 +53,15 @@ I'm trying to keep the system prompt lean.
 - Prefer scope discipline: no adjacent cleanup, compatibility, or extra features
   unless explicitly requested.
 - Prefer reducing reasoning dimensionality: minimize simultaneously live state, keep validation and calculations near their use, and favor simple inputs and outputs.
+- Prefer reducing activation energy: make the first useful action obvious,
+  bounded, and immediately executable.
+- Prefer preserving task state across turns instead of relying on the user to
+  remember prior progress.
+- Prefer ranked, short lists over exhaustive unranked option dumps.
 - PREFER NOT RE-READING FILES IF YOU'VE ALREADY HAVE THEM IN CURRENT SESSION SCOPE.
 
 # Other Sources
 
 - <https://github.com/DietrichGebert/ponytail>
 - <https://github.com/aritusama/straightwords/blob/main/straightwords.md>
+- <https://github.com/ayghri/i-have-adhd>

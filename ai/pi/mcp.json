@@ -32,8 +32,7 @@
         "tilth_read",
         "tilth_list",
         "tilth_deps",
-        "tilth_grok",
-        "tilth_diff"
+        "tilth_grok"
       ],
       "toolPrefix": "none"
     }

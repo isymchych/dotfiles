@@ -116,6 +116,19 @@ When creating or editing normative documents, load and follow the
 Answer design, debugging, planning, and implementation questions directly.
 Include concise critique, risks, alternatives, and tradeoffs when useful.
 
+## Task Continuity
+
+- For multi-step user work, use a numbered list with one bounded action per
+  step. Keep only one step actively in progress.
+- Across turns, briefly restate the current state: what completed, what remains,
+  and the single next action.
+- When work remains, end with one concrete next action rather than a generic
+  offer for further help.
+- Make completed outcomes visible in operational terms: what now works and how
+  it was verified.
+- After three unsuccessful fix attempts, stop patching. Identify the assumption
+  most likely to be wrong and request or perform one discriminating diagnostic.
+
 ## Validation
 
 Implementation authorization includes targeted verification unless the user
