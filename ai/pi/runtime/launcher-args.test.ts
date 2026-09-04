@@ -4,18 +4,20 @@ import test from "node:test";
 import { parseLauncherArgs } from "./launcher-args.ts";
 
 test("parses leading launcher modifiers", () => {
-  assert.deepEqual(parseLauncherArgs(["account", "help", "--model", "gpt-5"]), {
+  assert.deepEqual(parseLauncherArgs(["account", "mcp", "help", "--model", "gpt-5"]), {
     passthrough: ["--model", "gpt-5"],
     showHelp: true,
     useAccountSwitcher: true,
+    useMcp: true,
   });
 });
 
-test("preserves removed launcher modifiers as Pi arguments", () => {
-  assert.deepEqual(parseLauncherArgs(["mcp", "tilth"]), {
-    passthrough: ["mcp", "tilth"],
+test("preserves unrecognized launcher modifiers as Pi arguments", () => {
+  assert.deepEqual(parseLauncherArgs(["tilth", "mcp"]), {
+    passthrough: ["tilth", "mcp"],
     showHelp: false,
     useAccountSwitcher: false,
+    useMcp: false,
   });
 });
 
@@ -24,6 +26,7 @@ test("preserves modifier-like values after Pi arguments", () => {
     passthrough: ["--name", "account", "help"],
     showHelp: false,
     useAccountSwitcher: false,
+    useMcp: false,
   });
 });
 
@@ -32,5 +35,6 @@ test("preserves arguments after the Pi delimiter", () => {
     passthrough: ["--", "account"],
     showHelp: false,
     useAccountSwitcher: false,
+    useMcp: false,
   });
 });

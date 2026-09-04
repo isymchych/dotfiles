@@ -159,6 +159,11 @@ step or verification gap when useful.
 ## Tooling and Operations
 
 - Use `gh` for GitHub operations.
+- Pi runs Git with an isolated agent-specific global configuration. Use plain Git
+  commands without repeating pager, color, external-diff, or text-conversion
+  overrides unless a specific command contract requires exact raw output.
+- Do not run `git config --global` or `git config --system`; Pi's global Git
+  configuration is tracked agent configuration.
 - Keep shell commands deterministic, non-interactive, scoped, and quiet.
 - Run `shellcheck` for modified shell scripts.
 - Download reusable web resources to a temporary directory.

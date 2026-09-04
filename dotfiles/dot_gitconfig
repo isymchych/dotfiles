@@ -1,31 +1,11 @@
-[merge]
-  conflictstyle = diff3
-  tool = kdiff3
-
-[merge "mergiraf"]
-  name = mergiraf
-  driver = mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L
-
-[mergetool]
-  keepBackup = false
+[include]
+  path = ~/.config/git/config.shared
 
 [core]
-  autocrlf = input
-  editor = nvim
   pager = delta
-  excludesfile = ~/.gitignore_global
-  attributesfile = ~/.gitattributes
-  quotePath = false
 
 [color]
   ui = true
-
-[push]
-  default = simple
-  autoSetupRemote = true
-
-[pull]
-  ff = only
 
 [alias]
   lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
@@ -49,21 +29,6 @@
 
 [diff]
   external = difft
-
-[http]
-  postBuffer = 524288000
-
-[include]
-  path = ~/.gitconfig_local
-
-[filter "lfs"]
-  smudge = git-lfs smudge -- %f
-  process = git-lfs filter-process
-  required = true
-  clean = git-lfs clean -- %f
-
-[init]
-  defaultBranch = main
 
 [pager]
   branch = false
@@ -93,5 +58,3 @@
   hunk-header-file-style = red
   hunk-header-line-number-style = "#067a00"
   hunk-header-style = file line-number syntax
-[credential]
-  helper = /usr/lib/git-core/git-credential-libsecret

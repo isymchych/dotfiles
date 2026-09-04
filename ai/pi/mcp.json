@@ -18,23 +18,6 @@
         "PATH": "${ACCEL_OS}/node_modules/.bin:${PATH}"
       },
       "directTools": false
-    },
-    "tilth": {
-      "command": "tilth",
-      "args": ["--mcp"],
-      "env": {
-        "PATH": "${ACCEL_OS}/node_modules/.bin:${PATH}"
-      },
-      "lifecycle": "lazy-keep-alive",
-      "exposeResources": false,
-      "directTools": [
-        "tilth_search",
-        "tilth_read",
-        "tilth_list",
-        "tilth_deps",
-        "tilth_grok"
-      ],
-      "toolPrefix": "none"
     }
   }
 }

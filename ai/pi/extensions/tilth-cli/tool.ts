@@ -10,19 +10,22 @@ const require = createRequire(import.meta.url);
 const DEFAULT_TIMEOUT_MS = 60_000;
 const DEFAULT_READ_BUDGET = 12_000;
 const DEFAULT_SEARCH_BUDGET = 10_000;
-const DEFAULT_FILES_BUDGET = 8_000;
+const DEFAULT_LIST_BUDGET = 8_000;
 const DEFAULT_DEPS_BUDGET = 12_000;
+const DEFAULT_DIFF_BUDGET = 10_000;
 const MAX_BUDGET = 15_000;
 const DEFAULT_SEARCH_EXPAND = 2;
 const MAX_SEARCH_EXPAND = 5;
+const MAX_DIFF_EXPAND = 5;
 const REGEX_METACHAR_PATTERN = /[()[\]{}*+?|\\^$]/;
 
 export const tilthToolNames = [
   "tilth_read",
   "tilth_search",
-  "tilth_files",
+  "tilth_list",
   "tilth_deps",
   "tilth_grok",
+  "tilth_diff",
 ] as const;
 
 export const tilthReadSchema = Type.Object(
@@ -32,7 +35,8 @@ export const tilthReadSchema = Type.Object(
     }),
     scope: Type.Optional(
       Type.String({
-        description: "Optional subdirectory to resolve relative paths against.",
+        description:
+          "Optional subdirectory, or an absolute path to another repository or checkout, to resolve relative paths against.",
       }),
     ),
     section: Type.Optional(
@@ -46,7 +50,8 @@ export const tilthReadSchema = Type.Object(
       }),
     ),
     budget: Type.Optional(
-      Type.Number({
+      Type.Integer({
+        minimum: 1,
         description:
           "Rare override. Omit by default; tilth_read applies a small budget. Large values directly increase conversation context.",
       }),
@@ -69,7 +74,8 @@ export const tilthSearchSchema = Type.Object(
     ),
     scope: Type.Optional(
       Type.String({
-        description: "Optional subdirectory to search within.",
+        description:
+          "Optional subdirectory, or an absolute path to another repository or checkout, to search within.",
       }),
     ),
     expand: Type.Optional(
@@ -83,7 +89,8 @@ export const tilthSearchSchema = Type.Object(
       }),
     ),
     budget: Type.Optional(
-      Type.Number({
+      Type.Integer({
+        minimum: 1,
         description:
           "Rare override. Omit by default; tilth_search applies a small budget. Large values directly increase conversation context.",
       }),
@@ -97,7 +104,7 @@ export const tilthSearchSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export const tilthFilesSchema = Type.Object(
+export const tilthListSchema = Type.Object(
   {
     pattern: Type.String({
       description: "Glob pattern to list, for example '*.ts' or 'src/**/*.rs'.",
@@ -108,7 +115,8 @@ export const tilthFilesSchema = Type.Object(
       }),
     ),
     budget: Type.Optional(
-      Type.Number({
+      Type.Integer({
+        minimum: 1,
         description:
           "Rare override. Omit by default; tilth_files applies a small budget. Large values directly increase conversation context.",
       }),
@@ -124,11 +132,13 @@ export const tilthDepsSchema = Type.Object(
     }),
     scope: Type.Optional(
       Type.String({
-        description: "Optional subdirectory to search for dependents within.",
+        description:
+          "Optional subdirectory, or an absolute path to another repository or checkout, to search for dependents within.",
       }),
     ),
     budget: Type.Optional(
-      Type.Number({
+      Type.Integer({
+        minimum: 1,
         description:
           "Rare override. Omit by default; tilth_deps applies a small budget. Large values directly increase conversation context.",
       }),
@@ -144,7 +154,8 @@ export const tilthGrokSchema = Type.Object(
     }),
     scope: Type.Optional(
       Type.String({
-        description: "Optional subdirectory to narrow the search.",
+        description:
+          "Optional subdirectory, or an absolute path to another repository or checkout, to narrow the search within.",
       }),
     ),
     full: Type.Optional(
@@ -156,11 +167,78 @@ export const tilthGrokSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const tilthDiffSchema = Type.Object(
+  {
+    repository: Type.Optional(
+      Type.String({
+        description:
+          "Repository or checkout directory to inspect. Defaults to the current repository; relative paths resolve from it.",
+      }),
+    ),
+    source: Type.Optional(
+      Type.String({
+        description:
+          "Diff source: uncommitted (default), staged, or a git ref such as HEAD~1 or main..feat. Cannot be combined with file-pair, patch, or log mode.",
+      }),
+    ),
+    scope: Type.Optional(
+      Type.String({
+        description:
+          "Restrict diff output to a repository-relative changed file, optionally followed by :function. Directory scopes are not supported.",
+      }),
+    ),
+    a: Type.Optional(
+      Type.String({
+        description: "First file for a file-to-file diff. Must be used together with b.",
+      }),
+    ),
+    b: Type.Optional(
+      Type.String({
+        description: "Second file for a file-to-file diff. Must be used together with a.",
+      }),
+    ),
+    patch: Type.Optional(
+      Type.String({
+        description: "Path to a patch file to parse instead of running git diff.",
+      }),
+    ),
+    log: Type.Optional(
+      Type.String({
+        description: "Git log range such as HEAD~5..HEAD for per-commit structural summaries.",
+      }),
+    ),
+    search: Type.Optional(
+      Type.String({
+        description: "Filter output to symbols or files matching this substring.",
+      }),
+    ),
+    blast: Type.Optional(
+      Type.Boolean({
+        description: "Show blast-radius warnings for signature-changed symbols.",
+      }),
+    ),
+    expand: Type.Optional(
+      Type.Number({
+        description: "Number of changed symbols to expand with source context.",
+      }),
+    ),
+    budget: Type.Optional(
+      Type.Integer({
+        minimum: 1,
+        description:
+          "Rare override. Omit by default; tilth_diff applies a bounded budget. Large values directly increase conversation context.",
+      }),
+    ),
+  },
+  { additionalProperties: false },
+);
+
 export type TilthReadInput = Static<typeof tilthReadSchema>;
 export type TilthSearchInput = Static<typeof tilthSearchSchema>;
-export type TilthFilesInput = Static<typeof tilthFilesSchema>;
+export type TilthListInput = Static<typeof tilthListSchema>;
 export type TilthDepsInput = Static<typeof tilthDepsSchema>;
 export type TilthGrokInput = Static<typeof tilthGrokSchema>;
+export type TilthDiffInput = Static<typeof tilthDiffSchema>;
 export type TilthSearchMode = NonNullable<TilthSearchInput["mode"]>;
 
 export interface PreparedTilthInput<Input> {
@@ -180,7 +258,6 @@ export interface TilthToolDetails {
 export interface TilthToolResult {
   content: [{ type: "text"; text: string }];
   details: TilthToolDetails;
-  isError?: boolean;
 }
 
 export type TilthExec = (
@@ -197,6 +274,14 @@ function buildScopeArgs(cwd: string, scope: string | undefined): string[] {
   return ["--scope", path.resolve(cwd, scope)];
 }
 
+function buildDiffScopeArgs(scope: string | undefined): string[] {
+  if (scope === undefined || scope.trim().length === 0) {
+    return [];
+  }
+
+  return ["--scope", scope];
+}
+
 function buildBudgetArgs(budget: number | undefined): string[] {
   if (budget === undefined) {
     return [];
@@ -211,6 +296,10 @@ function clampBudget(
   warnings: string[],
 ): number {
   const requestedBudget = budget ?? defaultBudget;
+  if (requestedBudget < 1) {
+    warnings.push(`${toolName} budget clamped from ${requestedBudget} to 1.`);
+    return 1;
+  }
   if (requestedBudget <= MAX_BUDGET) {
     return requestedBudget;
   }
@@ -230,6 +319,17 @@ function clampSearchExpand(expand: number | undefined, warnings: string[]): numb
     `tilth_search expand clamped from ${expand} to ${MAX_SEARCH_EXPAND}; read more matches only after the first result set is insufficient.`,
   );
   return MAX_SEARCH_EXPAND;
+}
+
+function clampDiffExpand(expand: number | undefined, warnings: string[]): number | undefined {
+  if (expand === undefined || expand <= MAX_DIFF_EXPAND) {
+    return expand;
+  }
+
+  warnings.push(
+    `tilth_diff expand clamped from ${expand} to ${MAX_DIFF_EXPAND}; inspect the summary before expanding more changed symbols.`,
+  );
+  return MAX_DIFF_EXPAND;
 }
 
 export function prepareTilthReadInput(params: TilthReadInput): PreparedTilthInput<TilthReadInput> {
@@ -262,14 +362,12 @@ export function prepareTilthSearchInput(
   };
 }
 
-export function prepareTilthFilesInput(
-  params: TilthFilesInput,
-): PreparedTilthInput<TilthFilesInput> {
+export function prepareTilthListInput(params: TilthListInput): PreparedTilthInput<TilthListInput> {
   const warnings: string[] = [];
   return {
     input: {
       ...params,
-      budget: clampBudget(params.budget, DEFAULT_FILES_BUDGET, "tilth_files", warnings),
+      budget: clampBudget(params.budget, DEFAULT_LIST_BUDGET, "tilth_list", warnings),
     },
     warnings,
   };
@@ -282,6 +380,41 @@ export function prepareTilthDepsInput(params: TilthDepsInput): PreparedTilthInpu
       ...params,
       budget: clampBudget(params.budget, DEFAULT_DEPS_BUDGET, "tilth_deps", warnings),
     },
+    warnings,
+  };
+}
+
+export function prepareTilthDiffInput(params: TilthDiffInput): PreparedTilthInput<TilthDiffInput> {
+  const warnings: string[] = [];
+  const hasFilePair = params.a !== undefined || params.b !== undefined;
+  if ((params.a === undefined) !== (params.b === undefined)) {
+    throw new Error("tilth_diff requires a and b together");
+  }
+
+  const selectedModes = [
+    ...(params.source === undefined ? [] : ["source"]),
+    ...(hasFilePair ? ["file pair"] : []),
+    ...(params.patch === undefined ? [] : ["patch"]),
+    ...(params.log === undefined ? [] : ["log"]),
+  ];
+  if (selectedModes.length > 1) {
+    throw new Error(`tilth_diff modes are mutually exclusive: ${selectedModes.join(", ")}`);
+  }
+  if (params.source?.startsWith("-") === true) {
+    throw new Error("tilth_diff source must not start with '-'");
+  }
+
+  const input: TilthDiffInput = {
+    ...params,
+    budget: clampBudget(params.budget, DEFAULT_DIFF_BUDGET, "tilth_diff", warnings),
+  };
+  const expand = clampDiffExpand(params.expand, warnings);
+  if (expand !== undefined) {
+    input.expand = expand;
+  }
+
+  return {
+    input,
     warnings,
   };
 }
@@ -347,8 +480,8 @@ export function buildSearchArgs(params: TilthSearchInput, cwd: string): string[]
   ];
 }
 
-export function buildFilesArgs(params: TilthFilesInput, cwd: string): string[] {
-  const { input } = prepareTilthFilesInput(params);
+export function buildListArgs(params: TilthListInput, cwd: string): string[] {
+  const { input } = prepareTilthListInput(params);
   return [...buildScopeArgs(cwd, input.scope), ...buildBudgetArgs(input.budget), input.pattern];
 }
 
@@ -368,6 +501,24 @@ export function buildGrokArgs(params: TilthGrokInput, cwd: string): string[] {
     ...buildScopeArgs(cwd, params.scope),
     ...(params.full === true ? ["--full"] : []),
     params.target,
+  ];
+}
+
+export function buildDiffArgs(params: TilthDiffInput, _cwd: string): string[] {
+  const { input } = prepareTilthDiffInput(params);
+
+  return [
+    "diff",
+    input.source ?? "uncommitted",
+    ...buildDiffScopeArgs(input.scope),
+    ...(input.a === undefined ? [] : ["--a", input.a]),
+    ...(input.b === undefined ? [] : ["--b", input.b]),
+    ...(input.patch === undefined ? [] : ["--patch", input.patch]),
+    ...(input.log === undefined ? [] : ["--log", input.log]),
+    ...(input.search === undefined ? [] : ["--search", input.search]),
+    ...(input.blast === true ? ["--blast"] : []),
+    ...(input.expand === undefined ? [] : ["--expand", String(input.expand)]),
+    ...buildBudgetArgs(input.budget),
   ];
 }
 
@@ -418,6 +569,7 @@ export async function executeTilthCommand(
   signal: AbortSignal | undefined,
 ): Promise<TilthToolResult> {
   const command = resolveTilthBinaryPath();
+  let result: ExecResult;
 
   try {
     const options: ExecOptions = {
@@ -425,42 +577,28 @@ export async function executeTilthCommand(
       timeout: DEFAULT_TIMEOUT_MS,
       ...(signal === undefined ? {} : { signal }),
     };
-    const result = await exec(command, args, options);
-    const details: TilthToolDetails = {
-      command,
-      args,
-      cwd,
-      code: result.code,
-      killed: result.killed,
-      ...(result.stderr.trim().length === 0 ? {} : { stderr: result.stderr.trim() }),
-    };
-
-    if (result.code !== 0 || result.killed) {
-      return {
-        content: [{ type: "text", text: buildFailureText(details, result.stdout) }],
-        details,
-        isError: true,
-      };
-    }
-
-    return {
-      content: [{ type: "text", text: buildSuccessText(result.stdout, result.stderr) }],
-      details,
-    };
+    result = await exec(command, args, options);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return {
-      content: [{ type: "text", text: `tilth command failed: ${message}` }],
-      details: {
-        command,
-        args,
-        cwd,
-        code: -1,
-        killed: signal?.aborted ?? false,
-      },
-      isError: true,
-    };
+    throw new Error(`tilth command failed: ${message}`, { cause: error });
   }
+
+  const details: TilthToolDetails = {
+    command,
+    args,
+    cwd,
+    code: result.code,
+    killed: result.killed,
+    ...(result.stderr.trim().length === 0 ? {} : { stderr: result.stderr.trim() }),
+  };
+  if (result.code !== 0 || result.killed) {
+    throw new Error(buildFailureText(details, result.stdout));
+  }
+
+  return {
+    content: [{ type: "text", text: buildSuccessText(result.stdout, result.stderr) }],
+    details,
+  };
 }
 
 export async function executeTilthRead(
@@ -481,13 +619,13 @@ export async function executeTilthSearch(
   return executeTilthCommand(exec, buildSearchArgs(params, cwd), cwd, signal);
 }
 
-export async function executeTilthFiles(
+export async function executeTilthList(
   exec: TilthExec,
-  params: TilthFilesInput,
+  params: TilthListInput,
   cwd: string,
   signal: AbortSignal | undefined,
 ): Promise<TilthToolResult> {
-  return executeTilthCommand(exec, buildFilesArgs(params, cwd), cwd, signal);
+  return executeTilthCommand(exec, buildListArgs(params, cwd), cwd, signal);
 }
 
 export async function executeTilthDeps(
@@ -506,4 +644,56 @@ export async function executeTilthGrok(
   signal: AbortSignal | undefined,
 ): Promise<TilthToolResult> {
   return executeTilthCommand(exec, buildGrokArgs(params, cwd), cwd, signal);
+}
+
+export async function executeTilthDiff(
+  exec: TilthExec,
+  params: TilthDiffInput,
+  cwd: string,
+  signal: AbortSignal | undefined,
+): Promise<TilthToolResult> {
+  const repository = params.repository === undefined ? cwd : path.resolve(cwd, params.repository);
+  const args = buildDiffArgs(params, repository);
+  const source = params.source;
+  const usesGitRef =
+    source !== undefined && source !== "uncommitted" && source !== "working" && source !== "staged";
+
+  if (usesGitRef) {
+    let validation: ExecResult;
+    try {
+      validation = await exec(
+        "git",
+        [
+          "diff",
+          "--quiet",
+          "--no-ext-diff",
+          source,
+          "--",
+          ...(params.scope === undefined ? [] : [params.scope]),
+        ],
+        {
+          cwd: repository,
+          timeout: DEFAULT_TIMEOUT_MS,
+          ...(signal === undefined ? {} : { signal }),
+        },
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`tilth_diff could not validate source '${source}': ${message}`, {
+        cause: error,
+      });
+    }
+
+    if (validation.killed || (validation.code !== 0 && validation.code !== 1)) {
+      const output = validation.stderr.trim() || validation.stdout.trim();
+      const reason = validation.killed
+        ? "validation was interrupted or timed out"
+        : `git diff exited with code ${validation.code}`;
+      throw new Error(
+        `tilth_diff source '${source}' is invalid: ${reason}${output.length === 0 ? "" : `\n\n${output}`}`,
+      );
+    }
+  }
+
+  return executeTilthCommand(exec, args, repository, signal);
 }

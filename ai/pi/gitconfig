@@ -1,0 +1,15 @@
+[include]
+  path = ~/.config/git/config.shared
+
+[color]
+  ui = false
+
+[core]
+  pager = cat
+
+[pager]
+  branch = false
+  diff = false
+  log = false
+  reflog = false
+  show = false

@@ -6,8 +6,9 @@ import { Text } from "@earendil-works/pi-tui";
 
 import type {
   TilthDepsInput,
-  TilthFilesInput,
+  TilthDiffInput,
   TilthGrokInput,
+  TilthListInput,
   TilthReadInput,
   TilthSearchInput,
   TilthToolDetails,
@@ -200,6 +201,9 @@ export function renderTilthReadCall(
   if (args.full === true) {
     target += " [full]";
   }
+  if (args.scope !== undefined && args.scope.trim().length > 0) {
+    target += ` in ${formatRelativePath(args.scope, context.cwd)}`;
+  }
   return renderCollapsedCall(context.lastComponent, theme, context, "tilth_read", target);
 }
 
@@ -231,8 +235,8 @@ export function renderTilthSearchCall(
   return renderCollapsedCall(context.lastComponent, theme, context, "tilth_search", target);
 }
 
-export function renderTilthFilesCall(
-  args: TilthFilesInput,
+export function renderTilthListCall(
+  args: TilthListInput,
   theme: Theme,
   context: RenderContextLike,
 ): Text {
@@ -240,7 +244,7 @@ export function renderTilthFilesCall(
   if (args.scope !== undefined && args.scope.trim().length > 0) {
     target += ` in ${formatRelativePath(args.scope, context.cwd)}`;
   }
-  return renderCollapsedCall(context.lastComponent, theme, context, "tilth_files", target);
+  return renderCollapsedCall(context.lastComponent, theme, context, "tilth_list", target);
 }
 
 export function renderTilthDepsCall(
@@ -272,6 +276,43 @@ export function renderTilthGrokCall(
     target += ` (${suffixes.join(", ")})`;
   }
   return renderCollapsedCall(context.lastComponent, theme, context, "tilth_grok", target);
+}
+
+export function renderTilthDiffCall(
+  args: TilthDiffInput,
+  theme: Theme,
+  context: RenderContextLike,
+): Text {
+  let target: string;
+  if (args.patch !== undefined) {
+    target = `patch ${formatRelativePath(args.patch, context.cwd)}`;
+  } else if (args.log !== undefined) {
+    target = `log ${truncate(args.log, 36)}`;
+  } else if (args.a !== undefined && args.b !== undefined) {
+    target = `${formatRelativePath(args.a, context.cwd)} vs ${formatRelativePath(args.b, context.cwd)}`;
+  } else {
+    target = args.source ?? "uncommitted";
+  }
+  const suffixes: string[] = [];
+  if (args.scope !== undefined && args.scope.trim().length > 0) {
+    suffixes.push(formatRelativePath(args.scope, context.cwd));
+  }
+  if (args.repository !== undefined && args.repository.trim().length > 0) {
+    suffixes.push(`repository=${formatRelativePath(args.repository, context.cwd)}`);
+  }
+  if (args.search !== undefined) {
+    suffixes.push(`search=${truncate(args.search, 24)}`);
+  }
+  if (args.blast === true) {
+    suffixes.push("blast");
+  }
+  if (args.expand !== undefined) {
+    suffixes.push(`expand=${args.expand}`);
+  }
+  if (suffixes.length > 0) {
+    target += ` (${suffixes.join(", ")})`;
+  }
+  return renderCollapsedCall(context.lastComponent, theme, context, "tilth_diff", target);
 }
 
 export function summarizeTilthOutput(text: string): string {
