@@ -68,12 +68,15 @@ export function formatSuccessMessage(result: ApplyPatchResult): string {
 }
 
 export function formatFailureMessage(result: ApplyPatchResult): string {
+  const preflightFailed = result.failures.some((failure) => failure.phase === "preflight");
   const lines = [
-    result.summaries.length > 0
-      ? `apply_patch failed after applying ${pluralize(result.summaries.length, "operation", "operations")}.`
-      : isPartialFailure(result)
-        ? "apply_patch failed after partially applying operations."
-        : "apply_patch failed before applying any operations.",
+    preflightFailed
+      ? "apply_patch preflight failed; no files were modified."
+      : result.summaries.length > 0
+        ? `apply_patch failed after applying ${pluralize(result.summaries.length, "operation", "operations")}.`
+        : isPartialFailure(result)
+          ? "apply_patch failed after partially applying operations."
+          : "apply_patch failed before applying any operations.",
   ];
 
   if (result.summaries.length > 0) {
@@ -85,7 +88,13 @@ export function formatFailureMessage(result: ApplyPatchResult): string {
 
   lines.push("Failed:");
   for (const failure of result.failures) {
-    lines.push(`- ${failure.filePath}: ${failure.message}`);
+    const location =
+      failure.operationIndex === undefined
+        ? failure.filePath
+        : `${failure.filePath} (operation ${failure.operationIndex + 1}${
+            failure.chunkIndex === undefined ? "" : `, chunk ${failure.chunkIndex + 1}`
+          })`;
+    lines.push(`- ${location}: ${failure.message}`);
   }
 
   if (result.recoveryInstructions.mustReadFiles.length > 0) {

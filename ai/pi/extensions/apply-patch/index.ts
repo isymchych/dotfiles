@@ -570,7 +570,9 @@ export default function applyPatchExtension(pi: ExtensionAPI): void {
     promptSnippet:
       "Apply Codex-style patch envelopes for multi-file edits, updates, adds, deletes, and moves",
     promptGuidelines: [
-      "Use apply_patch for hunk-based edits, especially multi-file changes, renames, adds, deletes, or context-based updates.",
+      "Use apply_patch for hunk-based edits, renames, adds, deletes, and context-based updates.",
+      "Keep each patch to one cohesive, reviewable batch; prefer at most 3 updated files or 6 update chunks when operations are independent.",
+      "After a formatter, generator, or other state-changing command touches target files, reread or inspect those files before constructing another patch.",
       "Pass the full patch text in apply_patch.input.",
       "apply_patch accepts relative or absolute file paths in patch headers.",
       "apply_patch rejects symbolic-link targets, existing add or move destinations, repeated source targets, and move-only updates.",

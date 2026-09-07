@@ -30,6 +30,8 @@ matches a released Codex version or remains identical to later upstream code.
 - Preview uses a virtual workspace before the real workspace is mutated.
 - Results include combined previews, fuzz accounting, partial-success state,
   uncertain-state reporting, and explicit recovery paths.
+- Preflight failures return structured operation and chunk locations while
+  confirming that no files were mutated.
 - The constrained Lark grammar is maintained alongside the runtime parser.
 - Filesystem behavior is implemented by the local Node workspace boundary,
   including separate create and replace operations, atomic replacement, native

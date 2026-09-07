@@ -34,6 +34,28 @@ interface SequenceMatch {
   fuzz: 0 | 1 | 100 | 10000;
 }
 
+class PatchChunkApplyError extends Error {
+  public readonly chunkIndex: number;
+
+  public constructor(chunkIndex: number, message: string) {
+    super(message);
+    this.name = "PatchChunkApplyError";
+    this.chunkIndex = chunkIndex;
+  }
+}
+
+export class PatchOperationApplyError extends Error {
+  public readonly operationIndex: number;
+  public readonly chunkIndex: number | undefined;
+
+  public constructor(operationIndex: number, cause: unknown) {
+    super(getErrorMessage(cause), { cause });
+    this.name = "PatchOperationApplyError";
+    this.operationIndex = operationIndex;
+    this.chunkIndex = cause instanceof PatchChunkApplyError ? cause.chunkIndex : undefined;
+  }
+}
+
 interface ApplyPatchPartialWriteErrorOptions {
   recoveryPaths: readonly string[];
   wroteFiles: readonly string[];
@@ -300,11 +322,14 @@ function deriveUpdatedContent(
     return order;
   };
 
-  for (const chunk of chunks) {
+  for (const [chunkIndex, chunk] of chunks.entries()) {
     if (chunk.changeContext !== undefined) {
       const contextMatch = seekSequence(originalLines, [chunk.changeContext], lineIndex, false);
       if (contextMatch === undefined) {
-        throw new Error(`Failed to find context '${chunk.changeContext}' in ${filePath}.`);
+        throw new PatchChunkApplyError(
+          chunkIndex,
+          `Failed to find context '${chunk.changeContext}' in ${filePath}.`,
+        );
       }
       lineIndex = contextMatch.index + 1;
       fuzz += contextMatch.fuzz;
@@ -334,7 +359,8 @@ function deriveUpdatedContent(
     }
 
     if (match === undefined) {
-      throw new Error(
+      throw new PatchChunkApplyError(
+        chunkIndex,
         `Failed to find expected lines in ${filePath}:\n${chunk.oldLines.join("\n")}`,
       );
     }
@@ -561,8 +587,12 @@ export async function buildPreviewState(
 ): Promise<PreviewState> {
   const applied: PatchApplySuccess[] = [];
 
-  await runSequentially(operations, async (operation) => {
-    applied.push(await applyPatchOperation(operation, workspace, cwd, updateFileMode, signal));
+  await runSequentially(operations, async (operation, operationIndex) => {
+    try {
+      applied.push(await applyPatchOperation(operation, workspace, cwd, updateFileMode, signal));
+    } catch (error) {
+      throw new PatchOperationApplyError(operationIndex, error);
+    }
   });
 
   const firstChangedLine = buildFirstChangedLine(applied);

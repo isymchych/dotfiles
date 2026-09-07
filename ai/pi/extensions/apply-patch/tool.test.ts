@@ -49,6 +49,9 @@ interface ApplyPatchToolDetails extends Record<string, unknown> {
       filePath: string;
       operation: string;
       message: string;
+      phase?: "preflight";
+      operationIndex?: number;
+      chunkIndex?: number;
       recoveryPaths?: string[];
       wroteFiles?: string[];
       stateUnknown?: boolean;
@@ -171,6 +174,14 @@ test("tool exposes OpenAI Lark constrained sampling grammar", () => {
     type: "grammar",
     variants: { openai_lark: APPLY_PATCH_LARK_GRAMMAR },
   });
+  assert.deepEqual((registeredTool as { promptGuidelines?: unknown }).promptGuidelines, [
+    "Use apply_patch for hunk-based edits, renames, adds, deletes, and context-based updates.",
+    "Keep each patch to one cohesive, reviewable batch; prefer at most 3 updated files or 6 update chunks when operations are independent.",
+    "After a formatter, generator, or other state-changing command touches target files, reread or inspect those files before constructing another patch.",
+    "Pass the full patch text in apply_patch.input.",
+    "apply_patch accepts relative or absolute file paths in patch headers.",
+    "apply_patch rejects symbolic-link targets, existing add or move destinations, repeated source targets, and move-only updates.",
+  ]);
 });
 
 test("extension marks rich apply_patch failures as tool errors", () => {
@@ -430,17 +441,15 @@ test("apply_patch rejects paths through symbolic-link directories", async (t) =>
   t.after(async () => rm(outside, { recursive: true, force: true }));
   await symlink(outside, join(cwd, "linked"));
 
-  await assert.rejects(
-    async () =>
-      runApplyPatch(cwd, {
-        input: `*** Begin Patch
+  const { result } = await runApplyPatch(cwd, {
+    input: `*** Begin Patch
 *** Add File: linked/victim.txt
 +outside
 *** End Patch`,
-      }),
-    /Refusing to mutate path through symbolic link/,
-  );
+  });
 
+  assert.equal(result.isError, true);
+  assert.match(getTextOutput(result), /Refusing to mutate path through symbolic link/);
   assert.equal(await fileExists(outside, "victim.txt"), false);
 });
 
@@ -630,10 +639,8 @@ test("apply_patch rejects EOF chunks that rematch consumed lines", async (t) => 
   const cwd = await createTempWorkspace(t);
   await writeWorkspaceFile(cwd, "note.txt", "alpha\nbeta\n");
 
-  await assert.rejects(
-    async () =>
-      runApplyPatch(cwd, {
-        input: `*** Begin Patch
+  const { result } = await runApplyPatch(cwd, {
+    input: `*** Begin Patch
 *** Update File: note.txt
 @@
 -beta
@@ -644,10 +651,10 @@ test("apply_patch rejects EOF chunks that rematch consumed lines", async (t) => 
 +two
 *** End of File
 *** End Patch`,
-      }),
-    /Failed to find expected lines in note\.txt/,
-  );
+  });
 
+  assert.equal(result.isError, true);
+  assert.match(getTextOutput(result), /Failed to find expected lines in note\.txt/);
   assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\nbeta\n");
 });
 
@@ -685,25 +692,25 @@ test("apply_patch rejects existing add and move destinations", async (t) => {
   await writeWorkspaceFile(cwd, "existing.txt", "keep\n");
   await writeWorkspaceFile(cwd, "source.txt", "source\n");
 
-  await assert.rejects(async () =>
-    runApplyPatch(cwd, {
-      input: `*** Begin Patch
+  const addResult = await runApplyPatch(cwd, {
+    input: `*** Begin Patch
 *** Add File: existing.txt
 +replacement
 *** End Patch`,
-    }),
-  );
-  await assert.rejects(async () =>
-    runApplyPatch(cwd, {
-      input: `*** Begin Patch
+  });
+  const moveResult = await runApplyPatch(cwd, {
+    input: `*** Begin Patch
 *** Update File: source.txt
 *** Move to: existing.txt
 @@
  source
 *** End Patch`,
-    }),
-  );
+  });
 
+  assert.equal(addResult.result.isError, true);
+  assert.match(getTextOutput(addResult.result), /file already exists/);
+  assert.equal(moveResult.result.isError, true);
+  assert.match(getTextOutput(moveResult.result), /destination existing\.txt already exists/);
   assert.equal(await readWorkspaceFile(cwd, "existing.txt"), "keep\n");
   assert.equal(await readWorkspaceFile(cwd, "source.txt"), "source\n");
 });
@@ -716,19 +723,17 @@ test(
     await writeWorkspaceFile(cwd, "target.txt", "target\n");
     await symlink(join(cwd, "target.txt"), join(cwd, "link.txt"));
 
-    await assert.rejects(
-      async () =>
-        runApplyPatch(cwd, {
-          input: `*** Begin Patch
+    const { result } = await runApplyPatch(cwd, {
+      input: `*** Begin Patch
 *** Update File: link.txt
 @@
 -target
 +changed
 *** End Patch`,
-        }),
-      /symbolic link/,
-    );
+    });
 
+    assert.equal(result.isError, true);
+    assert.match(getTextOutput(result), /symbolic link/);
     assert.equal(await readWorkspaceFile(cwd, "target.txt"), "target\n");
   },
 );
@@ -757,29 +762,48 @@ test("apply_patch reports accurate preview metadata for deep edits", async (t) =
   assert.match(details.diff ?? "", / \.+/);
 });
 
-test("apply_patch preserves files when preflight fails", async (t) => {
+test("apply_patch returns a structured no-mutation result when preflight fails", async (t) => {
   const cwd = await createTempWorkspace(t);
-  await writeWorkspaceFile(cwd, "note.txt", "alpha\n");
+  await writeWorkspaceFile(cwd, "first.txt", "alpha\n");
+  await writeWorkspaceFile(cwd, "stale.txt", "current\n");
 
-  await assert.rejects(
-    async () =>
-      runApplyPatch(cwd, {
-        input: `*** Begin Patch
-*** Update File: note.txt
+  const { result } = await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: first.txt
+@@
+-alpha
++changed
+*** Update File: stale.txt
 @@
 -missing
-+beta
++replacement
 *** End Patch`,
-      }),
-    (error: unknown) => {
-      assert.ok(error instanceof Error);
-      assert.match(error.message, /Preflight failed before mutating files\./);
-      assert.match(error.message, /Failed to find expected lines in note\.txt/);
-      return true;
-    },
-  );
+  });
 
-  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\n");
+  assert.equal(await readWorkspaceFile(cwd, "first.txt"), "alpha\n");
+  assert.equal(await readWorkspaceFile(cwd, "stale.txt"), "current\n");
+  assert.equal(result.isError, true);
+  assert.equal(result.terminate, true);
+  assert.match(getTextOutput(result), /apply_patch preflight failed; no files were modified\./);
+  assert.match(getTextOutput(result), /stale\.txt \(operation 2, chunk 1\)/);
+  assert.match(getTextOutput(result), /Recovery: reread stale\.txt before retrying\./);
+
+  const patchResult = result.details?.result;
+  assert.ok(patchResult);
+  assert.deepEqual(patchResult.appliedFiles, []);
+  assert.deepEqual(patchResult.failures, [
+    {
+      filePath: "stale.txt",
+      operation: "update",
+      message: "Failed to find expected lines in stale.txt:\nmissing",
+      phase: "preflight",
+      operationIndex: 1,
+      chunkIndex: 0,
+      recoveryPaths: ["stale.txt"],
+    },
+  ]);
+  assert.equal(patchResult.hasPartialSuccess, false);
+  assert.deepEqual(patchResult.recoveryInstructions.mustReadFiles, ["stale.txt"]);
 });
 
 test("apply_patch marks partial failure as an error when a later operation fails", async (t) => {

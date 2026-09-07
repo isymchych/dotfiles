@@ -47,6 +47,9 @@ export interface ApplyPatchFailure {
   filePath: string;
   operation: ApplyPatchOperationKind;
   message: string;
+  phase?: "preflight";
+  operationIndex?: number;
+  chunkIndex?: number;
   recoveryPaths?: string[];
   wroteFiles?: string[];
   stateUnknown?: boolean;

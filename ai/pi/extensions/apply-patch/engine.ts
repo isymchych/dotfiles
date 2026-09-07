@@ -2,6 +2,7 @@ import {
   applyPatchOperation,
   buildApplyPatchResult,
   buildPreviewState,
+  PatchOperationApplyError,
   toApplyPatchFailure,
 } from "./apply.ts";
 import type {
@@ -26,10 +27,6 @@ import {
 export interface ApplyPatchExecutionOptions {
   createRealWorkspace?: () => Workspace;
   updateFileMode?: ApplyPatchFileUpdateMode;
-}
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 function buildDetails(
@@ -62,19 +59,51 @@ function getTargetPaths(cwd: string, operations: readonly PatchOperation[]): str
   return [...targetPaths].sort();
 }
 
-async function assertPreflight(
+async function getPreflightFailure(
   operations: readonly PatchOperation[],
   cwd: string,
   updateFileMode: ApplyPatchFileUpdateMode,
   signal?: AbortSignal,
-): Promise<void> {
+): Promise<ApplyPatchResult["failures"][number] | undefined> {
   try {
     await buildPreviewState(operations, createVirtualWorkspace(cwd), cwd, updateFileMode, signal);
+    return undefined;
   } catch (error) {
-    throw new Error(`Preflight failed before mutating files.\n${getErrorMessage(error)}`, {
-      cause: error,
-    });
+    if (!(error instanceof PatchOperationApplyError)) {
+      throw error;
+    }
+
+    const operation = operations[error.operationIndex];
+    if (operation === undefined) {
+      throw error;
+    }
+
+    const recoveryPaths =
+      operation.kind === "update" && operation.moveTo !== undefined
+        ? [operation.path, operation.moveTo]
+        : [operation.path];
+    return {
+      filePath: operation.path,
+      operation: operation.kind,
+      message: error.message,
+      phase: "preflight",
+      operationIndex: error.operationIndex,
+      ...(error.chunkIndex === undefined ? {} : { chunkIndex: error.chunkIndex }),
+      recoveryPaths,
+    };
   }
+}
+
+function buildPreflightFailureResult(
+  failure: ApplyPatchResult["failures"][number],
+): ApplyPatchToolResult {
+  const result = buildApplyPatchResult([], [], [failure], 0);
+  return {
+    content: [{ type: "text", text: formatFailureMessage(result) }],
+    details: buildDetails("", undefined, result),
+    isError: true,
+    terminate: true,
+  };
 }
 
 function assertOperationsAreValid(operations: readonly PatchOperation[], cwd: string): void {
@@ -108,10 +137,21 @@ export async function executeApplyPatchTool(
   const operations = parsePatch(params.input);
   const updateFileMode = options?.updateFileMode ?? "preserve";
   assertOperationsAreValid(operations, cwd);
-  await assertPreflight(operations, cwd, updateFileMode, signal);
+  const preflightFailure = await getPreflightFailure(operations, cwd, updateFileMode, signal);
+  if (preflightFailure !== undefined) {
+    return buildPreflightFailureResult(preflightFailure);
+  }
 
   return withWorkspaceLocks(getTargetPaths(cwd, operations), async () => {
-    await assertPreflight(operations, cwd, updateFileMode, signal);
+    const lockedPreflightFailure = await getPreflightFailure(
+      operations,
+      cwd,
+      updateFileMode,
+      signal,
+    );
+    if (lockedPreflightFailure !== undefined) {
+      return buildPreflightFailureResult(lockedPreflightFailure);
+    }
 
     const summaries: string[] = [];
     const appliedFiles: string[] = [];
