@@ -65,3 +65,4 @@ I'm trying to keep the system prompt lean.
 - <https://github.com/DietrichGebert/ponytail>
 - <https://github.com/aritusama/straightwords/blob/main/straightwords.md>
 - <https://github.com/ayghri/i-have-adhd>
+- <https://github.com/multica-ai/andrej-karpathy-skills/blob/main/skills/karpathy-guidelines/SKILL.md>

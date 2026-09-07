@@ -24,6 +24,8 @@ decision.
   the approved task.
 - Make collateral edits only when required for correctness, compilation, or
   testability, and disclose why.
+- Remove imports, variables, functions, tests, and documentation made obsolete
+  by the change; leave unrelated pre-existing cleanup alone.
 - Respect existing user changes; adapt instead of overwriting them.
 - Treat rejected options as closed unless a concrete blocker appears.
 - Stop and ask when unexpected changes affect touched files, safety, or scope.
@@ -48,10 +50,23 @@ Favor simplicity and pragmatism over cleverness, and durable maintainability
 over tactical churn. Do the work needed for a reliable result; do not optimize
 for a superficially small diff or quick answer.
 
-- After understanding the affected flow, avoid new code when existing project
-  code, standards, platform capabilities, or installed dependencies solve the
-  problem cleanly. Minimize long-term complexity, not merely lines or files
-  changed.
+After understanding the affected flow, use this solution ladder and stop at the
+first option that fully satisfies the explicit requirements and operational
+constraints:
+
+1. Do not implement speculative needs.
+2. Reuse existing project code, types, helpers, or established patterns.
+3. Use the language standard library.
+4. Use native platform capabilities.
+5. Use an already-installed dependency.
+6. Make the smallest clear local change.
+7. Only then introduce new code, abstractions, files, or dependencies.
+
+When multiple options satisfy the requirements, choose the earliest rung unless
+concrete evidence justifies a later one. The ladder minimizes the solution, not
+the investigation: understand the actual flow and affected ownership before
+choosing a rung.
+
 - Prefer explicit data flow, concrete dependencies, deep cohesive modules,
   simple callers, low coupling, and clear ownership.
 - Prefer reducing reasoning dimensionality: minimize simultaneously live state,
@@ -67,15 +82,20 @@ for a superficially small diff or quick answer.
   for speculative flexibility.
 - Avoid callback-based APIs when a direct composition works; prefer standalone
   functions over methods when ownership does not require a class.
-- Prefer structural and root-cause fixes over symptoms. Before fixing shared
-  behavior, trace its affected callers and place the fix at the narrowest
-  canonical owner. If the correct boundary fix exceeds scope, propose it before
-  proceeding.
+- For bug fixes, identify the canonical owner and inspect affected callers and
+  sibling paths before editing. Fix the root cause once at the narrowest shared
+  boundary rather than patching each symptom. If the correct boundary fix
+  exceeds scope, propose it before proceeding.
+- Prefer deletion to addition and fewer ownership boundaries to more. Use diff
+  size and file count only as tie-breakers after correctness, clarity, and
+  canonical placement.
 - When deliberately accepting a simplification with a real operational ceiling,
   document the ceiling and the condition that would justify replacing it.
 - Avoid speculative abstraction, premature generalization, unnecessary
   features, and compatibility work without active users/configurations or an
   explicit request.
+- Follow established local style and patterns unless they conflict with
+  correctness or explicit requirements.
 - Build around standards and documented protocols.
 - Use concise names and comments that explain intent; do not repeat information
   already conveyed by types or narrate implementation mechanics.
@@ -118,8 +138,8 @@ Include concise critique, risks, alternatives, and tradeoffs when useful.
 
 ## Task Continuity
 
-- For multi-step user work, use a numbered list with one bounded action per
-  step. Keep only one step actively in progress.
+- For multi-step user work, use a numbered list with one bounded action and its
+  verification method per step. Keep only one step actively in progress.
 - Across turns, briefly restate the current state: what completed, what remains,
   and the single next action.
 - When work remains, end with one concrete next action rather than a generic
@@ -135,7 +155,14 @@ Implementation authorization includes targeted verification unless the user
 limits or excludes it. Start with the most focused available checks and broaden
 only as needed.
 
-- Add tests only when requested or when the task is test-focused.
+- Before non-trivial implementation, translate the request into observable
+  success criteria and identify the narrowest checks that demonstrate them.
+- Add or retain tests when requested, when the task is test-focused, or when
+  they protect a distinct branch, invariant, contract, boundary, or failure
+  mode not adequately covered elsewhere.
+- When a change removes a behavioral distinction, consolidate or remove tests
+  whose only purpose was that distinction; do not add replacement tests merely
+  to preserve test count or matrix symmetry.
 - Report unrelated failures instead of fixing them.
 - Defer broad or slow checks until finalization in interactive approval modes.
 - Do not repeat checks without a relevant code change or explicit request.
@@ -174,3 +201,4 @@ step or verification gap when useful.
   project specifics and prefer primary official sources.
 - Do not use cloud-only services when a local option exists, telemetry,
   analytics, online pastebins, or link shorteners by default.
+- PREFER NOT RE-READING FILES IF YOU'VE ALREADY HAVE THEM IN CURRENT SESSION SCOPE.

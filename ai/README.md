@@ -37,7 +37,9 @@ add to sysprompt:
 - LSP?
 - thinking level https://github.com/sids/pi-extensions/tree/main/prompt-thinking
 - "ai" to start llm with microvm isolation - gondolin?
+- pi tool for executing code - like context-mode has
 - security review prompt
+- apply_patch often fails on multi-file patches, maybe limit to 3 files max?
 
 - create a tool (compress? branch? rewind?) for agent to optionally call to compress recent low-information messages (i.e. tool calls) with a dense summary (kind of compaction?)
   - only up to latest user message? or more - with user confirmation?
@@ -199,3 +201,31 @@ Makes targeted fixes based on evidence
 - [Agent Operating Model](docs/agent_operating_model.md)
 - [Engineering Guidelines](docs/engineering_guidelines.md)
 - [Prompting and Memory](docs/prompting_and_memory.md)
+
+## Skills
+
+- TODO <https://github.com/mattpocock/skills>
+- TODO <https://github.com/addyosmani/agent-skills>
+- TODO <https://github.com/pbakaus/impeccable>
+
+## Semantic code navigation
+
+- <https://github.com/jahala/tilth>
+- <https://github.com/ind-igo/cx>
+- TODO <https://github.com/sting8k/srcwalk>
+
+## CLI output compressors
+
+- <https://github.com/edouard-claude/snip>
+- <https://github.com/mpecan/tokf>
+- <https://github.com/AgusRdz/chop>
+- <https://github.com/rtk-ai/rtk>
+
+## AI runtimes
+
+- <https://github.com/emotionscientific/verlet-kernel>
+- <https://github.com/everruns/everruns>
+
+## AI Sandboxes
+
+- <https://github.com/everruns/bashkit/tree/main>
