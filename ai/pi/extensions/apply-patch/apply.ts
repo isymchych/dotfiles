@@ -1,6 +1,7 @@
 import type {
   ApplyPatchFailure,
   ApplyPatchPreviewFile,
+  ApplyPatchFileUpdateMode,
   ApplyPatchResult,
   PatchOperation,
   UpdateChunk,
@@ -13,9 +14,18 @@ import {
   generateDiffSummary,
 } from "./preview.ts";
 import type { Workspace } from "./workspace.ts";
+import { WorkspaceMutationError } from "./workspace.ts";
 
-interface SplitText {
-  lines: string[];
+type LineEnding = "\n" | "\r\n" | "\r";
+
+interface SourceLine {
+  text: string;
+  ending?: LineEnding;
+}
+
+interface SourceText {
+  lines: SourceLine[];
+  preferredEnding: LineEnding;
   hasTrailingNewline: boolean;
 }
 
@@ -27,6 +37,7 @@ interface SequenceMatch {
 interface ApplyPatchPartialWriteErrorOptions {
   recoveryPaths: readonly string[];
   wroteFiles: readonly string[];
+  stateUnknown: boolean;
   cause?: unknown;
 }
 
@@ -66,12 +77,14 @@ async function runSequentially<T>(
 class ApplyPatchPartialWriteError extends Error {
   public readonly recoveryPaths: string[];
   public readonly wroteFiles: string[];
+  public readonly stateUnknown: boolean;
 
   public constructor(message: string, options: ApplyPatchPartialWriteErrorOptions) {
     super(message, options.cause === undefined ? undefined : { cause: options.cause });
     this.name = "ApplyPatchPartialWriteError";
     this.recoveryPaths = [...new Set(options.recoveryPaths)];
     this.wroteFiles = [...new Set(options.wroteFiles)];
+    this.stateUnknown = options.stateUnknown;
   }
 }
 
@@ -91,30 +104,58 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function splitText(content: string): SplitText {
-  if (content.length === 0) {
-    return { lines: [], hasTrailingNewline: false };
+function isStateUnknown(error: unknown): boolean {
+  return error instanceof WorkspaceMutationError && error.stateUnknown;
+}
+
+function parseSourceText(content: string): SourceText {
+  const lines: SourceLine[] = [];
+  let preferredEnding: LineEnding | undefined;
+  let lineStart = 0;
+  let cursor = 0;
+
+  while (cursor < content.length) {
+    let ending: LineEnding | undefined;
+    let endingLength = 0;
+    if (content[cursor] === "\r" && content[cursor + 1] === "\n") {
+      ending = "\r\n";
+      endingLength = 2;
+    } else if (content[cursor] === "\r") {
+      ending = "\r";
+      endingLength = 1;
+    } else if (content[cursor] === "\n") {
+      ending = "\n";
+      endingLength = 1;
+    }
+
+    if (ending === undefined) {
+      cursor += 1;
+      continue;
+    }
+
+    preferredEnding ??= ending;
+    lines.push({ text: content.slice(lineStart, cursor), ending });
+    cursor += endingLength;
+    lineStart = cursor;
   }
 
-  const hasTrailingNewline = content.endsWith("\n");
-  const lines = content.split("\n");
-  if (hasTrailingNewline) {
-    lines.pop();
+  if (lineStart < content.length) {
+    lines.push({ text: content.slice(lineStart) });
   }
 
   return {
     lines,
-    hasTrailingNewline,
+    preferredEnding: preferredEnding ?? "\n",
+    hasTrailingNewline: lines.at(-1)?.ending !== undefined,
   };
 }
 
-function joinSplitText(lines: readonly string[], hasTrailingNewline: boolean): string {
-  if (lines.length === 0) {
-    return hasTrailingNewline ? "\n" : "";
-  }
+function joinSourceLines(lines: readonly SourceLine[]): string {
+  return lines.map((line) => `${line.text}${line.ending ?? ""}`).join("");
+}
 
-  const content = lines.join("\n");
-  return hasTrailingNewline ? `${content}\n` : content;
+function normalizeLinesToLf(lines: readonly string[]): string {
+  return lines.length === 0 ? "" : `${lines.join("\n")}\n`;
 }
 
 function normalizeSeekLine(line: string): string {
@@ -139,8 +180,7 @@ function seekSequence(
     return undefined;
   }
 
-  const searchStart =
-    endOfFile && lines.length >= pattern.length ? lines.length - pattern.length : start;
+  const searchStart = endOfFile ? Math.max(start, lines.length - pattern.length) : start;
   const searchEnd = lines.length - pattern.length;
 
   const passes: Array<{
@@ -184,55 +224,113 @@ function seekSequence(
   return undefined;
 }
 
-function applyLineReplacements(
-  lines: readonly string[],
-  replacements: ReadonlyArray<[number, number, string[]]>,
-): string[] {
+interface LineReplacement {
+  start: number;
+  oldLength: number;
+  newSegment: string[];
+  order: number;
+}
+
+function applyLineReplacements<T>(
+  lines: readonly T[],
+  replacements: readonly LineReplacement[],
+  makeLine: (line: string) => T,
+): T[] {
   const next = [...lines];
-  for (const [start, oldLength, newSegment] of [...replacements].sort(
-    (left, right) => right[0] - left[0],
+  for (const replacement of [...replacements].sort(
+    (left, right) => right.start - left.start || right.order - left.order,
   )) {
-    next.splice(start, oldLength, ...newSegment);
+    next.splice(replacement.start, replacement.oldLength, ...replacement.newSegment.map(makeLine));
   }
   return next;
+}
+
+function appendPreservingReplacements(
+  replacements: LineReplacement[],
+  chunk: UpdateChunk,
+  matchIndex: number,
+  pattern: readonly string[],
+  replacementLines: readonly string[],
+  nextOrder: () => number,
+): void {
+  let oldStart = 0;
+  let newStart = 0;
+
+  for (const [oldContext, newContext] of chunk.contextLineIndices) {
+    if (oldContext >= pattern.length || newContext >= replacementLines.length) {
+      break;
+    }
+    if (oldStart !== oldContext || newStart !== newContext) {
+      replacements.push({
+        start: matchIndex + oldStart,
+        oldLength: oldContext - oldStart,
+        newSegment: replacementLines.slice(newStart, newContext),
+        order: nextOrder(),
+      });
+    }
+    oldStart = oldContext + 1;
+    newStart = newContext + 1;
+  }
+
+  if (oldStart !== pattern.length || newStart !== replacementLines.length) {
+    replacements.push({
+      start: matchIndex + oldStart,
+      oldLength: pattern.length - oldStart,
+      newSegment: replacementLines.slice(newStart),
+      order: nextOrder(),
+    });
+  }
 }
 
 function deriveUpdatedContent(
   filePath: string,
   currentContent: string,
   chunks: readonly UpdateChunk[],
+  updateFileMode: ApplyPatchFileUpdateMode,
 ): { content: string; fuzz: number } {
-  const original = splitText(currentContent);
-  const replacements: Array<[number, number, string[]]> = [];
+  const original = parseSourceText(currentContent);
+  const originalLines = original.lines.map((line) => line.text);
+  const replacements: LineReplacement[] = [];
   let lineIndex = 0;
   let fuzz = 0;
+  let replacementOrder = 0;
+  const nextReplacementOrder = (): number => {
+    const order = replacementOrder;
+    replacementOrder += 1;
+    return order;
+  };
 
   for (const chunk of chunks) {
-    for (const changeContext of chunk.changeContexts) {
-      const contextMatch = seekSequence(original.lines, [changeContext], lineIndex, false);
+    if (chunk.changeContext !== undefined) {
+      const contextMatch = seekSequence(originalLines, [chunk.changeContext], lineIndex, false);
       if (contextMatch === undefined) {
-        throw new Error(`Failed to find context '${changeContext}' in ${filePath}.`);
+        throw new Error(`Failed to find context '${chunk.changeContext}' in ${filePath}.`);
       }
       lineIndex = contextMatch.index + 1;
       fuzz += contextMatch.fuzz;
     }
 
     if (chunk.oldLines.length === 0) {
-      const insertionIndex = chunk.isEndOfFile ? original.lines.length : lineIndex;
-      replacements.push([insertionIndex, 0, [...chunk.newLines]]);
+      const insertionIndex = originalLines.length;
+      replacements.push({
+        start: insertionIndex,
+        oldLength: 0,
+        newSegment: [...chunk.newLines],
+        order: nextReplacementOrder(),
+      });
       continue;
     }
 
     let pattern = chunk.oldLines;
     let replacementLines = chunk.newLines;
 
-    let match = seekSequence(original.lines, pattern, lineIndex, chunk.isEndOfFile);
+    let match = seekSequence(originalLines, pattern, lineIndex, chunk.isEndOfFile);
     if (match === undefined && pattern[pattern.length - 1] === "") {
       pattern = pattern.slice(0, -1);
       if (replacementLines[replacementLines.length - 1] === "") {
         replacementLines = replacementLines.slice(0, -1);
       }
-      match = seekSequence(original.lines, pattern, lineIndex, chunk.isEndOfFile);
+      match = seekSequence(originalLines, pattern, lineIndex, chunk.isEndOfFile);
     }
 
     if (match === undefined) {
@@ -241,13 +339,48 @@ function deriveUpdatedContent(
       );
     }
 
-    replacements.push([match.index, pattern.length, [...replacementLines]]);
+    if (updateFileMode === "preserve") {
+      appendPreservingReplacements(
+        replacements,
+        chunk,
+        match.index,
+        pattern,
+        replacementLines,
+        nextReplacementOrder,
+      );
+    } else {
+      replacements.push({
+        start: match.index,
+        oldLength: pattern.length,
+        newSegment: [...replacementLines],
+        order: nextReplacementOrder(),
+      });
+    }
     lineIndex = match.index + pattern.length;
     fuzz += match.fuzz;
   }
 
-  const nextLines = applyLineReplacements(original.lines, replacements);
-  return { content: joinSplitText(nextLines, original.hasTrailingNewline), fuzz };
+  if (updateFileMode === "normalize-lf") {
+    const nextLines = applyLineReplacements(originalLines, replacements, (line) => line);
+    return { content: normalizeLinesToLf(nextLines), fuzz };
+  }
+
+  const nextLines = applyLineReplacements(original.lines, replacements, (text) => ({
+    text,
+    ending: original.preferredEnding,
+  }));
+  for (const line of nextLines.slice(0, -1)) {
+    line.ending ??= original.preferredEnding;
+  }
+  const finalLine = nextLines.at(-1);
+  if (finalLine !== undefined) {
+    if (original.hasTrailingNewline) {
+      finalLine.ending ??= original.preferredEnding;
+    } else {
+      delete finalLine.ending;
+    }
+  }
+  return { content: joinSourceLines(nextLines), fuzz };
 }
 
 async function applyAddOperation(
@@ -260,7 +393,7 @@ async function applyAddOperation(
     throw new Error(`Failed to add ${operation.path}: file already exists.`);
   }
 
-  await workspace.writeText(absolutePath, operation.contents);
+  await workspace.createText(absolutePath, operation.contents);
   const diff = generateDiffSummary("", operation.contents);
   return {
     summary: `Added file ${operation.path}.`,
@@ -309,6 +442,7 @@ async function applyUpdateOperation(
   operation: Extract<PatchOperation, { kind: "update" }>,
   workspace: Workspace,
   cwd: string,
+  updateFileMode: ApplyPatchFileUpdateMode,
 ): Promise<PatchApplySuccess> {
   const absolutePath = resolvePatchPath(cwd, operation.path);
   if (!(await workspace.exists(absolutePath))) {
@@ -319,7 +453,7 @@ async function applyUpdateOperation(
   const updated =
     operation.chunks.length === 0
       ? { content: currentText, fuzz: 0 }
-      : deriveUpdatedContent(operation.path, currentText, operation.chunks);
+      : deriveUpdatedContent(operation.path, currentText, operation.chunks, updateFileMode);
   const nextContent = updated.content;
   const absoluteMovePath =
     operation.moveTo === undefined ? undefined : resolvePatchPath(cwd, operation.moveTo);
@@ -343,7 +477,7 @@ async function applyUpdateOperation(
     if (nextContent === currentText) {
       await workspace.renameFile(absolutePath, absoluteMovePath);
     } else {
-      await workspace.writeText(absoluteMovePath, nextContent);
+      await workspace.createText(absoluteMovePath, nextContent);
       try {
         await workspace.deleteFile(absolutePath);
       } catch (deleteError) {
@@ -355,19 +489,21 @@ async function applyUpdateOperation(
             {
               recoveryPaths: [operation.path, moveTo],
               wroteFiles: [moveTo],
+              stateUnknown: true,
               cause: deleteError,
             },
           );
         }
 
-        throw new Error(
+        throw new WorkspaceMutationError(
           `Failed to move ${operation.path}: deleting ${operation.path} failed after writing ${moveTo}, and the destination rollback succeeded.\nDelete error: ${getErrorMessage(deleteError)}`,
-          { cause: deleteError },
+          isStateUnknown(deleteError),
+          deleteError,
         );
       }
     }
   } else {
-    await workspace.writeText(absolutePath, nextContent);
+    await workspace.replaceText(absolutePath, nextContent);
   }
 
   const diff = generateDiffSummary(currentText, nextContent);
@@ -398,6 +534,7 @@ export async function applyPatchOperation(
   operation: PatchOperation,
   workspace: Workspace,
   cwd: string,
+  updateFileMode: ApplyPatchFileUpdateMode,
   signal?: AbortSignal,
 ): Promise<PatchApplySuccess> {
   if (isAborted(signal)) {
@@ -412,19 +549,20 @@ export async function applyPatchOperation(
     return applyDeleteOperation(operation, workspace, cwd);
   }
 
-  return applyUpdateOperation(operation, workspace, cwd);
+  return applyUpdateOperation(operation, workspace, cwd, updateFileMode);
 }
 
 export async function buildPreviewState(
   operations: readonly PatchOperation[],
   workspace: Workspace,
   cwd: string,
+  updateFileMode: ApplyPatchFileUpdateMode,
   signal?: AbortSignal,
 ): Promise<PreviewState> {
   const applied: PatchApplySuccess[] = [];
 
   await runSequentially(operations, async (operation) => {
-    applied.push(await applyPatchOperation(operation, workspace, cwd, signal));
+    applied.push(await applyPatchOperation(operation, workspace, cwd, updateFileMode, signal));
   });
 
   const firstChangedLine = buildFirstChangedLine(applied);
@@ -444,13 +582,24 @@ export function toApplyPatchFailure(operation: PatchOperation, error: unknown): 
       message: error.message,
       recoveryPaths: error.recoveryPaths,
       wroteFiles: error.wroteFiles,
+      ...(error.stateUnknown ? { stateUnknown: true } : {}),
     };
   }
 
+  const stateUnknown = error instanceof WorkspaceMutationError && error.stateUnknown;
   return {
     filePath: operation.path,
     operation: operation.kind,
     message: getErrorMessage(error),
+    ...(stateUnknown
+      ? {
+          recoveryPaths:
+            operation.kind === "update" && operation.moveTo !== undefined
+              ? [operation.path, operation.moveTo]
+              : [operation.path],
+          stateUnknown: true,
+        }
+      : {}),
   };
 }
 
@@ -459,17 +608,14 @@ function getFailureRecoveryPaths(failure: ApplyPatchFailure): string[] {
 }
 
 function didFailureWriteFiles(failure: ApplyPatchFailure): boolean {
-  return (failure.wroteFiles?.length ?? 0) > 0;
+  return failure.stateUnknown === true || (failure.wroteFiles?.length ?? 0) > 0;
 }
 
 function buildRecoveryInstructions(
   result: Pick<ApplyPatchResult, "appliedFiles" | "failures">,
 ): ApplyPatchResult["recoveryInstructions"] {
   const mustReadFiles = [...new Set(result.failures.flatMap(getFailureRecoveryPaths))];
-  const mustNotReadFiles = [
-    ...new Set(result.appliedFiles.filter((filePath) => !mustReadFiles.includes(filePath))),
-  ];
-  return { mustReadFiles, mustNotReadFiles };
+  return { mustReadFiles, mustNotReadFiles: [] };
 }
 
 export function buildApplyPatchResult(
@@ -486,7 +632,10 @@ export function buildApplyPatchResult(
       failures.length > 0 &&
       (appliedFiles.length > 0 || failures.some((failure) => didFailureWriteFiles(failure))),
     recoveryInstructions: { mustReadFiles: [], mustNotReadFiles: [] },
-    details: { fuzz },
+    details: {
+      fuzz,
+      exact: !failures.some((failure) => failure.stateUnknown === true),
+    },
   };
   result.recoveryInstructions = buildRecoveryInstructions(result);
   return result;

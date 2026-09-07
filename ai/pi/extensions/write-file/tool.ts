@@ -151,7 +151,11 @@ export async function executeWriteFileTool(
       const previousContent = exists ? await workspace.readText(absolutePath) : "";
       const wrote = !exists || previousContent !== params.content;
       if (wrote) {
-        await workspace.writeText(absolutePath, params.content);
+        if (params.mode === "create") {
+          await workspace.createText(absolutePath, params.content);
+        } else {
+          await workspace.replaceText(absolutePath, params.content);
+        }
       }
 
       const diff = generateDiffSummary(previousContent, params.content);

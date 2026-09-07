@@ -13,10 +13,13 @@ export type ApplyPatchInput = Static<typeof applyPatchSchema>;
 
 export type ApplyPatchOperationKind = "add" | "delete" | "update";
 
+export type ApplyPatchFileUpdateMode = "normalize-lf" | "preserve";
+
 export interface UpdateChunk {
-  changeContexts: string[];
+  changeContext?: string;
   oldLines: string[];
   newLines: string[];
+  contextLineIndices: Array<[number, number]>;
   isEndOfFile: boolean;
 }
 
@@ -46,6 +49,7 @@ export interface ApplyPatchFailure {
   message: string;
   recoveryPaths?: string[];
   wroteFiles?: string[];
+  stateUnknown?: boolean;
 }
 
 export interface ApplyPatchRecoveryInstructions {
@@ -61,6 +65,7 @@ export interface ApplyPatchResult {
   recoveryInstructions: ApplyPatchRecoveryInstructions;
   details: {
     fuzz: number;
+    exact: boolean;
   };
 }
 

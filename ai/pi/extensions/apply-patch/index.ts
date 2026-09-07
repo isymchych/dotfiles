@@ -1,7 +1,7 @@
 /**
- * Register a dedicated apply_patch tool for Codex-style patch edits.
+ * Register a dedicated apply_patch tool adapted from OpenAI Codex.
  *
- * This keeps hunk-based patch application separate from exact-text editing.
+ * Upstream baseline and intentional differences are recorded in ./UPSTREAM.md.
  */
 import {
   defineTool,
@@ -550,17 +550,30 @@ function appendDiffSection(lines: string[], diff: string, theme: Theme): void {
   lines.push(...renderDiffLines(diff, theme));
 }
 
+function hasApplyPatchFailures(details: unknown): boolean {
+  if (typeof details !== "object" || details === null || !("result" in details)) {
+    return false;
+  }
+  const result = details.result;
+  if (typeof result !== "object" || result === null || !("failures" in result)) {
+    return false;
+  }
+  return Array.isArray(result.failures) && result.failures.length > 0;
+}
+
 export default function applyPatchExtension(pi: ExtensionAPI): void {
   const tool = defineTool<typeof applyPatchSchema, ApplyPatchToolDetails>({
     name: "apply_patch",
     label: "apply_patch",
-    description: "Apply Codex-style patch envelopes with add/delete/update/move file operations.",
+    description:
+      "Apply safe, Codex-compatible patch envelopes with add/delete/update/move file operations.",
     promptSnippet:
       "Apply Codex-style patch envelopes for multi-file edits, updates, adds, deletes, and moves",
     promptGuidelines: [
       "Use apply_patch for hunk-based edits, especially multi-file changes, renames, adds, deletes, or context-based updates.",
       "Pass the full patch text in apply_patch.input.",
       "apply_patch accepts relative or absolute file paths in patch headers.",
+      "apply_patch rejects symbolic-link targets, existing add or move destinations, repeated source targets, and move-only updates.",
     ],
     parameters: applyPatchSchema,
     constrainedSampling: APPLY_PATCH_CONSTRAINED_SAMPLING,
@@ -594,4 +607,13 @@ export default function applyPatchExtension(pi: ExtensionAPI): void {
   });
 
   pi.registerTool(tool);
+  pi.on("tool_result", (event): { isError: true } | undefined => {
+    if (event.toolName !== "apply_patch") {
+      return undefined;
+    }
+    if (hasApplyPatchFailures(event.details)) {
+      return { isError: true };
+    }
+    return undefined;
+  });
 }

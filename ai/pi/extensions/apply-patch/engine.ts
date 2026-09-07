@@ -6,6 +6,7 @@ import {
 } from "./apply.ts";
 import type {
   ApplyPatchInput,
+  ApplyPatchFileUpdateMode,
   ApplyPatchPreview,
   ApplyPatchResult,
   ApplyPatchToolDetails,
@@ -22,26 +23,9 @@ import {
   withWorkspaceLocks,
 } from "./workspace.ts";
 
-interface ApplyPatchExecutionOptions {
+export interface ApplyPatchExecutionOptions {
   createRealWorkspace?: () => Workspace;
-}
-
-async function runSequentially<T>(
-  items: readonly T[],
-  handler: (item: T, index: number) => Promise<void>,
-  index = 0,
-): Promise<void> {
-  if (index >= items.length) {
-    return;
-  }
-
-  const item = items[index];
-  if (item === undefined) {
-    return;
-  }
-
-  await handler(item, index);
-  await runSequentially(items, handler, index + 1);
+  updateFileMode?: ApplyPatchFileUpdateMode;
 }
 
 function getErrorMessage(error: unknown): string {
@@ -81,14 +65,30 @@ function getTargetPaths(cwd: string, operations: readonly PatchOperation[]): str
 async function assertPreflight(
   operations: readonly PatchOperation[],
   cwd: string,
+  updateFileMode: ApplyPatchFileUpdateMode,
   signal?: AbortSignal,
 ): Promise<void> {
   try {
-    await buildPreviewState(operations, createVirtualWorkspace(cwd), cwd, signal);
+    await buildPreviewState(operations, createVirtualWorkspace(cwd), cwd, updateFileMode, signal);
   } catch (error) {
     throw new Error(`Preflight failed before mutating files.\n${getErrorMessage(error)}`, {
       cause: error,
     });
+  }
+}
+
+function assertOperationsAreValid(operations: readonly PatchOperation[], cwd: string): void {
+  if (operations.length === 0) {
+    throw new Error("No files were modified.");
+  }
+
+  const sourcePaths = new Set<string>();
+  for (const operation of operations) {
+    const sourcePath = resolvePatchPath(cwd, operation.path);
+    if (sourcePaths.has(sourcePath)) {
+      throw new Error(`Multiple operations target ${operation.path}.`);
+    }
+    sourcePaths.add(sourcePath);
   }
 }
 
@@ -106,10 +106,12 @@ export async function executeApplyPatchTool(
   options?: ApplyPatchExecutionOptions,
 ): Promise<ApplyPatchToolResult> {
   const operations = parsePatch(params.input);
-  await assertPreflight(operations, cwd, signal);
+  const updateFileMode = options?.updateFileMode ?? "preserve";
+  assertOperationsAreValid(operations, cwd);
+  await assertPreflight(operations, cwd, updateFileMode, signal);
 
   return withWorkspaceLocks(getTargetPaths(cwd, operations), async () => {
-    await assertPreflight(operations, cwd, signal);
+    await assertPreflight(operations, cwd, updateFileMode, signal);
 
     const summaries: string[] = [];
     const appliedFiles: string[] = [];
@@ -119,9 +121,15 @@ export async function executeApplyPatchTool(
     let fuzz = 0;
 
     const workspace = options?.createRealWorkspace?.() ?? createRealWorkspace();
-    await runSequentially(operations, async (operation) => {
+    for (const operation of operations) {
       try {
-        const success = await applyPatchOperation(operation, workspace, cwd, signal);
+        const success = await applyPatchOperation(
+          operation,
+          workspace,
+          cwd,
+          updateFileMode,
+          signal,
+        );
         summaries.push(success.summary);
         appliedFiles.push(success.appliedFile);
         appliedPreviewFiles.push(success.previewFile);
@@ -133,8 +141,9 @@ export async function executeApplyPatchTool(
         fuzz += success.fuzz;
       } catch (error) {
         failures.push(toApplyPatchFailure(operation, error));
+        break;
       }
-    });
+    }
 
     const result = buildApplyPatchResult(summaries, appliedFiles, failures, fuzz);
     const preview = buildPreview(appliedPreviewFiles);

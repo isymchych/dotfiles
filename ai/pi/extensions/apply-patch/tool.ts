@@ -1,5 +1,6 @@
-export { executeApplyPatchTool } from "./engine.ts";
+export { executeApplyPatchTool, type ApplyPatchExecutionOptions } from "./engine.ts";
 export {
+  type ApplyPatchFileUpdateMode,
   applyPatchSchema,
   type ApplyPatchFailure,
   type ApplyPatchInput,

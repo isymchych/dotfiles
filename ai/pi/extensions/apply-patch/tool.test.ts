@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import {
   access,
+  chmod,
   mkdtemp,
   mkdir,
   readFile,
   rename,
   rm,
   stat,
+  symlink,
   unlink,
   writeFile,
 } from "node:fs/promises";
@@ -23,6 +25,7 @@ import {
   prepareApplyPatchArguments,
   type ApplyPatchInput,
 } from "./tool.ts";
+import { WorkspaceMutationError } from "./workspace.ts";
 
 interface ApplyPatchToolDetails extends Record<string, unknown> {
   diff?: string;
@@ -48,6 +51,7 @@ interface ApplyPatchToolDetails extends Record<string, unknown> {
       message: string;
       recoveryPaths?: string[];
       wroteFiles?: string[];
+      stateUnknown?: boolean;
     }>;
     hasPartialSuccess: boolean;
     recoveryInstructions: {
@@ -56,6 +60,7 @@ interface ApplyPatchToolDetails extends Record<string, unknown> {
     };
     details: {
       fuzz: number;
+      exact: boolean;
     };
   };
 }
@@ -106,9 +111,11 @@ async function runApplyPatch(
   params: ApplyPatchInput,
   options?: {
     onUpdate?: (partial: ToolUpdate) => void;
+    updateFileMode?: "normalize-lf" | "preserve";
     createRealWorkspace?: () => {
       readText: (absolutePath: string) => Promise<string>;
-      writeText: (absolutePath: string, content: string) => Promise<void>;
+      createText: (absolutePath: string, content: string) => Promise<void>;
+      replaceText: (absolutePath: string, content: string) => Promise<void>;
       deleteFile: (absolutePath: string) => Promise<void>;
       renameFile: (fromPath: string, toPath: string) => Promise<void>;
       exists: (absolutePath: string) => Promise<boolean>;
@@ -117,9 +124,16 @@ async function runApplyPatch(
 ): Promise<{ result: ToolResult; updates: ToolUpdate[] }> {
   const updates: ToolUpdate[] = [];
   const executionOptions =
-    options?.createRealWorkspace === undefined
+    options?.createRealWorkspace === undefined && options?.updateFileMode === undefined
       ? undefined
-      : { createRealWorkspace: options.createRealWorkspace };
+      : {
+          ...(options.createRealWorkspace === undefined
+            ? {}
+            : { createRealWorkspace: options.createRealWorkspace }),
+          ...(options.updateFileMode === undefined
+            ? {}
+            : { updateFileMode: options.updateFileMode }),
+        };
   const result = await executeApplyPatchTool(
     "tool-call-1",
     params,
@@ -144,10 +158,14 @@ test("tool exposes OpenAI Lark constrained sampling grammar", () => {
   const registerTool = (tool: unknown): void => {
     registeredTool = tool;
   };
+  const on = (): void => {};
 
-  (applyPatchExtension as unknown as (pi: { registerTool: typeof registerTool }) => void)({
-    registerTool,
-  });
+  (
+    applyPatchExtension as unknown as (pi: {
+      registerTool: typeof registerTool;
+      on: typeof on;
+    }) => void
+  )({ registerTool, on });
 
   assert.deepEqual((registeredTool as { constrainedSampling?: unknown }).constrainedSampling, {
     type: "grammar",
@@ -155,15 +173,59 @@ test("tool exposes OpenAI Lark constrained sampling grammar", () => {
   });
 });
 
-test("apply_patch grammar covers local patch envelope variants", () => {
+test("extension marks rich apply_patch failures as tool errors", () => {
+  let toolResultHandler: ((event: unknown) => unknown) | undefined;
+  const registerTool = (): void => {};
+  const on = (eventName: string, handler: (event: unknown) => unknown): void => {
+    if (eventName === "tool_result") {
+      toolResultHandler = handler;
+    }
+  };
+
+  (
+    applyPatchExtension as unknown as (pi: {
+      registerTool: typeof registerTool;
+      on: typeof on;
+    }) => void
+  )({ registerTool, on });
+
+  assert.ok(toolResultHandler);
+  assert.deepEqual(
+    toolResultHandler({
+      toolName: "apply_patch",
+      details: { result: { failures: [{ message: "failed" }] } },
+    }),
+    { isError: true },
+  );
+  assert.equal(
+    toolResultHandler({
+      toolName: "apply_patch",
+      details: { result: { failures: [] } },
+    }),
+    undefined,
+  );
+});
+
+test("apply_patch grammar stays aligned with the Codex-compatible runtime", () => {
   assert.match(APPLY_PATCH_LARK_GRAMMAR, /start: begin_patch/);
   assert.match(APPLY_PATCH_LARK_GRAMMAR, /add_hunk:/);
   assert.match(APPLY_PATCH_LARK_GRAMMAR, /delete_hunk:/);
   assert.match(APPLY_PATCH_LARK_GRAMMAR, /update_hunk:/);
   assert.match(APPLY_PATCH_LARK_GRAMMAR, /change_move:/);
   assert.match(APPLY_PATCH_LARK_GRAMMAR, /eof_line:/);
-  assert.match(APPLY_PATCH_LARK_GRAMMAR, /add_line\*/);
-  assert.match(APPLY_PATCH_LARK_GRAMMAR, /\(\(change_move separator\* change\?\) \| change\)/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /start: begin_patch hunk\+ end_patch/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /add_line\+/);
+  assert.match(APPLY_PATCH_LARK_GRAMMAR, /change_move\? change/);
+  assert.match(
+    APPLY_PATCH_LARK_GRAMMAR,
+    /initial_change: change_context\? change_line\+ \(change_context change_line\+\)\*/,
+  );
+  assert.match(
+    APPLY_PATCH_LARK_GRAMMAR,
+    /following_change: change_context change_line\+ \(change_context change_line\+\)\*/,
+  );
+  assert.doesNotMatch(APPLY_PATCH_LARK_GRAMMAR, /change: \(change_context \| change_line\)\+/);
+  assert.doesNotMatch(APPLY_PATCH_LARK_GRAMMAR, /separator/);
 });
 
 test("prepareArguments accepts raw strings and legacy patch objects", () => {
@@ -194,7 +256,7 @@ test("apply_patch adds, updates, and deletes files without partial UI updates", 
 *** End Patch`,
   });
 
-  assert.equal(await readWorkspaceFile(cwd, "added.txt"), "hello\nworld");
+  assert.equal(await readWorkspaceFile(cwd, "added.txt"), "hello\nworld\n");
   assert.equal(await readWorkspaceFile(cwd, "keep.txt"), "one\nbeta\n");
   assert.equal(await fileExists(cwd, "remove.txt"), false);
   assert.equal(
@@ -212,21 +274,21 @@ test("apply_patch adds, updates, and deletes files without partial UI updates", 
   assert.match(details.diff ?? "", /File: remove.txt/);
 });
 
-test("apply_patch supports move-only updates", async (t) => {
+test("apply_patch requires move operations to include a change chunk", async (t) => {
   const cwd = await createTempWorkspace(t);
   await writeWorkspaceFile(cwd, "src.txt", "alpha\n");
 
-  const { result } = await runApplyPatch(cwd, {
-    input: `*** Begin Patch
+  await assert.rejects(async () =>
+    runApplyPatch(cwd, {
+      input: `*** Begin Patch
 *** Update File: src.txt
 *** Move to: moved.txt
 *** End Patch`,
-  });
+    }),
+  );
 
-  assert.equal(await fileExists(cwd, "src.txt"), false);
-  assert.equal(await readWorkspaceFile(cwd, "moved.txt"), "alpha\n");
-  assert.equal(getTextOutput(result), "Applied 1 operation.\n1. Moved src.txt to moved.txt.");
-  assert.equal(result.details?.preview?.files[0]?.moveTo, "moved.txt");
+  assert.equal(await readWorkspaceFile(cwd, "src.txt"), "alpha\n");
+  assert.equal(await fileExists(cwd, "moved.txt"), false);
 });
 
 test("apply_patch supports move with content changes and end-of-file hunks", async (t) => {
@@ -255,19 +317,19 @@ test("apply_patch supports move with content changes and end-of-file hunks", asy
   assert.match(result.details?.diff ?? "", /File: src\/app.ts -> src\/main.ts/);
 });
 
-test("apply_patch accepts heredoc-wrapped input", async (t) => {
+test("apply_patch accepts Codex-compatible EOF heredoc input", async (t) => {
   const cwd = await createTempWorkspace(t);
   await writeWorkspaceFile(cwd, "note.txt", "alpha\n");
 
   await runApplyPatch(cwd, {
-    input: `<<'PATCH'
+    input: `<<'EOF'
 *** Begin Patch
 *** Update File: note.txt
 @@
 -alpha
 +beta
 *** End Patch
-PATCH`,
+EOF`,
   });
 
   assert.equal(await readWorkspaceFile(cwd, "note.txt"), "beta\n");
@@ -323,7 +385,7 @@ test("apply_patch uses fuzzy matching and reports non-zero fuzz", async (t) => {
   assert.ok((result.details?.result?.details.fuzz ?? 0) > 0);
 });
 
-test("apply_patch preserves trailing newline state on update", async (t) => {
+test("apply_patch preserves trailing newline state by default", async (t) => {
   const cwd = await createTempWorkspace(t);
   await writeWorkspaceFile(cwd, "no-newline.txt", "alpha");
   await writeWorkspaceFile(cwd, "with-newline.txt", "alpha\n");
@@ -345,11 +407,104 @@ test("apply_patch preserves trailing newline state on update", async (t) => {
   assert.equal(await readWorkspaceFile(cwd, "with-newline.txt"), "beta\n");
 });
 
-test("apply_patch supports add then update in the same patch", async (t) => {
+test("apply_patch replaces a read-only file through an atomic rename", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha\n");
+  await chmod(join(cwd, "note.txt"), 0o444);
+
+  await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: note.txt
+@@
+-alpha
++beta
+*** End Patch`,
+  });
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "beta\n");
+});
+
+test("apply_patch rejects paths through symbolic-link directories", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  const outside = await mkdtemp(join(tmpdir(), "pi-apply-patch-outside-"));
+  t.after(async () => rm(outside, { recursive: true, force: true }));
+  await symlink(outside, join(cwd, "linked"));
+
+  await assert.rejects(
+    async () =>
+      runApplyPatch(cwd, {
+        input: `*** Begin Patch
+*** Add File: linked/victim.txt
++outside
+*** End Patch`,
+      }),
+    /Refusing to mutate path through symbolic link/,
+  );
+
+  assert.equal(await fileExists(outside, "victim.txt"), false);
+});
+
+test("apply_patch can normalize updated files to LF with a trailing newline", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha\r\nbeta");
+
+  await runApplyPatch(
+    cwd,
+    {
+      input: `*** Begin Patch
+*** Update File: note.txt
+@@
+-alpha
++one
+ beta
+*** End Patch`,
+    },
+    { updateFileMode: "normalize-lf" },
+  );
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "one\nbeta\n");
+});
+
+test("apply_patch preserves CRLF endings and an unterminated final line", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha\r\nbeta");
+
+  await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: note.txt
+@@
+-alpha
++one
+ beta
+*** End Patch`,
+  });
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "one\r\nbeta");
+});
+
+test("apply_patch reports line numbers for malformed consecutive contexts", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await assert.rejects(
+    async () =>
+      runApplyPatch(cwd, {
+        input: `*** Begin Patch
+*** Update File: note.txt
+@@
+@@
++line
+*** End Patch`,
+      }),
+    /line 4/,
+  );
+});
+
+test("apply_patch rejects repeated source targets before mutation", async (t) => {
   const cwd = await createTempWorkspace(t);
 
-  const { result } = await runApplyPatch(cwd, {
-    input: `*** Begin Patch
+  await assert.rejects(
+    async () =>
+      runApplyPatch(cwd, {
+        input: `*** Begin Patch
 *** Add File: note.txt
 +alpha
 +beta
@@ -359,13 +514,11 @@ test("apply_patch supports add then update in the same patch", async (t) => {
 +one
  beta
 *** End Patch`,
-  });
-
-  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "one\nbeta");
-  assert.equal(
-    getTextOutput(result),
-    "Applied 2 operations.\n1. Added file note.txt.\n2. Updated note.txt.",
+      }),
+    /Multiple operations target note\.txt/,
   );
+
+  assert.equal(await fileExists(cwd, "note.txt"), false);
 });
 
 test("apply_patch supports delete then move to the same destination in one patch", async (t) => {
@@ -378,6 +531,8 @@ test("apply_patch supports delete then move to the same destination in one patch
 *** Delete File: dst.txt
 *** Update File: src.txt
 *** Move to: dst.txt
+@@
+ alpha
 *** End Patch`,
   });
 
@@ -423,6 +578,160 @@ test("apply_patch supports explicit end-of-file insertion hunks", async (t) => {
 
   assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\nbeta\ngamma\n");
 });
+
+test("apply_patch appends insertion-only chunks like Codex", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha\nbeta\n");
+
+  await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: note.txt
+@@
++gamma
+*** End Patch`,
+  });
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\nbeta\ngamma\n");
+});
+
+test("apply_patch separates an unterminated final line before an insertion-only chunk", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha");
+
+  await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: note.txt
+@@
++gamma
+*** End Patch`,
+  });
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\ngamma");
+});
+
+test("apply_patch preserves insertion-only chunk order at end of file", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha\n");
+
+  await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: note.txt
+@@
++one
+@@
++two
+*** End Patch`,
+  });
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\none\ntwo\n");
+});
+
+test("apply_patch rejects EOF chunks that rematch consumed lines", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "alpha\nbeta\n");
+
+  await assert.rejects(
+    async () =>
+      runApplyPatch(cwd, {
+        input: `*** Begin Patch
+*** Update File: note.txt
+@@
+-beta
++one
+*** End of File
+@@
+-beta
++two
+*** End of File
+*** End Patch`,
+      }),
+    /Failed to find expected lines in note\.txt/,
+  );
+
+  assert.equal(await readWorkspaceFile(cwd, "note.txt"), "alpha\nbeta\n");
+});
+
+test("apply_patch preserves indented marker-looking context lines", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "note.txt", "before\n*** Update File: other.txt\nafter\n");
+
+  await runApplyPatch(cwd, {
+    input: `*** Begin Patch
+*** Update File: note.txt
+@@
+ before
+ *** Update File: other.txt
+-after
++updated
+*** End Patch`,
+  });
+
+  assert.equal(
+    await readWorkspaceFile(cwd, "note.txt"),
+    "before\n*** Update File: other.txt\nupdated\n",
+  );
+});
+
+test("apply_patch rejects empty patches", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await assert.rejects(
+    async () => runApplyPatch(cwd, { input: "*** Begin Patch\n*** End Patch" }),
+    /No files were modified/,
+  );
+});
+
+test("apply_patch rejects existing add and move destinations", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "existing.txt", "keep\n");
+  await writeWorkspaceFile(cwd, "source.txt", "source\n");
+
+  await assert.rejects(async () =>
+    runApplyPatch(cwd, {
+      input: `*** Begin Patch
+*** Add File: existing.txt
++replacement
+*** End Patch`,
+    }),
+  );
+  await assert.rejects(async () =>
+    runApplyPatch(cwd, {
+      input: `*** Begin Patch
+*** Update File: source.txt
+*** Move to: existing.txt
+@@
+ source
+*** End Patch`,
+    }),
+  );
+
+  assert.equal(await readWorkspaceFile(cwd, "existing.txt"), "keep\n");
+  assert.equal(await readWorkspaceFile(cwd, "source.txt"), "source\n");
+});
+
+test(
+  "apply_patch rejects symbolic-link targets instead of replacing or following them",
+  { skip: process.platform === "win32" },
+  async (t) => {
+    const cwd = await createTempWorkspace(t);
+    await writeWorkspaceFile(cwd, "target.txt", "target\n");
+    await symlink(join(cwd, "target.txt"), join(cwd, "link.txt"));
+
+    await assert.rejects(
+      async () =>
+        runApplyPatch(cwd, {
+          input: `*** Begin Patch
+*** Update File: link.txt
+@@
+-target
++changed
+*** End Patch`,
+        }),
+      /symbolic link/,
+    );
+
+    assert.equal(await readWorkspaceFile(cwd, "target.txt"), "target\n");
+  },
+);
 
 test("apply_patch reports accurate preview metadata for deep edits", async (t) => {
   const cwd = await createTempWorkspace(t);
@@ -481,8 +790,14 @@ test("apply_patch marks partial failure as an error when a later operation fails
   let firstWriteApplied = false;
   const injectedWorkspace = {
     readText: async (absolutePath: string): Promise<string> => readFile(absolutePath, "utf-8"),
-    writeText: async (absolutePath: string, content: string): Promise<void> => {
+    createText: async (absolutePath: string, content: string): Promise<void> => {
       await mkdir(dirname(absolutePath), { recursive: true });
+      await writeFile(absolutePath, content, "utf-8");
+      if (absolutePath === join(cwd, "a.txt")) {
+        firstWriteApplied = true;
+      }
+    },
+    replaceText: async (absolutePath: string, content: string): Promise<void> => {
       await writeFile(absolutePath, content, "utf-8");
       if (absolutePath === join(cwd, "a.txt")) {
         firstWriteApplied = true;
@@ -518,6 +833,10 @@ test("apply_patch marks partial failure as an error when a later operation fails
 +one
 *** Update File: b.txt
 *** Move to: c.txt
+@@
+ beta
+*** Add File: later.txt
++later
 *** End Patch`,
     },
     {
@@ -528,6 +847,7 @@ test("apply_patch marks partial failure as an error when a later operation fails
   assert.equal(await readWorkspaceFile(cwd, "a.txt"), "one\n");
   assert.equal(await readWorkspaceFile(cwd, "b.txt"), "beta\n");
   assert.equal(await fileExists(cwd, "c.txt"), false);
+  assert.equal(await fileExists(cwd, "later.txt"), false);
   assert.equal(result.isError, true);
   assert.equal(result.terminate, true);
   assert.equal(updates.length, 0);
@@ -544,7 +864,8 @@ test("apply_patch marks partial failure as an error when a later operation fails
     ["b.txt"],
   );
   assert.deepEqual(patchResult.recoveryInstructions.mustReadFiles, ["b.txt"]);
-  assert.deepEqual(patchResult.recoveryInstructions.mustNotReadFiles, ["a.txt"]);
+  assert.deepEqual(patchResult.recoveryInstructions.mustNotReadFiles, []);
+  assert.equal(patchResult.details.exact, true);
   assert.match(details.diff ?? "", /File: a\.txt/);
   assert.doesNotMatch(details.diff ?? "", /File: b\.txt/);
 });
@@ -557,8 +878,11 @@ test("apply_patch reports a failed move-with-content-change that already wrote t
   const destinationPath = join(cwd, "dst.txt");
   const injectedWorkspace = {
     readText: async (absolutePath: string): Promise<string> => readFile(absolutePath, "utf-8"),
-    writeText: async (absolutePath: string, content: string): Promise<void> => {
+    createText: async (absolutePath: string, content: string): Promise<void> => {
       await mkdir(dirname(absolutePath), { recursive: true });
+      await writeFile(absolutePath, content, "utf-8");
+    },
+    replaceText: async (absolutePath: string, content: string): Promise<void> => {
       await writeFile(absolutePath, content, "utf-8");
     },
     deleteFile: async (absolutePath: string): Promise<void> => {
@@ -617,4 +941,74 @@ test("apply_patch reports a failed move-with-content-change that already wrote t
   );
   assert.deepEqual(patchResult.recoveryInstructions.mustReadFiles, ["src.txt", "dst.txt"]);
   assert.deepEqual(patchResult.recoveryInstructions.mustNotReadFiles, []);
+});
+
+test("apply_patch treats a state-unknown move destination write as partial", async (t) => {
+  const cwd = await createTempWorkspace(t);
+  await writeWorkspaceFile(cwd, "src.txt", "alpha\n");
+
+  const destinationPath = join(cwd, "dst.txt");
+  const injectedWorkspace = {
+    readText: async (absolutePath: string): Promise<string> => readFile(absolutePath, "utf-8"),
+    createText: async (absolutePath: string, _content: string): Promise<void> => {
+      assert.equal(absolutePath, destinationPath);
+      throw new WorkspaceMutationError("simulated uncertain destination write failure", true);
+    },
+    replaceText: async (absolutePath: string, content: string): Promise<void> => {
+      await writeFile(absolutePath, content, "utf-8");
+    },
+    deleteFile: async (absolutePath: string): Promise<void> => {
+      await unlink(absolutePath);
+    },
+    renameFile: async (fromPath: string, toPath: string): Promise<void> => {
+      await mkdir(dirname(toPath), { recursive: true });
+      await rename(fromPath, toPath);
+    },
+    exists: async (absolutePath: string): Promise<boolean> => {
+      try {
+        await access(absolutePath);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  };
+
+  const { result } = await runApplyPatch(
+    cwd,
+    {
+      input: `*** Begin Patch
+*** Update File: src.txt
+*** Move to: dst.txt
+@@
+-alpha
++beta
+*** End Patch`,
+    },
+    {
+      createRealWorkspace: () => injectedWorkspace,
+    },
+  );
+
+  assert.equal(await readWorkspaceFile(cwd, "src.txt"), "alpha\n");
+  assert.equal(await fileExists(cwd, "dst.txt"), false);
+  assert.equal(result.isError, true);
+  assert.equal(result.terminate, true);
+  assert.match(getTextOutput(result), /apply_patch failed after partially applying operations\./);
+  assert.match(getTextOutput(result), /Recovery: reread src\.txt, dst\.txt before retrying\./);
+
+  const patchResult = result.details?.result;
+  assert.ok(patchResult);
+  assert.equal(patchResult.hasPartialSuccess, true);
+  assert.equal(patchResult.details.exact, false);
+  assert.deepEqual(patchResult.failures, [
+    {
+      filePath: "src.txt",
+      operation: "update",
+      message: "simulated uncertain destination write failure",
+      recoveryPaths: ["src.txt", "dst.txt"],
+      stateUnknown: true,
+    },
+  ]);
+  assert.deepEqual(patchResult.recoveryInstructions.mustReadFiles, ["src.txt", "dst.txt"]);
 });
