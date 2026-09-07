@@ -225,7 +225,7 @@ export default function tilthCliExtension(pi: ExtensionAPI): void {
         "Use tilth_diff for structural change review instead of raw git diff or git log --patch.",
         "Use raw git diff --no-ext-diff --patch only when exact patch text is required.",
         "Call tilth_diff with no arguments for tracked staged and unstaged changes relative to HEAD; untracked files are excluded and must be discovered separately. Use source=staged for the index only.",
-        "Use repository to select another checkout; scope filters files relative to that repository.",
+        "Use repository to select another checkout; scope must identify one changed file or file:function relative to that repository; never pass a directory.",
       ],
       parameters: tilthDiffSchema,
       renderShell: "self",
