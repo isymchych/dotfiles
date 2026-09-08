@@ -7,16 +7,21 @@ import {
   printStructuredGitError,
 } from "../../lib/git_error.ts";
 
+const BODY_LINE_MAX = 99;
+
 type CommitMode = "create" | "amend";
 
 type ApplyOptions = {
   mode: CommitMode;
   noVerify: boolean;
+  allowSubjectOnly: boolean;
+  verbatim: boolean;
   expectedHead: string | null;
   allowPublished: boolean;
 };
 
 class UsageError extends Error {}
+class MessageError extends Error {}
 
 function parseOptions(args: string[]): ApplyOptions {
   const [mode, ...rest] = args;
@@ -25,6 +30,8 @@ function parseOptions(args: string[]): ApplyOptions {
   const options: ApplyOptions = {
     mode,
     noVerify: false,
+    allowSubjectOnly: false,
+    verbatim: false,
     expectedHead: null,
     allowPublished: false,
   };
@@ -33,6 +40,14 @@ function parseOptions(args: string[]): ApplyOptions {
     const arg = rest[index];
     if (arg === "--no-verify") {
       options.noVerify = true;
+      continue;
+    }
+    if (arg === "--allow-subject-only") {
+      options.allowSubjectOnly = true;
+      continue;
+    }
+    if (arg === "--verbatim") {
+      options.verbatim = true;
       continue;
     }
     if (arg === "--allow-published" && mode === "amend") {
@@ -60,8 +75,92 @@ async function readMessage(): Promise<string> {
   const chunks: string[] = [];
   for await (const chunk of process.stdin) chunks.push(String(chunk));
   const message = chunks.join("");
-  if (!message.trim()) throw new Error("empty commit message");
+  if (!message.trim()) throw new MessageError("empty commit message");
   return message;
+}
+
+function normalizeMessage(message: string): string {
+  const lines = message.trim().split(/\r?\n/);
+  const subject = lines[0]?.trim() ?? "";
+  if (!subject) throw new MessageError("empty commit subject");
+
+  const bodySource = lines[1]?.trim() === "" ? lines.slice(2) : lines.slice(1);
+  const bodyLines: string[] = [];
+  for (const line of bodySource) bodyLines.push(...wrapLine(line.trimEnd()));
+  while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === "") bodyLines.pop();
+
+  if (bodyLines.length === 0) return `${subject}\n`;
+  return `${[subject, "", ...bodyLines].join("\n")}\n`;
+}
+
+function wrapLine(line: string): string[] {
+  if (line === "") return [""];
+  if (line.startsWith("- ")) {
+    const marker = "- ";
+    const wrapped = wrapText(line.slice(marker.length).trim(), BODY_LINE_MAX - marker.length);
+    if (wrapped.length === 0) return ["-"];
+    return [`${marker}${wrapped[0]}`, ...wrapped.slice(1).map((part) => `  ${part}`)];
+  }
+
+  const leadingSpaces = line.length - line.trimStart().length;
+  const indent = " ".repeat(leadingSpaces);
+  const wrapped = wrapText(line.trim(), BODY_LINE_MAX - leadingSpaces);
+  if (wrapped.length === 0) return [indent];
+  return wrapped.map((part) => `${indent}${part}`);
+}
+
+function wrapText(text: string, width: number): string[] {
+  if (text === "") return [];
+  if (width < 1) return [text];
+
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    if (current === "") {
+      if (word.length <= width) {
+        current = word;
+      } else {
+        lines.push(...splitLongToken(word, width));
+      }
+      continue;
+    }
+    if (current.length + 1 + word.length <= width) {
+      current = `${current} ${word}`;
+      continue;
+    }
+
+    lines.push(current);
+    if (word.length <= width) {
+      current = word;
+    } else {
+      const pieces = splitLongToken(word, width);
+      lines.push(...pieces.slice(0, -1));
+      current = pieces.at(-1) ?? "";
+    }
+  }
+
+  if (current !== "") lines.push(current);
+  return lines;
+}
+
+function splitLongToken(token: string, width: number): string[] {
+  const chunks: string[] = [];
+  for (let index = 0; index < token.length; index += width) {
+    chunks.push(token.slice(index, index + width));
+  }
+  return chunks;
+}
+
+function validateMessage(message: string, options: ApplyOptions): void {
+  const [subject = "", ...bodyLines] = message.split(/\r?\n/);
+  if (!subject.trim()) throw new MessageError("empty commit subject");
+  if (!options.allowSubjectOnly && !bodyLines.some((line) => line.trim())) {
+    throw new MessageError(
+      "subject-only commit message requires explicit --allow-subject-only override",
+    );
+  }
 }
 
 async function requireGit(result: GitCommandResult, context: string): Promise<string> {
@@ -118,7 +217,9 @@ async function readHeadSha(): Promise<string> {
 if (import.meta.main) {
   try {
     const options = parseOptions(process.argv.slice(2));
-    const message = await readMessage();
+    const rawMessage = await readMessage();
+    const message = options.verbatim ? rawMessage : normalizeMessage(rawMessage);
+    validateMessage(message, options);
     if (options.mode === "amend") await verifyAmendSafety(options);
 
     const result = await runGit(buildArgs(options), { stdin: message });
@@ -134,7 +235,7 @@ if (import.meta.main) {
     const code =
       error instanceof UsageError
         ? "ERR_USAGE"
-        : message.startsWith("empty commit")
+        : error instanceof MessageError
           ? "ERR_MESSAGE_INVALID"
           : "ERR_INTERNAL";
     printStructuredGitError(formatGitError(code, message, ""));

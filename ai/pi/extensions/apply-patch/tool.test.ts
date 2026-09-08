@@ -184,12 +184,12 @@ test("tool exposes OpenAI Lark constrained sampling grammar", () => {
   ]);
 });
 
-test("extension marks rich apply_patch failures as tool errors", () => {
-  let toolResultHandler: ((event: unknown) => unknown) | undefined;
+test("extension leaves structured apply_patch failures recoverable", () => {
+  let toolResultHookCount = 0;
   const registerTool = (): void => {};
-  const on = (eventName: string, handler: (event: unknown) => unknown): void => {
+  const on = (eventName: string, _handler: (event: unknown) => unknown): void => {
     if (eventName === "tool_result") {
-      toolResultHandler = handler;
+      toolResultHookCount += 1;
     }
   };
 
@@ -200,21 +200,7 @@ test("extension marks rich apply_patch failures as tool errors", () => {
     }) => void
   )({ registerTool, on });
 
-  assert.ok(toolResultHandler);
-  assert.deepEqual(
-    toolResultHandler({
-      toolName: "apply_patch",
-      details: { result: { failures: [{ message: "failed" }] } },
-    }),
-    { isError: true },
-  );
-  assert.equal(
-    toolResultHandler({
-      toolName: "apply_patch",
-      details: { result: { failures: [] } },
-    }),
-    undefined,
-  );
+  assert.equal(toolResultHookCount, 0);
 });
 
 test("apply_patch grammar stays aligned with the Codex-compatible runtime", () => {

@@ -48,18 +48,48 @@ function commitBody(cwd: string): string {
   return content.slice(content.indexOf("\n\n") + 2);
 }
 
-test("apply_commit creates a commit without rewriting its message", () => {
+test("apply_commit preserves exact input in verbatim mode", () => {
   const cwd = createRepository();
 
   try {
     writeFile(join(cwd, "new.txt"), "new\n");
     git(cwd, "add", "new.txt");
-    const message = "feat: preserve message\n\n  indented detail\nhttps://example.test/a?x=1\n";
+    const message = `feat: preserve message\n\n  indented detail\n${"x".repeat(110)}\n`;
 
-    const result = run(applyScript, cwd, ["create"], message);
+    const result = run(applyScript, cwd, ["create", "--verbatim"], message);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /^OK [0-9a-f]{40}\n$/);
     assert.equal(commitBody(cwd), message);
+  } finally {
+    removeDir(cwd, { recursive: true, force: true });
+  }
+});
+
+test("apply_commit normalizes separators and wraps paragraphs and bullets", () => {
+  const cwd = createRepository();
+
+  try {
+    writeFile(join(cwd, "formatted.txt"), "formatted\n");
+    git(cwd, "add", "formatted.txt");
+    const paragraph = "a".repeat(100);
+    const bullet = "b".repeat(100);
+    const message = `\n  feat: format message  \n   \n${paragraph}\n\n- ${bullet}\n\n`;
+
+    const result = run(applyScript, cwd, ["create"], message);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(
+      commitBody(cwd),
+      [
+        "feat: format message",
+        "",
+        "a".repeat(99),
+        "a",
+        "",
+        `- ${"b".repeat(97)}`,
+        `  ${"b".repeat(3)}`,
+        "",
+      ].join("\n"),
+    );
   } finally {
     removeDir(cwd, { recursive: true, force: true });
   }
@@ -77,12 +107,12 @@ test("apply_commit preserves staged changes when amending only a message", () =>
       applyScript,
       cwd,
       ["amend", "--expected-head", expectedHead],
-      "feat: new message\n",
+      "feat: new message\n\nExplain the updated outcome.\n",
     );
     assert.equal(result.status, 0, result.stderr);
     assert.equal(git(cwd, "diff", "--cached", "--name-only"), "staged.txt");
     assert.equal(git(cwd, "show", "--format=", "--name-only", "HEAD"), "committed.txt");
-    assert.equal(commitBody(cwd), "feat: new message\n");
+    assert.equal(commitBody(cwd), "feat: new message\n\nExplain the updated outcome.\n");
   } finally {
     removeDir(cwd, { recursive: true, force: true });
   }
@@ -99,7 +129,7 @@ test("apply_commit rejects stale or published amends unless explicitly allowed",
       applyScript,
       cwd,
       ["amend", "--expected-head", expectedHead],
-      "feat: stale\n",
+      "feat: stale\n\nExplain the stale outcome.\n",
     );
     assert.equal(stale.status, 67);
     assert.match(stale.stderr, /^ERR_HEAD_CHANGED\n/);
@@ -113,7 +143,7 @@ test("apply_commit rejects stale or published amends unless explicitly allowed",
       applyScript,
       cwd,
       ["amend", "--expected-head", currentHead],
-      "feat: published\n",
+      "feat: published\n\nExplain the published outcome.\n",
     );
     assert.equal(published.status, 68);
     assert.match(published.stderr, /^ERR_PUBLISHED_COMMIT\n/);
@@ -122,7 +152,7 @@ test("apply_commit rejects stale or published amends unless explicitly allowed",
       applyScript,
       cwd,
       ["amend", "--expected-head", currentHead, "--allow-published"],
-      "feat: published\n",
+      "feat: published\n\nExplain the published outcome.\n",
     );
     assert.equal(allowed.status, 0, allowed.stderr);
   } finally {
@@ -141,12 +171,64 @@ test("apply_commit honors hooks unless --no-verify is requested", () => {
     writeFile(hook, "#!/bin/sh\necho pre-commit >&2\nexit 1\n");
     chmod(hook, 0o755);
 
-    const blocked = run(applyScript, cwd, ["create"], "feat: blocked\n");
+    const blocked = run(
+      applyScript,
+      cwd,
+      ["create"],
+      "feat: blocked\n\nExercise the configured hook.\n",
+    );
     assert.equal(blocked.status, 3);
     assert.match(blocked.stderr, /^ERR_GIT_HOOK_PRE_COMMIT\n/);
 
-    const allowed = run(applyScript, cwd, ["create", "--no-verify"], "feat: allowed\n");
+    const allowed = run(
+      applyScript,
+      cwd,
+      ["create", "--no-verify"],
+      "feat: allowed\n\nBypass the configured hook.\n",
+    );
     assert.equal(allowed.status, 0, allowed.stderr);
+  } finally {
+    removeDir(cwd, { recursive: true, force: true });
+  }
+});
+
+test("apply_commit rejects subject-only messages unless explicitly allowed", () => {
+  const cwd = createRepository();
+
+  try {
+    writeFile(join(cwd, "subject.txt"), "subject\n");
+    git(cwd, "add", "subject.txt");
+
+    const rejected = run(applyScript, cwd, ["create"], "feat: subject only\n");
+    assert.equal(rejected.status, 2);
+    assert.match(rejected.stderr, /^ERR_MESSAGE_INVALID\n/);
+    assert.match(rejected.stderr, /--allow-subject-only/);
+    assert.equal(git(cwd, "status", "--short"), "A  subject.txt");
+
+    const allowed = run(
+      applyScript,
+      cwd,
+      ["create", "--allow-subject-only"],
+      "feat: subject only\n",
+    );
+    assert.equal(allowed.status, 0, allowed.stderr);
+    assert.equal(commitBody(cwd), "feat: subject only\n");
+  } finally {
+    removeDir(cwd, { recursive: true, force: true });
+  }
+});
+
+test("apply_commit rejects an empty subject in verbatim mode", () => {
+  const cwd = createRepository();
+
+  try {
+    writeFile(join(cwd, "invalid.txt"), "invalid\n");
+    git(cwd, "add", "invalid.txt");
+
+    const result = run(applyScript, cwd, ["create", "--verbatim"], "\n\nBody only.\n");
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /^ERR_MESSAGE_INVALID\nempty commit subject\n$/);
+    assert.equal(git(cwd, "status", "--short"), "A  invalid.txt");
   } finally {
     removeDir(cwd, { recursive: true, force: true });
   }

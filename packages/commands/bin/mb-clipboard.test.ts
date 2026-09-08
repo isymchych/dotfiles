@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -94,20 +94,26 @@ test("extensionForMime uses canonical mappings and binary fallback", () => {
 test("templates are read directly from the repository", async () => {
   const fixture = await createFixture();
   try {
-    const templatePath = fileURLToPath(
-      new URL("../assets/mb-clipboard/templates/task-template.md", import.meta.url),
-    );
+    const templatesDir = fileURLToPath(new URL("../assets/mb-clipboard/templates/", import.meta.url));
+    const templateNames = (await readdir(templatesDir, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && !entry.name.startsWith("."))
+      .map((entry) => entry.name)
+      .sort();
+    const templateName = "task-template.md";
+    const templateIndex = templateNames.indexOf(templateName);
+    assert.notEqual(templateIndex, -1);
+    const templatePath = path.join(templatesDir, templateName);
     const template = await readFile(templatePath);
 
     const result = await runClipboard({
       ...fixture.env,
-      FUZZEL_SELECTION: "t:0",
+      FUZZEL_SELECTION: `t:${templateIndex}`,
     });
 
     assert.equal(result.code, 0, result.stderr);
     assert.equal(
       await readFile(fixture.menuCapture, "utf8"),
-      "t:0\ttask-template.md\nt:1\ttz-template.md\n",
+      templateNames.map((name, index) => `t:${index}\t${name}\n`).join(""),
     );
     assert.deepEqual(await readFile(fixture.copyCapture), template);
   } finally {
